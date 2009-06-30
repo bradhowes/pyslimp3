@@ -48,5 +48,41 @@ When viewing one of the Searcher screens, the following keys are defined:
 || kArrowDown || Decrease the value shown in the current character position in the order 9-0Z-A. ||
 || kArrowLeft || Erase the last character of the search text. If no characters exist, show the previous screen (TopBrowser) ||
 || kArrowRight || Move to the right to add a new character to the search text. Two presses in a row will execute the search if the search text is at least 3 characters in length. ||
-|| kDigit1 - kDigit9 || Enter text using the TelephoneTextEntry system. ||
+|| kDigit1 - kDigit9 || Enter characters as described in TelephoneKeypadProcessing. ||
 
+= Album Browser Keys = 
+
+When viewing a list of albums, either by one artist, or all albums within iTunes, the following keys are defined:
+
+|| *Key Code* || *Action* ||
+|| kArrowUp || Previous album in the collection.||
+|| kArrowDown || Next album in the collection.||
+|| kArrowLeft || Show prior Browser instance ||
+|| kArrowRight || Show a TrackListBrowser instance for the current album. ||
+|| kPlay || Begin playiing all of the tracks for the current album. ||
+|| kPIP || Show the current album ratings ||
+
+= Artist Browser Keys =
+
+When viewing a list of artists, the following keys are defined:
+
+|| *Key Code* || *Action* ||
+|| kArrowUp || Previous artist in the collection.||
+|| kArrowDown || Next artist in the collection.||
+|| kArrowLeft || Show prior Browser instance ||
+|| kArrowRight || Show an AlbumListBrowser instance for the current artist. ||
+|| kPlay || Begin playiing all of the tracks for all of the albums associated with the current artist. ||
+
+= Playback Display Keys =
+
+When viewing the currently playing track, the following keys are defined:
+
+|| *Key Code* || *Action* ||
+|| kArrowLeft || Show prior Browser instance ||
+|| kArrowRight || Show the current track ratings. ||
+|| kPIP || Show the current track ratings. ||
+|| kPlay || Begin playing the track. ||
+|| kStop || Stop iTunes from playing and rewind to the start of the current track ||
+|| kPause || Stop iTunes from playing and remain at the current position ||
+|| kRewind || Move to the previous track in the current playlist. If held down, move backwards (rewind) the playback position until released. ||
+|| kFastForward || Move to the next track in the current playlist. If held down, move forwards the playback position until released. ||
