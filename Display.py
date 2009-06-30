@@ -147,6 +147,7 @@ class DisplayGenerator( object ):
 class ClockGenerator( DisplayGenerator ):
     
     def __init__( self ):
+        DisplayGenerator.__init__( self )
         self.timestamp = datetime.now()
         self.offset = 0
         self.width = 0

@@ -484,7 +484,12 @@ class iTunesXML( object ):
     #
     def getVolume( self ): return self.app.sound_volume.get()
     def setVolume( self, value ): self.app.sound_volume.set( value )
-    def adjustVolume( self, delta ): self.setVolume( self.getVolume() + delta )
+    def adjustVolume( self, delta ): 
+        prev = self.getVolume()
+        new = old + delta
+        self.setVolume( new )
+        now = self.getVolume()
+        print prev, new, now
 
     #
     # Application mute controls.
@@ -557,7 +562,11 @@ class iTunesXML( object ):
     #
     # Get the current position (seconds) of the iTunes player
     #
-    def getPlayerPosition( self ): return int( self.app.player_position.get() )
+    def getPlayerPosition( self ): 
+        try:
+            return int( self.app.player_position.get() )
+        except TypeError:
+            return 0
 
     #
     # Stop the iTunes player

@@ -39,26 +39,41 @@ class Animator( object ):
 
     def __init__( self, screenTimeout = kBlankingTimeout ):
         self.content = None
-        self.blanked = False
-        self.blankingTimestamp = datetime.now()
+        self.screenTimeout = screenTimeout
+        self.reset()
+
+    def reset( self ):
         self.offsets = [ 0 ] * kDisplayHeight
         self.atEnd = False
-        self.screenTimeout = screenTimeout
-
+        self.holdCounter = Animator.kHoldCount
+        self.unblankScreen()
+   
     #
     # Apply new display content for animating. Resets animation values if the
     # screen content is different.
     #
     def setContent( self, content ):
-        if self.content is None or content != self.content:
+        
+        #
+        # If the main content lines are different, reset any animation and
+        # unblank the screen.
+        #
+        if content.hasDifferentLines( self.content ):
             self.content = content
-            self.blankingTimestamp = datetime.now()
-            self.blanked = False
-            self.offsets = [ 0 ] * kDisplayHeight
+            self.reset()
             self.shiftsNeeded = content.shiftsNeeded
             self.maxShift = max( content.shiftsNeeded )
-            self.holdCounter = Animator.kHoldCount
-            self.atEnd = False
+
+        #
+        # Lines are the same, but the right overlays are different, just
+        # keep the blanker from taking effect.
+        #
+        elif content.hasDifferentRightOverlays( self.content ):
+            self.unblankScreen()
+
+        #
+        # Both are the same. Blank after some number of seconds have passed.
+        #
         elif not self.blanked:
             delta = datetime.now()
             delta -= self.blankingTimestamp

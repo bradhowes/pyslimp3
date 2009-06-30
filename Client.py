@@ -210,7 +210,7 @@ class Client( object ):
         #
         if self.overlayTimer is not None:
             self.server.removeTimer( self.overlayTimer )
-        self.overlayTimer = self.server.addTimer( kOverlayDuration, self,
+        self.overlayTimer = self.server.addTimer( self.kOverlayDuration, self,
                                                   self.clearOverlay )
 
     #
@@ -308,21 +308,22 @@ class Client( object ):
         #
         # See if the current display generator can process the keyCode
         #
-        generator = self.linesGenerator.processKeyCode( keyCode )
-        if generator:
-            if generator == self.linesGenerator:
-                self.emitDisplay()
-            else:
-                
-                #
-                # New generator is different from the current one. Install it
-                # in the proper slot.
-                #
-                if generator.isOverlay():
-                    self.setOverlayGenerator( generator )
+        else:
+            generator = self.linesGenerator.processKeyCode( keyCode )
+            if generator:
+                if generator == self.linesGenerator:
+                    self.emitDisplay()
                 else:
-                    self.setLinesGenerator( generator )
-            return
+                
+                    #
+                    # New generator is different from the current one. Install
+                    # it in the proper slot.
+                    #
+                    if generator.isOverlay():
+                        self.setOverlayGenerator( generator )
+                    else:
+                        self.setLinesGenerator( generator )
+                return
 
         #
         # Finally, look for any 'global' functions to handle.

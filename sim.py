@@ -69,8 +69,8 @@ class KeyReader( asyncore.file_dispatcher ):
         self.sim = sim
 
     def handle_read( self ):
-        a = self.recv( 1024 ).strip()
-        if len( a ): self.sim.processKeys( a )
+        data = self.recv( 1024 ).strip()
+        if len( data ): self.sim.processKey( data )
 
     def handle_connect( self ): return
     def handle_write( self ): return
@@ -103,7 +103,6 @@ class ServerSocket( asyncore.dispatcher ):
 
     def emitKey( self, code ):
         kTicksPerSecond = 625000.0
-        kMaxTimeStamp = int( 0xFFFFFFFF / kTicksPerSecond )
         timeStamp = time.time()
         format = '>cBIBBI6x'
         for when in ( 0x000112233, 0x00112233 + 0.100 ):
@@ -153,11 +152,11 @@ class sim( object ):
                 self.serverSocket.emitHeartbeat()
             asyncore.loop( timeout = 10.00, count = 1 )
 
-    def processKeys( self, keys ):
-        for key in keys:
-            code = keymap.get( key )
-            if code is not None:
-                self.serverSocket.emitKey( code )
+    def processKey( self, data ):
+        key = data[ 0 ]
+        code = keymap.get( key )
+        if code is not None:
+            self.serverSocket.emitKey( code )
 
 if __name__ == "__main__":
     a = sim()
