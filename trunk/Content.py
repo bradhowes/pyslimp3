@@ -106,17 +106,22 @@ class Content:
         return output, self.cursor
 
     #
-    # Determine if this Content instance will render the same as another.
+    # Determine if this Content instance has different content lines than
+    # another one.
     #
-    def __eq__( self, rhs ):
+    def hasDifferentLines( self, rhs ):
+        if rhs is None: return True
         for index in range( kDisplayHeight ):
-            if self.lines[ index ] != rhs.lines[ index ]: return False
-            if self.rightOverlays[ index ] != rhs.rightOverlays[ index ]:
-                return False
-        return True
+            if self.lines[ index ] != rhs.lines[ index ]: return True
+        return False
 
     #
-    # Determine if this Content instance will not render the same as another.
+    # Determine if this Content instance has different right overlays than
+    # another one.
     #
-    def __ne__( self, rhs ):
-        return not self.__eq__( rhs )
+    def hasDifferentRightOverlays( self, rhs ):
+        if rhs is None: return True
+        for index in range( kDisplayHeight ):
+            if self.rightOverlays[ index ] != rhs.rightOverlays[ index ]: 
+                return True
+        return False

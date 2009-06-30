@@ -160,26 +160,28 @@ class KeyProcessor( object ):
             delta = timeStamp - self.notifyTimeStamp
             if delta < 0:
                 delta += self.kMaxTimeStamp
+
             if not self.emittedHeldKey:
                 if delta >= self.kHoldPressThreshold:
                     self.emittedHeldKey = True
                     self.notify( kModHeld )
-            elif delta >= self.kMinPressThreshold:
+            else:
                 self.notify( kModRepeat )
-        elif self.releaseTimer is None:
+
+        if self.releaseTimer is None:
             self.reset()
             self.lastKey = key
-            self.startReleaseTimer( timeStamp )
+            self.startReleaseTimer( timeStamp, 2 * self.kMinPressThreshold )
             self.notify( kModFirst )
 
     #
     # Start a timer that will invoke checkForRelease() after kMinPressThreshold
     # seconds.
     #
-    def startReleaseTimer( self, timeStamp ):
+    def startReleaseTimer( self, timeStamp, delta ):
         self.releaseTimeStamp = timeStamp
-        self.releaseTimer = self.timerManager.addTimer(
-            self.kMinPressThreshold, self, self.checkForRelease )
+        self.releaseTimer = self.timerManager.addTimer( delta, self, 
+                                                        self.checkForRelease )
 
     #
     # Check if a release event has occured and if so notify the notifier.
@@ -190,7 +192,8 @@ class KeyProcessor( object ):
         # If an event was received since we last checked, try again.
         #
         if self.lastTimeStamp != self.releaseTimeStamp:
-            self.startReleaseTimer( self.lastTimeStamp )
+            self.startReleaseTimer( self.lastTimeStamp, 
+                                    self.kMinPressThreshold )
             return
 
         #

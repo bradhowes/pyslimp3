@@ -21,6 +21,10 @@ from Content import Content
 from Display import *
 from KeyProcessor import *
 
+#
+# Temporary (overlay) display of the current user rating for a song or album.
+# Use the up/down arrow buttons to change the rating.
+#
 class RatingDisplay( iTunesSourceGenerator ):
 
     def __init__( self, source, prevLevel, obj ):
@@ -40,39 +44,54 @@ class RatingDisplay( iTunesSourceGenerator ):
         return self.prevLevel
 
     def up( self ):
-        self.setRating( self.obj, min( self.rating + 10, 100 ) )
+        self.setRating( min( self.getRating() + 10, 100 ) )
         return self
 
     def down( self ):
-        self.setRating( self.obj, max( self.rating - 10, 0 ) )
+        self.setRating( max( self.getRating() - 10, 0 ) )
         return self
 
     def generate( self ):
-        self.rating = rating = self.getRating( self.obj )
+        rating = self.getRating()
         numStars = rating // 20
         halfStar = ( rating - numStars * 20 ) // 10
+        stars = '%d' % numStars
         stars = '*' * numStars
         if halfStar:
             stars += ' 1/2'
         return Content( [ self.obj.getName(),
-                          centerAlign( stars ) ],
+                          centerAlign( stars + ' stars' ) ],
                         [ 'Rating', 
                           '' ] )
 
+    #
+    # Override of DisplayGenerator method. Convert digits 0-5 into a rating
+    # from 0-100. Anything larger
+    #
+    def digit( self, digit ):
+        if digit > 5:
+            digit = 5
+        rating = digit * 20
+        self.setRating( rating )
+        return self
+#
+# Derviation of RatingDisplay that works with albums.
+#
 class AlbumRatingDisplay( RatingDisplay ):
-
     def __init__( self, source, prevLevel, album ):
         RatingDisplay.__init__( self, source, prevLevel, album )
-    def getRating( self, obj ): 
-        return self.source.getAlbumRating( obj )
-    def setRating( self, obj, value ): 
-        self.source.setAlbumRating( obj, value )
+    def getRating( self ): 
+        return self.source.getAlbumRating( self.obj )
+    def setRating( self, value ): 
+        self.source.setAlbumRating( self.obj, value )
 
+#
+# Derviation of RatingDisplay that works with artists.
+#
 class TrackRatingDisplay( RatingDisplay ):
-
     def __init__( self, source, prevLevel, track ):
         RatingDisplay.__init__( self, source, prevLevel, track )
-    def getRating( self, obj ): 
-        return self.source.getTrackRating( obj )
-    def setRating( self, obj, value ): 
-        self.source.setTrackRating( obj, value )
+    def getRating( self ): 
+        return self.source.getTrackRating( self.obj )
+    def setRating( self, value ): 
+        self.source.setTrackRating( self.obj, value )

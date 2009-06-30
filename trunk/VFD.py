@@ -74,6 +74,8 @@ class VFD( object ):
     # Add a display character to the buffer.
     #
     def _addCharacter( self, value ):
+        if value > 0xFF:
+            value = 0xFF
         self.buffer.extend( ( 0x03, value ) ) # Display character prefix
 
     #
