@@ -1,0 +1,9 @@
+#summary How displays get generated for viewing on the SLiMP3 device
+
+= Introduction =
+
+{{{
+Client.emitDisplay() -> DisplayGenerator.generate() -> Animator.render() -> Content.render() -> VFD.build()
+}}}
+
+The Client instance associated with a specific SLiMP3 device on the network generates display data approximately 4 times per second. At each update, it asks the active DisplayGenerator instance to generate a display data, the result of which is an instance of the Content class. The Client object then hands off the Content object to its Animator instance, which handles animation of lines that are longer than that of the display. Its {{{render()}}} method invokes the Content object's {{{render()}}} method to generate the near-final output for the SLiMP3 device. Finally, the Client instance passes the output of its Animator to its VFD instance, which encodes the textual display in a format that SLiMP3 will recognize. Lastly, the Client instance sends the encoded data in an 'l' message (for LCD) to the SLiMP3 device for display.
