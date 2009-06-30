@@ -1,4 +1,4 @@
-#summary description of text entering using the numeric keypad of the remote control
+#summary How to enter text using the numeric keypad of the remote control
 
 = Introduction =
 
