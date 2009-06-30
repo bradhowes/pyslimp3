@@ -8,17 +8,14 @@ The Searcher classes support this type of text entry for the search text, and th
 
 == Telephone Keypad Text Entry ==
 
-|| *Digit* || Letters ||
-|| 0 || *None* ||
-|| 1 || *None* ||
-|| 2 || ABC ||
-|| 3 || DEF ||
-|| 4 || GHI ||
-|| 5 || JKL ||
-|| 6 || MNO ||
-|| 7 || PQRS ||
-|| 8 || TUV ||
-|| 9 || WXYZ ||
+<table frame="box">
+<tr><td align="center"></td><td align="center">ABC</td><td align="center">DEF</td></tr>
+<tr><td align="center">1</td><td align="center">2</td><td align="center">3</td></tr>
+<tr><td align="center">GHI</td><td align="center">JKL</td><td align="center">MNO</td></tr>
+<tr><td align="center">4</td><td align="center">5</td><td align="center">6</td></tr>
+<tr><td align="center">PQRS</td><td align="center">TUV</td><td align="center">WXYZ</td></tr>
+<tr><td align="center">7</td><td align="center">8</td><td align="center">9</td></tr>
+</table>
 
 === Example ===
 
