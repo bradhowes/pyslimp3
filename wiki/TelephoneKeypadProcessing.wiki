@@ -6,8 +6,6 @@ Since most remote control devices do not have an alphanumeric keypad, one must d
 
 The Searcher classes support this type of text entry for the search text, and the Browsers classes use it to identify the item in the browsed set to display.
 
-== Telephone Keypad Text Entry ==
-
 <table frame="box">
 <tr><td align="center"></td><td align="center">ABC</td><td align="center">DEF</td></tr>
 <tr><td align="center">1</td><td align="center">2</td><td align="center">3</td></tr>
@@ -17,6 +15,6 @@ The Searcher classes support this type of text entry for the search text, and th
 <tr><td align="center">7</td><td align="center">8</td><td align="center">9</td></tr>
 </table>
 
-=== Example ===
+= Example =
 
 In a Searcher display, pressing the `4` key will first show the letter `G`. Pressing `4` again will replace the `G` with `H`. Yet again, and the letter `I` appears. Finally, one more press and the `4` number appears in place of the `I`.
