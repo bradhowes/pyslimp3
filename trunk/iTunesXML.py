@@ -471,7 +471,7 @@ class iTunesXML( object ):
     # Scan a container for elements containing a given search term.
     #
     def searchFor( self, term, container ):
-        term = term.lower()
+        term = term.upper()
         found = []
         for each in container:
             if each.key.find( term ) != -1:

@@ -23,7 +23,9 @@ from KeyProcessor import *
 
 #
 # Temporary (overlay) display of the current user rating for a song or album.
-# Use the up/down arrow buttons to change the rating.
+# Use the up/down arrow buttons to change the rating. Also supports using the
+# keys 0-5 to directly set the rating. With the arrow keys, one can set
+# half-stars.
 #
 class RatingDisplay( iTunesSourceGenerator ):
 
@@ -51,22 +53,26 @@ class RatingDisplay( iTunesSourceGenerator ):
         self.setRating( max( self.getRating() - 10, 0 ) )
         return self
 
+    #
+    # Show current rating as a string of '*' characters representing the number
+    # of 'stars' followed by a numeric value in [0-5]. 
+    #
     def generate( self ):
         rating = self.getRating()
         numStars = rating // 20
         halfStar = ( rating - numStars * 20 ) // 10
-        stars = '%d' % numStars
-        stars = '*' * numStars
+        stars = ( '*' * numStars ) + ( ' %d' % ( numStars,  ) )
         if halfStar:
-            stars += ' 1/2'
+            stars += '.5'
+        stars += ' stars'
         return Content( [ self.obj.getName(),
-                          centerAlign( stars + ' stars' ) ],
+                          centerAlign( stars ) ],
                         [ 'Rating', 
                           '' ] )
 
     #
     # Override of DisplayGenerator method. Convert digits 0-5 into a rating
-    # from 0-100. Anything larger
+    # from 0-100. Does not support half-stars.
     #
     def digit( self, digit ):
         if digit > 5:
@@ -74,6 +80,7 @@ class RatingDisplay( iTunesSourceGenerator ):
         rating = digit * 20
         self.setRating( rating )
         return self
+
 #
 # Derviation of RatingDisplay that works with albums.
 #

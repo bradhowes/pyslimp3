@@ -124,15 +124,15 @@ class KeyProcessor( object ):
         self.timerManager = timerManager
         self.notifier = notifier
         self.releaseTimer = None
-        self.lastKey = None
         self.lastTimeStamp = None
         self.reset()
 
+    #
+    # Reset the key processor to a known state.
+    #
     def reset( self ):
-        self.emittedHeldKey = False
-        self.repeatCount = 10
-        self.repeatCounter = 0
         self.notifyTimeStamp = None
+        self.emittedHeldKey = False
         if self.releaseTimer:
             self.silenced = True
         else:
@@ -154,23 +154,43 @@ class KeyProcessor( object ):
             self.lastTimeStamp = timeStamp
             return
 
-        self.lastTimeStamp = timeStamp
-
+        #
+        # Same key?
+        #
         if key == self.lastKey:
+
+            #
+            # Update the timestamp so that checkForRelease() will keep running.
+            #
+            self.lastTimeStamp = timeStamp
+
+            #
+            # Calculate how long the key has been held down for.
+            #
             delta = timeStamp - self.notifyTimeStamp
             if delta < 0:
                 delta += self.kMaxTimeStamp
 
+            #
+            # If we have yet to emit the 'kModHeld' modifier, check to see if
+            # we've held the key down long enough to emit it.
+            #
             if not self.emittedHeldKey:
                 if delta >= self.kHoldPressThreshold:
                     self.emittedHeldKey = True
                     self.notify( kModHeld )
             else:
+
+                #
+                # We've already emitted a 'held' event, so now emit 'repeat'
+                # events.
+                #
                 self.notify( kModRepeat )
 
-        if self.releaseTimer is None:
+        elif self.releaseTimer is None:
             self.reset()
             self.lastKey = key
+            self.lastTimeStamp = timeStamp
             self.startReleaseTimer( timeStamp, 2 * self.kMinPressThreshold )
             self.notify( kModFirst )
 
@@ -180,7 +200,7 @@ class KeyProcessor( object ):
     #
     def startReleaseTimer( self, timeStamp, delta ):
         self.releaseTimeStamp = timeStamp
-        self.releaseTimer = self.timerManager.addTimer( delta, self, 
+        self.releaseTimer = self.timerManager.addTimer( delta, 
                                                         self.checkForRelease )
 
     #
@@ -196,14 +216,10 @@ class KeyProcessor( object ):
                                     self.kMinPressThreshold )
             return
 
-        #
-        # Since no new event, assume button has been released.
-        #
-        if not self.silenced:
-            if self.emittedHeldKey:
-                self.notify( kModReleaseHeld )
-            else:
-                self.notify( kModRelease )
+        if self.emittedHeldKey:
+            self.notify( kModReleaseHeld )
+        else:
+            self.notify( kModRelease )
 
         self.releaseTimer = None
         self.reset()

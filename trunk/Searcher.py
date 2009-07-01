@@ -24,32 +24,30 @@ from Display import *
 from KeyProcessor import *
 
 #
-# Simple display generate that indicates that there are no matches for a given
-# search term. The only key supported is 'left'
+# Generic search term entry and display for album and artist searching. Uses
+# telephone-style keypad letter entry:
 #
-class NoneFound( DisplayGenerator ):
-
-    def __init__( self, prevLevel, context, term ): 
-        DisplayGenerator.__init__( self )
-        self.context = context
-        self.term = term
-        self.prevLevel = prevLevel
-
-    #
-    # Override of DisplayGenerator.fillKeyMap. Enable kArrowLeft.
-    #
-    def fillKeyMap( self ):
-        DisplayGenerator.fillKeyMap( self )
-        self.addKeyMapEntry( kArrowLeft, kModFirst, self.left )
-
-    def generate( self ): return Content(
-        [ centerAlign( 'No %ss matched' % ( self.context.lower(), ) ),
-          centerAlign( self.term ) ] )
-
-    def left( self ): return self.prevLevel
-
+#      ABC  DEF
+#  1    2    3
 #
-# Generic search term entry and display for album and artist searching.
+# GHI  JKL  MNO
+#  4    5    6
+#
+# PQRS TUV WXYZ
+#  7    8    9
+#
+#       0
+#
+# Repeated pressing of the same key cycles through the assigned letters as well
+# as the key's numeric digit. Special case is '1', which cycles through the
+# digits.
+#   
+# One can also use the up/down arrow keys to change the current character.
+# Currently, we only support English alphanumeric characters (A-Z, 0-9).
+#
+# Press right-arrow to move to a new character position; press twice to execute
+# the search. Press the left-arrow to erase the last character position; if
+# there are no more, show the previous browser screen.
 #
 class Searcher( iTunesSourceGenerator ):
 
@@ -224,6 +222,10 @@ class AlbumSearcher( Searcher ):
         if len( found ) == 0: return None
         return AlbumSearchResults( self.source, self, found )
 
+#
+# Specialization of AlbumListBrowser that browses the results of the last
+# search.
+#
 class AlbumSearchResults( AlbumListBrowser ):
     def generateWith( self, obj ):
         return Content( [ obj.getName(),
@@ -244,6 +246,10 @@ class ArtistSearcher( Searcher ):
         if len( found ) == 0: return None
         return ArtistSearchResults( self.source, self, found )
 
+#
+# Specialization of ArtstListBrowser that browses the results of the last
+# search.
+#
 class ArtistSearchResults( ArtistListBrowser ):
     def generateWith( self, obj ): 
         return Content( [ obj.getName(),
@@ -251,3 +257,30 @@ class ArtistSearchResults( ArtistListBrowser ):
                                           '(%d %s)' ) ],
                         [ 'Found',
                           self.getIndexOverlay() ] )
+
+#
+# Simple display generate that indicates that there are no matches for a given
+# search term. The only key supported is 'left'
+#
+class NoneFound( DisplayGenerator ):
+
+    def __init__( self, prevLevel, context, term ): 
+        DisplayGenerator.__init__( self )
+        self.context = context
+        self.term = term
+        self.prevLevel = prevLevel
+
+    def isOverlay( self ): return True
+
+    #
+    # Override of DisplayGenerator.fillKeyMap. Enable kArrowLeft.
+    #
+    def fillKeyMap( self ):
+        DisplayGenerator.fillKeyMap( self )
+        self.addKeyMapEntry( kArrowLeft, kModFirst, self.left )
+
+    def generate( self ): return Content(
+        [ centerAlign( 'No %ss matched' % ( self.context.lower(), ) ),
+          centerAlign( self.term ) ] )
+
+    def left( self ): return self.prevLevel

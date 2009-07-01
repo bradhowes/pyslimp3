@@ -49,8 +49,8 @@ class OrderedItem( object ):
         # English and Spanish articles from the start of the name, and removing
         # any non-alphanumeric characters.
         #
-        bits = name.lower().split()
-        if bits[ 0 ] in ( 'a', 'an', 'the', 'el', 'la', 'los', 'las' ):
+        bits = name.upper().split()
+        if bits[ 0 ] in ( 'A', 'AN', 'THE', 'EL', 'LA', 'LOS', 'LAS' ):
             bits = bits[ 1: ]
         self.key = filter( lambda a: a.isalnum() or a.isspace(), 
                            ' '.join( bits ) )

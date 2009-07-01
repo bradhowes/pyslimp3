@@ -182,10 +182,10 @@ class Client( object ):
         # If there is an existing overlay screen generator, remove it and the
         # timer used to remove it.
         #
-        if self.overlayTimer is not None:
-            self.server.removeTimer( self.overlayTimer )
-            self.overlayGenerator = None
+        if self.overlayTimer:
+            self.overlayTimer.deactivate()
             self.overlayTimer = None
+            self.overlayGenerator = None
         self.emitDisplay()
 
     #
@@ -208,9 +208,9 @@ class Client( object ):
         # Install a timer to remove the overlay screen generator, removing any
         # existing timer.
         #
-        if self.overlayTimer is not None:
-            self.server.removeTimer( self.overlayTimer )
-        self.overlayTimer = self.server.addTimer( self.kOverlayDuration, self,
+        if self.overlayTimer:
+            self.overlayTimer.deactivate()
+        self.overlayTimer = self.server.addTimer( self.kOverlayDuration,
                                                   self.clearOverlay )
 
     #
@@ -225,7 +225,9 @@ class Client( object ):
             #
             self.keyProcessor.reset()
             self.overlayGenerator = None
-            self.overlayTimer = None
+            if self.overlayTimer:
+                self.overlayTimer.deactivate()
+                self.overlayTimer = None
             self.emitDisplay()
 
     #
@@ -250,7 +252,7 @@ class Client( object ):
         # Install a new timer for the next update.
         #
         self.server.removeTimer( self.refreshTimer )
-        self.refreshTimer = self.server.addTimer( self.kRefreshInterval, self, 
+        self.refreshTimer = self.server.addTimer( self.kRefreshInterval, 
                                                   self.refreshDisplay )
 
     #
@@ -271,8 +273,8 @@ class Client( object ):
         #
         self.animator.setContent( content )
         try:
-            lines, cursor = self.animator.render()
-            self.emit( self.vfd.build( lines, cursor ), self.hardwareAddress )
+            lines = self.animator.render()
+            self.emit( self.vfd.build( lines ), self.hardwareAddress )
         except socket.error:
             pass
 
@@ -283,9 +285,11 @@ class Client( object ):
     #
     def processKeyEvent( self, timeStamp, key ):
         self.lastKeyTimeStamp = datetime.now()
-        self.keyProcessor.process( timeStamp, key )
-        if self.animator.isBlanking():
-            self.animator.unblankScreen()
+        if self.animator.screenSaverActivated():
+            self.animator.removeScreenSaver()
+            self.emitDisplay()
+        else:
+            self.keyProcessor.process( timeStamp, key )
 
     #
     # Callback invoked by KeyProcessor when it has a valid keyCode event to
@@ -296,41 +300,45 @@ class Client( object ):
 
         #
         # If there is an temporary overlay display, see if it can process the
-        # keyCode. If the overlay generator returns a non-None value, install
-        # the returned value as an new overlay display generator.
+        # keyCode. Otherwise, let the current display generator have a crack at
+        # it.
         #
         if self.overlayGenerator:
             generator = self.overlayGenerator.processKeyCode( keyCode )
-            if generator:
-                self.setOverlayGenerator( generator )
-                return
-
-        #
-        # See if the current display generator can process the keyCode
-        #
         else:
             generator = self.linesGenerator.processKeyCode( keyCode )
-            if generator:
-                if generator == self.linesGenerator:
-                    self.emitDisplay()
-                else:
-                
-                    #
-                    # New generator is different from the current one. Install
-                    # it in the proper slot.
-                    #
-                    if generator.isOverlay():
-                        self.setOverlayGenerator( generator )
-                    else:
-                        self.setLinesGenerator( generator )
-                return
 
         #
-        # Finally, look for any 'global' functions to handle.
+        # If not None, the key event was handled. Possibly install a new
+        # display generator.
         #
-        proc = self.keyMap.get( keyCode )
-        if proc:
-            proc()
+        if generator:
+            if generator.isOverlay():
+                
+                #
+                # Install a temporary overlay display. Note that always
+                # install, even for the same overlay generator in order to
+                # reset the overlay timer.
+                #
+                self.setOverlayGenerator( generator )
+
+            else:
+
+                #
+                # Normal display. Only update if it is different.
+                #
+                if generator != self.linesGenerator:
+                    self.setLinesGenerator( generator )
+                else:
+                    self.emitDisplay()
+
+        #
+        # Last-chance key event processing. Look to see if we can handle it.
+        #
+        else:
+            proc = self.keyMap.get( keyCode )
+            if proc:
+                proc()
 
     #
     # Volume control methods

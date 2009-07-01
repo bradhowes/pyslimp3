@@ -36,8 +36,7 @@ class Content:
     # it is given. The optional 'cursor' value must be a value between 0 and
     # kDisplayHeight * kDisplayWidth.
     #
-    def __init__( self, lines, rightOverlays = kBlankOverlays, cursor = None ):
-        self.cursor = cursor
+    def __init__( self, lines, rightOverlays = kBlankOverlays ):
 
         #
         # Normalize content so that we have kDisplayHeight lines and overlays.
@@ -103,14 +102,13 @@ class Content:
                 size = len( rightOverlay )
                 line = line[ : kDisplayWidth - size ] + rightOverlay
             output[ index ] = line
-        return output, self.cursor
+        return output
 
     #
     # Determine if this Content instance has different content lines than
     # another one.
     #
     def hasDifferentLines( self, rhs ):
-        if rhs is None: return True
         for index in range( kDisplayHeight ):
             if self.lines[ index ] != rhs.lines[ index ]: return True
         return False
@@ -120,7 +118,6 @@ class Content:
     # another one.
     #
     def hasDifferentRightOverlays( self, rhs ):
-        if rhs is None: return True
         for index in range( kDisplayHeight ):
             if self.rightOverlays[ index ] != rhs.rightOverlays[ index ]: 
                 return True

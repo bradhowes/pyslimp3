@@ -19,41 +19,74 @@
 
 from time import time
 
+#
+# A Timer object contains a timestamp that indicates when it should fire, and a
+# method to invoke when it is fired (from inside its fire() method). Note that
+# the notifier object may be a method or an object that implements the __call__
+# interface.
+#
 class Timer( object ):
 
     kFired = -1
 
-    def __init__( self, next, when, client, notifier ):
+    def __init__( self, next, when, notifier ):
         self.next = next
         self.when = when
-        self.client = client
         self.notifier = notifier
 
+    #
+    # If not already fired (or deactivated), invoke the notifier given in the
+    # constructor. 
+    #
     def fire( self ):
         if self.when != self.kFired:
             self.when = self.kFired
-            if self.notifier:
-                self.notifier()
-            elif self.client:
-                self.client.handleTimeout()
+            self.notifier()
 
+    def deactivate( self ):
+        self.when = self.kFired
+        
+
+#
+# Manager of active Timer objects. Maintains a linked list of Timer objects,
+# ordered by their timestamp values. Periodically, one must invoke
+# the processTimers() method to process the active Timer objects.
+#
 class TimerManager( object ):
 
     def __init__( self ):
-        self.head = Timer( None, Timer.kFired, None, None )
+        self.head = Timer( None, Timer.kFired, None )
 
-    def addTimer( self, delta, client, notifier ):
+    #
+    # Create a new Timer object, add to the list of pending timers, and return
+    # it to the caller. The delta parameter is the number of seconds in the
+    # future when the timer should fire. The notifier parameter is a method to
+    # invoke or an object that implements the __call__ interface.
+    #
+    def addTimer( self, delta, notifier ):
+        
+        #
+        # Calculate the absolute time when the timer should fire.
+        #
         when = time() + delta
+        
+        #
+        # Insert at the appropriate place in the list to keep the firing times
+        # ordered in increasing value.
+        #
         pos = self.head
         while pos.next is not None and pos.next.when < when:
             pos = pos.next
-        pos.next = Timer( pos.next, when, client, notifier )
+        pos.next = Timer( pos.next, when, notifier )
         return pos.next
 
+    #
+    # Remove the indicated timer from the list of active timers.
+    #
     def removeTimer( self, timer ):
         if timer is None:
             return
-        timer.when = Timer.kFired
+        timer.deactivate()
         pos = self.head
         while pos.next is not None:
             if pos.next == timer:
@@ -61,30 +94,28 @@ class TimerManager( object ):
                 return
             pos = pos.next
 
-    def removeClientTimers( self, client ):
-        pos = self.head
-        while pos.next is not None:
-            timer = pos.next
-            if timer.client == client:
-                timer.when = Timer.kFired
-                pos.next = timer.next
-            pos = timer
-
+    #
+    # Process the list of active timers, executing the fire() method of each
+    # one whose timestamp is older than the current time.
+    #
     def processTimers( self ):
         now = time()
         timer = self.head.next
+
+        #
+        # Process timers until we reach one that has a timestamp in the future.
+        #
         while timer is not None and timer.when <= now:
             self.head.next = timer.next
             timer.fire()
             timer = timer.next
 
+    #
+    # Remove all Timer objects. Below should be sufficient unless there was a
+    # loop.
+    #
     def reset( self ):
-        pos = self.head
-        while pos.next is not None:
-            tmp = pos.next.next
-            pos.next.next = None
-            pos.next = tmp
-        print( 'self.head', self.head )
+        self.head.next = None
 
     def dump( self ):
         pos = self.head.next

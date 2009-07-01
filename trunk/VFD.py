@@ -90,7 +90,7 @@ class VFD( object ):
     #
     # Generate a new client message containing display text.
     #
-    def build( self, lines, cursor ):
+    def build( self, lines, cursor = None ):
         self.reset()
         
         #
