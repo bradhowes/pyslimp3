@@ -82,7 +82,7 @@ class Server( asyncore.dispatcher ):
 
     def run( self ):
         timerManager = self.timerManager
-        timerManager.addTimer( self.kSaveClientStateInterval, self, 
+        timerManager.addTimer( self.kSaveClientStateInterval, 
                                self.saveClientState )
         loop = asyncore.loop
         while 1:
@@ -142,11 +142,11 @@ class Server( asyncore.dispatcher ):
 
     def saveClientState( self ):
         self.clients.save()
-        self.timerManager.addTimer( self.kSaveClientStateInterval, self, 
+        self.timerManager.addTimer( self.kSaveClientStateInterval,
                                     self.saveClientState )
 
-    def addTimer( self, delta, client, notifier ):
-        return self.timerManager.addTimer( delta, client, notifier )
+    def addTimer( self, delta, notifier ):
+        return self.timerManager.addTimer( delta, notifier )
 
     def removeTimer( self, timer ):
         self.timerManager.removeTimer( timer )

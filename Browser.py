@@ -112,6 +112,9 @@ class Browser( iTunesSourceGenerator ):
     def getNameAtIndex( self, index ):
         return self.collection[ index ].getName()
 
+    def getKeyAtIndex( self, index ):
+        return self.collection[ index ].getKey()
+
     #
     # Override of DisplayGenerator method. If there are 10 or less items, jump
     # to the exact index based on the 'digit' pressed. Otherwise, treat the
@@ -143,7 +146,7 @@ class Browser( iTunesSourceGenerator ):
             hi = maxIndex
             while lo < hi:
                 mid = ( lo + hi ) // 2
-                if self.getNameAtIndex( mid )[ 0 ] < value:
+                if self.getKeyAtIndex( mid )[ 0 ] < value:
                     lo = mid + 1
                 else:
                     hi = mid

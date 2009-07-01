@@ -65,6 +65,9 @@ class PlaybackDisplay( iTunesSourceGenerator ):
         line1 = '%s - %s' % ( track.getAlbumName(), track.getArtistName() )
         line2 = '%d.%s' % ( track.getIndex(), track.getName() )
         state = self.kPlayerState.get( self.source.getPlayerState(), '???' )
+        if state == '':
+            if self.source.getMute():
+                state = 'MUTED'
         position = getHHMMSS( self.source.getPlayerPosition() )
         return Content( [ line1, 
                           line2 ],

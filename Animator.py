@@ -19,6 +19,7 @@
 
 from datetime import datetime
 from Display import *
+from ScreenSavers import *
 
 #
 # Renderer of Content contents to make a display. When the content is the same,
@@ -26,96 +27,71 @@ from Display import *
 # left until all of the line has been displayed. It then loops back and shows
 # the beginning of the line.
 # 
-# Supports a screensaver that is invoked after some configurable amount of time
-# with no screen changes. After that interval, the display will go blank.
-# Pressing a remote key or somehow causing the current display to change will
-# remove the blanking.
-#
 class Animator( object ):
 
-    kHoldCount = 8              # number of renders before animating
-    kBlankingTimeout = 2 * 60   # 2 minutes of inactivity
-    kBlankScreen = [ ' ' * kDisplayWidth ] * kDisplayHeight
+    kHoldCount = 10             # Number of renders before animating
+    kScreenSaverTimeout = 5 * 60 # 5 minutes of screen inactivity
 
-    def __init__( self, screenTimeout = kBlankingTimeout ):
+    def __init__( self, screenSaverClass = Swapper,
+                  screenSaverTimeout = kScreenSaverTimeout ):
         self.content = None
-        self.screenTimeout = screenTimeout
+        self.screenSaverClass = screenSaverClass
+        self.screenSaverTimeout = screenSaverTimeout
         self.reset()
 
     def reset( self ):
         self.offsets = [ 0 ] * kDisplayHeight
         self.atEnd = False
         self.holdCounter = Animator.kHoldCount
-        self.unblankScreen()
-   
+        self.removeScreenSaver()
+
     #
     # Apply new display content for animating. Resets animation values if the
     # screen content is different.
     #
     def setContent( self, content ):
-        
+
         #
-        # If the main content lines are different, reset any animation and
-        # unblank the screen.
+        # If the main content lines are different or the shifts needed to show
+        # an entire line are different, reset the animation.
         #
-        if content.hasDifferentLines( self.content ):
-            self.content = content
+        shiftsNeeded = content.shiftsNeeded
+        if self.content is None or \
+                content.hasDifferentLines( self.content ) or \
+                self.shiftsNeeded != shiftsNeeded:
             self.reset()
-            self.shiftsNeeded = content.shiftsNeeded
-            self.maxShift = max( content.shiftsNeeded )
-
-        #
-        # Lines are the same, but the right overlays are different, just
-        # keep the blanker from taking effect.
-        #
+            self.maxShift = max( shiftsNeeded )
+            self.shiftsNeeded = shiftsNeeded
         elif content.hasDifferentRightOverlays( self.content ):
-            self.unblankScreen()
-
-        #
-        # Both are the same. Blank after some number of seconds have passed.
-        #
-        elif not self.blanked:
+            self.removeScreenSaver()
+        elif self.screenSaver is None:
             delta = datetime.now()
-            delta -= self.blankingTimestamp
-            if delta.seconds >= self.screenTimeout:
-                self.blanked = True
+            delta -= self.activatingTimestamp
+            if delta.seconds >= self.screenSaverTimeout:
+                self.screenSaver = self.screenSaverClass( self.output )
+        self.content = content
 
-    #
-    # Unblank the screen, allowing updates to show
-    #
-    def unblankScreen( self ):
-        self.blankingTimestamp = datetime.now()
-        self.blanked = False
+    def removeScreenSaver( self ):
+        self.activatingTimestamp = datetime.now()
+        self.screenSaver = None
 
-    #
-    # Blank the screen, inhibiting content data from reaching the display
-    #
-    def blankScreen( self ):
-        self.blanked = True
+    def screenSaverActivated( self ):
+        return self.screenSaver is not None
 
-    #
-    # Determine if the screeen should be blanked due to inactivity.
-    #
-    def isBlanking( self ): 
-        return self.blanked
-    
     #
     # Gererate output for the display, applying any animation necessary to show
     # long lines.
     #
     def render( self ):
 
-        #
-        # Just show a blank screen if there are no updates after N seconds
-        #
-        if self.blanked:
-            return self.kBlankScreen
+        if self.screenSaver:
+            return self.screenSaver.render()
 
         #
         # Obtain a rendering from the current display content, using any
         # animation offsets we have.
         #
-        output = self.content.render( self.offsets )
+        self.output = output = self.content.render( self.offsets )
         if self.maxShift == 0:
             return output
 
@@ -167,8 +143,10 @@ class Animator( object ):
 
                     #
                     # Increment the offset to scroll the line to the left.
+                    # Clamp to the amount needed to shift the line to the right
+                    # and store.
                     #
-                    offset += 1
-                    self.offsets[ index ] = offset
+                    offset += 3
+                    self.offsets[ index ] = min( offset, shiftNeeded )
 
         return output
