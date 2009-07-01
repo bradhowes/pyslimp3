@@ -485,11 +485,7 @@ class iTunesXML( object ):
     def getVolume( self ): return self.app.sound_volume.get()
     def setVolume( self, value ): self.app.sound_volume.set( value )
     def adjustVolume( self, delta ): 
-        prev = self.getVolume()
-        new = old + delta
-        self.setVolume( new )
-        now = self.getVolume()
-        print prev, new, now
+        self.setVolume( self.getVolume() + delta )
 
     #
     # Application mute controls.
