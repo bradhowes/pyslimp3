@@ -42,16 +42,16 @@ class Browser( iTunesSourceGenerator ):
                 'TUV',
                 'WXYZ' ]
 
-    def __init__( self, iTunes, prevLevel, collection ):
+    def __init__( self, iTunes, prevLevel ):
         iTunesSourceGenerator.__init__( self, iTunes )
         self.index = 0
         self.prevLevel = prevLevel
-        self.collection = collection
         self.reset()
 
     def reset( self ):
         self.lastDigit = None
         self.digitIndex = 0
+        self.nextLevel = None
 
     #
     # Install handlers for the arrow keys.
@@ -63,9 +63,9 @@ class Browser( iTunesSourceGenerator ):
         self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kArrowRight,( kModFirst, ), self.right )
 
-    def getMaxIndex( self ): return len( self.collection )
+    def getMaxIndex( self ): return len( self.getCollection() )
 
-    def getCurrentObject( self ): return self.collection[ self.index ]
+    def getCurrentObject( self ): return self.getCollection()[ self.index ]
 
     def getIndexOverlay( self, prefix = '' ):
         if prefix: prefix += ' '
@@ -77,13 +77,17 @@ class Browser( iTunesSourceGenerator ):
     def generate( self ):
         return self.generateWith( self.getCurrentObject() )
 
+    def setIndex( self, value ):
+        self.index = value
+        self.nextLevel = None
+
     #
     # Move to the previous item in the collection
     #
     def up( self ):
         index = self.index - 1
         if index == -1: index = self.getMaxIndex() - 1
-        self.index = index
+        self.setIndex( index )
         self.reset()
         return self
 
@@ -93,7 +97,7 @@ class Browser( iTunesSourceGenerator ):
     def down( self ):
         index = self.index + 1
         if index == self.getMaxIndex(): index = 0
-        self.index = index
+        self.setIndex( index )
         self.reset()
         return self
 
@@ -107,13 +111,16 @@ class Browser( iTunesSourceGenerator ):
     #
     # Does nothing. Derived classes may override.
     #
-    def right( self ): return None
+    def right( self ): 
+        if not self.nextLevel:
+            self.nextLevel = self.makeNextLevel()
+        return self.nextLevel
 
     def getNameAtIndex( self, index ):
-        return self.collection[ index ].getName()
+        return self.getCollection()[ index ].getName()
 
     def getKeyAtIndex( self, index ):
-        return self.collection[ index ].getKey()
+        return self.getCollection()[ index ].getKey()
 
     #
     # Override of DisplayGenerator method. If there are 10 or less items, jump
@@ -124,7 +131,7 @@ class Browser( iTunesSourceGenerator ):
         maxIndex = self.getMaxIndex()
         if maxIndex <= 10:
             if digit == 0: digit = 10
-            self.index = min( digit, self.getMaxIndex() ) - 1
+            self.setIndex( min( digit, self.getMaxIndex() ) - 1 )
         elif digit > 1:
             values = Browser.kDigits[ digit ]
             if digit == self.lastDigit:
@@ -150,6 +157,6 @@ class Browser( iTunesSourceGenerator ):
                     lo = mid + 1
                 else:
                     hi = mid
-            self.index = lo
+            self.setIndex( lo )
 
         return self

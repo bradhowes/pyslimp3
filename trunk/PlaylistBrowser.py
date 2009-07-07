@@ -32,7 +32,9 @@ from TrackListBrowser import *
 class PlaylistBrowser( Browser ):
 
     def __init__( self, iTunes, prevLevel ):
-        Browser.__init__( self, iTunes, prevLevel, iTunes.getPlaylistList() )
+        Browser.__init__( self, iTunes, prevLevel )
+        
+    def getCollection( self ): return self.source.getPlaylistList()
 
     #
     # Enable 'play'
@@ -54,13 +56,11 @@ class PlaylistBrowser( Browser ):
     #
     # Create and show a TrackListBrowser for the playlist tracks
     #
-    def right( self ):
+    def makeNextLevel( self ):
         obj = self.getCurrentObject()
         if obj.getTrackCount() == 0:
-            return self
-        title = obj.getName()
-        return TrackListBrowser( self.source, self, obj.getTracks(), 
-                                 title, trackAlbumArtistNameFormatter )
+            return None
+        return TrackListBrowser( self.source, self, obj.getTracks() )
 
     #
     # Begin playback at the start of the playlist (or at the track at the given

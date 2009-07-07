@@ -31,13 +31,15 @@ from Searcher import AlbumSearcher, ArtistSearcher
 class TopBrowser( Browser ):
 
     def __init__( self, iTunes ):
-        Browser.__init__( self, iTunes, None, 
-                          ( self.browseAlbums,
+        Browser.__init__( self, iTunes, None )
+        self.collection = ( self.browseAlbums,
                             self.browseArtists,
                             self.browseGenres,
                             self.browsePlaylists,
                             self.albumSearcher,
-                            self.artistSearcher ) )
+                            self.artistSearcher )
+        
+    def getCollection( self ): return self.collection
 
     #
     # Obtain the display content for the current index.
@@ -48,21 +50,20 @@ class TopBrowser( Browser ):
     #
     # Go down a level and show a different browser.
     #
-    def right( self ): return self.getCurrentObject()( False )
+    def makeNextLevel( self ):
+        return self.getCurrentObject()( False )
 
     def browseAlbums( self, getText ):
         if getText:
             return [ 'Browse Albums', 
                      '(%d total)' % self.source.getAlbumCount() ]
-        return AlbumListBrowser( self.source, self,
-                                 self.source.getAlbumList() )
+        return AlbumListBrowser( self.source, self )
 
     def browseArtists( self, getText ):
         if getText:
             return [ 'Browse Artists', 
                      '(%d total)' % self.source.getArtistCount() ]
-        return ArtistListBrowser( self.source, self,
-                                  self.source.getArtistList() )
+        return ArtistListBrowser( self.source, self )
 
     def browseGenres( self, getText ):
         if getText:

@@ -29,10 +29,12 @@ from Display import *
 class GenreListBrowser( Browser ):
 
     def __init__( self, iTunes, prevLevel ):
-        Browser.__init__( self, iTunes, prevLevel, iTunes.getGenreNames() )
+        Browser.__init__( self, iTunes, prevLevel )
+
+    def getCollection( self ): return self.source.getGenreNames()
 
     def getNameAtIndex( self, index ):
-        return self.collection[ index ].getName()
+        return self.getCollection()[ index ].getName()
 
     def generateWith( self, obj ): 
         genre = self.source.getGenre( obj )
@@ -42,7 +44,7 @@ class GenreListBrowser( Browser ):
                         [ 'Genre',
                           self.getIndexOverlay() ] )
 
-    def right( self ): 
+    def makeNextLevel( self ): 
         obj = self.getCurrentObject()
         genre = self.source.getGenre( obj )
         return AlbumListBrowser( self.source, self, genre )

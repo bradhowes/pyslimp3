@@ -38,11 +38,11 @@ def trackAlbumArtistNameFormatter( track ):
 
 class TrackListBrowser( Browser ):
 
-    def __init__( self, iTunes, prevLevel, trackList, title,
-                  formatter ):
-        Browser.__init__( self, iTunes, prevLevel, trackList )
-        self.title = title
-        self.formatter = formatter
+    def __init__( self, iTunes, prevLevel, trackList ):
+        Browser.__init__( self, iTunes, prevLevel )
+        self.trackList = trackList
+
+    def getCollection( self ): return self.trackList
 
     #
     # Enable 'play'
@@ -55,8 +55,8 @@ class TrackListBrowser( Browser ):
     # Show the current track name and duration values
     #
     def generateWith( self, obj ): 
-        return Content( [ self.formatter( obj ),
-                          self.title ],
+        return Content( [ obj.getName(),
+                          obj.getAlbumName() + '/' + obj.getArtistName()  ],
                         [ self.getIndexOverlay(),
                           getHHMMSS( obj.getDuration() ) ] )
 

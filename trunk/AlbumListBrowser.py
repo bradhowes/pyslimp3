@@ -31,8 +31,14 @@ from TrackListBrowser import *
 #
 class AlbumListBrowser( Browser ):
 
-    def __init__( self, iTunes, prevLevel, albumList ):
-        Browser.__init__( self, iTunes, prevLevel, albumList )
+    def __init__( self, source, prevLevel, albumList = None ):
+        Browser.__init__( self, source, prevLevel )
+        self.albumList = albumList
+
+    def getCollection( self ): 
+        if self.albumList is None:
+            return self.source.getAlbumList()
+        return self.albumList
 
     #
     # Enable 'play'
@@ -43,7 +49,7 @@ class AlbumListBrowser( Browser ):
         self.addKeyMapEntry( kPIP, None, self.ratings )
 
     def getNameAtIndex( self, index ):
-        return self.collection[ index ].getName()
+        return self.getCollection()[ index ].getName()
 
     #
     # Show the current album name and track count
@@ -57,11 +63,9 @@ class AlbumListBrowser( Browser ):
     #
     # Create and show a TrackListBrowser for the album tracks
     #
-    def right( self ):
+    def makeNextLevel( self ):
         obj = self.getCurrentObject()
-        title = obj.getName() + ' - ' + obj.getArtistName()
-        return TrackListBrowser( self.source, self, obj.getTracks(), title,
-                                 trackNameFormatter )
+        return TrackListBrowser( self.source, self, obj.getTracks() )
 
     #
     # Begin playback at the start of the album (or at the track at the given

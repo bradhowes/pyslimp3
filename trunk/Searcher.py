@@ -92,6 +92,7 @@ class Searcher( iTunesSourceGenerator ):
         self.lastDigit = None
         self.digitIndex = 0
         self.stack = None
+        self.nextLevel = None
 
     #
     # Generate the search screen
@@ -99,13 +100,12 @@ class Searcher( iTunesSourceGenerator ):
     def generate( self ):
         pos = len( self.searchText ) + kDisplayWidth - 1
         return Content( [ self.tag + ' Search Query:',
-                          self.searchText ],
-                        cursor = pos )
+                          self.searchText ] )
 
     def updateLastCharacter( self, value ):
         self.searchText = self.searchText[ : -1 ] + value
+        self.nextLevel = None
 
-        
     #
     # Show the next character in the current position.
     #
@@ -166,7 +166,7 @@ class Searcher( iTunesSourceGenerator ):
     # search and show the results.
     #
     def right( self ):
-        
+
         #
         # If the last character is not a 'new' character, then save the current
         # state digit processing state and add a 'new' character
@@ -184,6 +184,9 @@ class Searcher( iTunesSourceGenerator ):
         if len( self.searchText ) < 3:
             return self
 
+        if self.nextLevel:
+            return self.nextLevel
+
         #
         # Strip off the 'new' character
         #
@@ -192,6 +195,7 @@ class Searcher( iTunesSourceGenerator ):
         found = self.searchFor( searchText )
         if found is None:
             found = NoneFound( self, self.tag, searchText )
+        self.nextLevel = found
         return found
 
     #
@@ -204,6 +208,7 @@ class Searcher( iTunesSourceGenerator ):
             return self.prevLevel
         self.searchText = self.searchText[ : -1 ]
         self.lastDigit, self.digitIndex, self.stack = self.stack
+        self.nextLevel = None
         return self
     
     def searchFor( self ):
@@ -227,6 +232,13 @@ class AlbumSearcher( Searcher ):
 # search.
 #
 class AlbumSearchResults( AlbumListBrowser ):
+    
+    def __init__( self, source, prev, found ):
+        AlbumListBrowser.__init__( self, source, prev )
+        self.found = found
+
+    def getCollection( self ): return self.found
+
     def generateWith( self, obj ):
         return Content( [ obj.getName(),
                           obj.getArtistName() ],
@@ -251,6 +263,13 @@ class ArtistSearcher( Searcher ):
 # search.
 #
 class ArtistSearchResults( ArtistListBrowser ):
+    
+    def __init__( self, source, prev, found ):
+        ArtistListBrowser.__init__( self, source, prev )
+        self.found = found
+
+    def getCollection( self ): return self.found
+
     def generateWith( self, obj ): 
         return Content( [ obj.getName(),
                           formatQuantity( obj.getAlbumCount(), 'album', None,
