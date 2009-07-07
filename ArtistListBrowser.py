@@ -31,8 +31,7 @@ from PlaybackDisplay import PlaybackDisplay
 #
 class ArtistListBrowser( Browser ):
 
-    def __init__( self, iTunes, prevLevel, artistList ):
-        Browser.__init__( self, iTunes, prevLevel, artistList )
+    def getCollection( self ): return self.source.getArtistList()
 
     #
     # Enable 'play'
@@ -54,7 +53,7 @@ class ArtistListBrowser( Browser ):
     #
     # Create and show an AlbumListBrowser for the artist's albums
     #
-    def right( self ):
+    def makeNextLevel( self ):
         obj = self.getCurrentObject()
         return AlbumListBrowser( self.source, self, obj.getAlbums() )
 
