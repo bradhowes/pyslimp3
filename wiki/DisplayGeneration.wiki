@@ -7,3 +7,15 @@ Client.emitDisplay() -> DisplayGenerator.generate() -> Animator.render() -> Cont
 }}}
 
 The Client instance associated with a specific SLiMP3 device on the network generates display data approximately 4 times per second. At each update, it asks the active DisplayGenerator instance to generate a display data, the result of which is an instance of the Content class. The Client object then hands off the Content object to its Animator instance, which handles animation of lines that are longer than that of the display. Its {{{render()}}} method invokes the Content object's {{{render()}}} method to generate the near-final output for the SLiMP3 device. Finally, the Client instance passes the output of its Animator to its VFD instance, which encodes the textual display in a format that SLiMP3 will recognize. Lastly, the Client instance sends the encoded data in an 'l' message (for LCD) to the SLiMP3 device for display.
+
+== Client ==
+
+There is one client instance per SLiMP3 device found on the network. The Client object holds references to one or two DisplayGenerator objects, a _normal_ display generator such as the iTunes playback display, and an _overlay_ display that appears temporarily when the user changes the volume or repeat mode.
+
+== DisplayGenerator ==
+
+There is a hierarchy of classes derived from DisplayGenerator, each one tailored to display a particular piece of information such as search results or album information or artist information. The DisplayGenerator.generate() method returns a new Content object which contains the text to show on the two lines of the SLiMP3 device: two lines of content and two lines of overlay text that always appear on the right side of the display, no matter how long the content lines are. The Animator class described below will scroll the content lines over time so that they are shown in their entirety.
+
+== Animator ==
+
+Although the Client's DisplayGenerator objects change as the user moves around in the SLiMP3 menu screens, it only has one Animator instance that translates Content lines into actual screens for display. Since there are only 40 characters per line in the original SLiMP3, the Animator class handles scrolling of long content lines so that the user will see the entire line over time. Also, the Animator class makes sure that any fixed overlay text defined by the active DisplayGenerator is always visible to the user.
