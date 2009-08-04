@@ -46,11 +46,13 @@ class RatingDisplay( iTunesSourceGenerator ):
         return self.prevLevel
 
     def up( self ):
-        self.setRating( min( self.getRating() + 10, 100 ) )
+        value = min( self.getRating() + 10, 100 )
+        self.setRating( value )
         return self
 
     def down( self ):
-        self.setRating( max( self.getRating() - 10, 0 ) )
+        value = max( self.getRating() - 10, 0 )
+        self.setRating( value )
         return self
 
     #
