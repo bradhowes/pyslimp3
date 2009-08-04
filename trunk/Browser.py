@@ -116,6 +116,9 @@ class Browser( iTunesSourceGenerator ):
             self.nextLevel = self.makeNextLevel()
         return self.nextLevel
 
+    def makeNextLevel( self ):
+        return None
+
     def getNameAtIndex( self, index ):
         return self.getCollection()[ index ].getName()
 

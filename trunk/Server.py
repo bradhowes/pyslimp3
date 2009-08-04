@@ -40,6 +40,8 @@ class Server( asyncore.dispatcher ):
 
     def __init__( self ):
         asyncore.dispatcher.__init__( self )
+        self.loader = None
+        self.loadTimeStamp = None
         self.clients = ClientPersistence.ClientPersistence()
         self.makeTimerManager()
         self.makeITunesManager()
@@ -57,6 +59,7 @@ class Server( asyncore.dispatcher ):
         self.timerManager = Timer.TimerManager()
 
     def iTunesLoad( self ):
+        print "Server.iTunesLoad"
 
         #
         # Get the location of the iTunes XML file. Apparently we can get it
@@ -73,19 +76,22 @@ class Server( asyncore.dispatcher ):
         # Convert the (file:) URL from above into a local file path.
         #
         self.filename, headers = urllib.urlretrieve( location )
-        self.loadTimeStamp = None
-        self.iTunesLoadCheck()
+        self.iTunes.load( self.filename )
+        if self.loader:
+            self.loader.join()
+            self.loader = None
+        self.loadTimeStamp = stat( self.filename )[ ST_MTIME ]
+        self.loader = None
 
     def iTunesLoadCheck( self ):
-        print 'iTunesLoadCheck'
         when = stat( self.filename )[ ST_MTIME ]
         if self.loadTimeStamp is None:
             delta = self.kLibraryReloadInterval
         else:
             delta = when - self.loadTimeStamp
-        if delta >= self.kLibraryReloadInterval:
-            self.iTunes.load( self.filename )
-            self.loadTimeStamp = when
+        if delta >= self.kLibraryReloadInterval and self.loader is None:
+            self.loader = threading.Thread( target = self.iTunesLoad )
+            self.loader.start()
         self.addTimer( self.kLibraryLoadCheckInterval, self.iTunesLoadCheck )
 
     def makeDispatcher( self, port = kDefaultPort ):

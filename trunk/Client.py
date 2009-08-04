@@ -327,7 +327,7 @@ class Client( object ):
                 #
                 # Normal display. Only update if it is different.
                 #
-                if generator != self.linesGenerator:
+                if generator != self.linesGenerator or self.overlayGenerator:
                     self.setLinesGenerator( generator )
                 else:
                     self.emitDisplay()
