@@ -20,8 +20,8 @@
 from datetime import datetime
 from os import stat
 from stat import *
-import subprocess
-import array, asyncore, cPickle, socket, struct, threading, urllib
+import array, asyncore, cPickle, socket, struct, subprocess, threading, \
+    traceback, urllib
 import ClientPersistence, Display, IR, iTunesXML, Timer
 
 #
@@ -140,9 +140,12 @@ class Server( asyncore.dispatcher ):
             struct.unpack( format, msg )
         remoteId = 0            # !!! FIX ME
         key = self.irManager.lookup( remoteId, buttonCode )
-        # print 'key:', key
         if key is not None:
-            client.processKeyEvent( timeStamp, key )
+            try:
+                client.processKeyEvent( timeStamp, key )
+            except:
+                print '*** failed to process IR message'
+                traceback.print_exc()
 
     def handle_connect( self ): pass
     def handle_accept( self ): pass

@@ -84,7 +84,7 @@ class Browser( iTunesSourceGenerator ):
     #
     # Move to the previous item in the collection
     #
-    def up( self ):
+    def down( self ):
         index = self.index - 1
         if index == -1: index = self.getMaxIndex() - 1
         self.setIndex( index )
@@ -94,7 +94,7 @@ class Browser( iTunesSourceGenerator ):
     #
     # Move to the next item in the collection
     #
-    def down( self ):
+    def up( self ):
         index = self.index + 1
         if index == self.getMaxIndex(): index = 0
         self.setIndex( index )

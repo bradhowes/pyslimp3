@@ -82,7 +82,8 @@ class Playlist( OrderedItem ):
 class Track( object ):
     def __init__( self, track ):
         self.track = track
-        self.id = int( track.get( 'Track ID' ) )
+        # self.id = int( track.get( 'Track ID' ) )
+        self.id = str( track.get( 'Persistent ID' ) )
         self.index = int( track.get( 'Track Number', '-1' ) )
         self.name = track.get( 'Name', '' )
         self.artistName = track.get( 'Artist', '' )
@@ -105,7 +106,7 @@ class Track( object ):
 class ActiveTrack( object ):
     def __init__( self, track ):
         self.track = track
-        self.id = track.database_ID()
+        self.id = track.persistent_ID()
         self.index = track.track_number()
         self.name = track.name()
         self.artistName = track.artist()
@@ -382,6 +383,24 @@ class iTunesXML( object ):
         artistList.sort()
         albumList.sort()
 
+        #
+        # Validate the load.
+        #
+        if 0:
+            library = self.getLibrary()
+            print '...validating loaded track IDs'
+            for artist in artistList:
+                for album in artist.getAlbums():
+                    for track in album.getTracks():
+                        if library.tracks[ appscript.its.persistent_ID ==
+                                           track.getID() ].name()[0] != \
+                                           track.getName():
+                            print '*** track ID mismatch', track.getID(), \
+                                track.getName()
+
+        #
+        # Now install the new data structures.
+        #
         self.artistMap = artistMap
         self.artistList = artistList
         self.albumList = albumList
@@ -670,7 +689,8 @@ class iTunesXML( object ):
     #
     def playlistAddTrack( self, playlist, track ):
         self.getLibrary().tracks[ 
-            appscript.its.database_ID == track.getID() ].duplicate(
+#            appscript.its.database_ID == track.getID() ].duplicate(
+            appscript.its.persistent_ID == track.getID() ].duplicate(
             to = playlist )
 
     #
@@ -679,6 +699,19 @@ class iTunesXML( object ):
     def playlistAddAlbum( self, playlist, album ):
         for track in album.getTracks():
             self.playlistAddTrack( playlist, track )
+
+    def doPlayPlaylist( self, playlist, trackIndex ):
+        if playlist is None:
+            print '*** NULL playlist'
+        elif trackIndex >= len( playlist.tracks.get() ):
+            print '*** invalid trackIndex:', trackIndex, \
+                len( playlist.tracks.get() )
+        else:
+            playlist.tracks[ trackIndex + 1 ].play()
+
+    def playPlaylist( self, playlist, trackIndex = 0 ):
+        playlist = self.getPlaylistObject( playlist.getName(), False )
+        self.doPlayPlaylist( playlist, trackIndex )
 
     #
     # Clear the 'MBJB' playlist, add the tracks of the albums of the given
@@ -689,7 +722,7 @@ class iTunesXML( object ):
         self.playlistClear( playlist )
         for each in artist.getAlbums():
             self.playlistAddAlbum( playlist, each )
-        self.getApp().play( playlist )
+        self.doPlayPlaylist( playlist, 1 )
 
     #
     # Clear the 'MBJB' playlist, add the tracks of the given album to the
@@ -699,29 +732,24 @@ class iTunesXML( object ):
         playlist = self.getPlaylistObject( self.kOurPlaylistName, True )
         self.playlistClear( playlist )
         self.playlistAddAlbum( playlist, album )
-        playlist.tracks[ trackIndex + 1 ].play()
-
-    def playPlaylist( self, playlist, trackIndex = 0 ):
-        playlist = self.getPlaylistObject( playlist.getName(), False )
-        if playlist:
-            playlist.tracks[ trackIndex + 1 ].play()
+        self.doPlayPlaylist( playlist, trackIndex )
 
     def getAlbumRating( self, album ):
         id = album.getTrack( 0 ).getID()
         return self.getLibrary().tracks[ 
-            appscript.its.database_ID == id ].album_rating.get()[ 0 ]
+            appscript.its.persistent_ID == id ].album_rating.get()[ 0 ]
 
     def setAlbumRating( self, album, rating ):
         id = album.getTrack( 0 ).getID()
         self.getLibrary().tracks[ 
-            appscript.its.database_ID == id ].album_rating.set( rating )
+            appscript.its.persistent_ID == id ].album_rating.set( rating )
 
     def getTrackRating( self, track ):
         id = track.getID()
         return self.getLibrary().tracks[ 
-            appscript.its.database_ID == id ].rating.get()[ 0 ]
+            appscript.its.persistent_ID == id ].rating.get()[ 0 ]
 
     def setTrackRating( self, track, rating ):
         id = track.getID()
         self.getLibrary().tracks[ 
-            appscript.its.database_ID == id ].rating.set( rating )
+            appscript.its.persistent_ID == id ].rating.set( rating )
