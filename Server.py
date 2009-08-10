@@ -152,18 +152,10 @@ class Server( asyncore.dispatcher ):
     def writable( self ): return False
 
     def sendHello( self, address ):
-        try:
-            self.socket.sendto( 'h' + chr( 0 ) * 17, address )
-            return True
-        except:
-            return False
+        self.socket.sendto( 'h' + chr( 0 ) * 17, address )
 
     def sendDiscoveryResponse( self, address ):
-        try:
-            self.socket.sendto( 'D' + chr( 0 ) * 17, address )
-            return True
-        except:
-            return Falsen
+        self.socket.sendto( 'D' + chr( 0 ) * 17, address )
 
     def saveClientState( self ):
         self.clients.save()

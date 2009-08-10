@@ -46,3 +46,7 @@ class ClientPersistence( object ):
         if not client.server:
             client.initialize( server, key )
         return client
+
+    def deleteClient( self, addr ):
+        key = repr( addr )
+        self.clients[ key ] = None
