@@ -27,12 +27,94 @@ from array import array
 # including the Noritake Vacuum Fluorescent Display found on Logitech's code
 # repository; I assume they are interpreted and eaten by the SLIMP3 device.
 #
-# SLIMP3's VFD supports custom character definition; we do not.
+# SLIMP3's VFD supports custom character definition; we do not right now.
+# However, we do try and map some Latin-1 characters to the equivalent in the
+# VFD, such as accents.
 #
 class VFD( object ):
 
     kMinBrightness = 0          # Minimum brightness level for the display
     kMaxBrightness = 3          # Maximum brightness level for the display
+
+    #
+    # Latin-1 characters to VFD device character set (non-Japanese version). We
+    # are using internal Python Unicode strings, and the first 256 charcters in
+    # Unicode match those in latin-1 encodings. So, we offer a translation of
+    # Latin-1 characters into matching (or closely matching) VFD characters.
+    # Works pretty well.
+    #
+    kCharacterMap = { 165: 250, # yen sign
+                      166: 124, # broken bar
+                      171: 34,  # left angle quotes
+                      173: 45,  # soft hyphen
+                      180: 219, # spacing acute
+                      187: 34,  # right angle quotes
+                      191: 235, # inverted question mark
+                      192: 180, # A grave
+                      193: 179, # A acute
+                      194: 211, # A circumflex
+                      195: 178, # A tilde
+                      196: 241, # A umlaut
+                      197: 209, # A ring
+                      198: 206, # AE ligature
+                      199: 201, # C cedilla
+                      200: 184, # E grave
+                      201: 183, # E acute
+                      202: 214, # E circumflex
+                      203: 247, # E umlaut
+                      204: 240, # I grave
+                      205: 176, # I acute
+                      206: 208, # I circumflex
+                      207: 177, # I umlaut
+                      208: 203, # ETH
+                      209: 222, # N tilde
+                      210: 175, # O grave
+                      211: 191, # O acute
+                      212: 223, # O circumflex
+                      213: 207, # O tilde
+                      214: 239, # O umlaut
+                      215: 120, # multiplication sign
+                      216: 189, # O slash
+                      217: 182, # U grave
+                      218: 181, # U acute
+                      219: 244, # U circumflex
+                      220: 229, # U umlaut
+                      221: 188, # Y acute
+                      222: 251, # THORN
+                      223: 226, # sharp s
+                      224: 164, # a grave
+                      225: 163, # a acute
+                      226: 195, # a circumflex
+                      227: 162, # a tilde
+                      228: 225, # a umlaut
+                      229: 193, # a ring
+                      230: 190, # ae ligature
+                      231: 201, # c cedilla
+                      232: 168, # e grave
+                      233: 167, # e acute
+                      234: 198, # e circumflex
+                      235: 231, # e umlaut
+                      236: 224, # i grave
+                      237: 160, # i acute
+                      238: 192, # i circumflex
+                      239: 161, # i umlaut
+                      240: 187, # eth
+                      241: 238, # n tilde
+                      242: 175, # o grave
+                      243: 191, # o acute
+                      244: 223, # o circumflex
+                      245: 207, # o tilde
+                      246: 239, # o umlaut
+                      247: 47,  # division sign
+                      248: 189, # o slash
+                      249: 166, # u grave
+                      250: 165, # u acute
+                      251: 228, # u circumflex
+                      252: 245, # u umlaut
+                      253: 172, # y acute
+                      254: 251, # thorn
+                      255: 204, # y umlaut
+                      }
 
     def __init__( self, brightness ):
         self.brightness = 3
@@ -74,8 +156,21 @@ class VFD( object ):
     # Add a display character to the buffer.
     #
     def _addCharacter( self, value ):
-        if value > 0xFF:
-            value = 0xFF
+
+        #
+        # See if there is a translation to use for the given value.
+        #
+        alt = self.kCharacterMap.get( value, None )
+        if alt:
+            value = alt
+        elif value > 0xFF:
+
+            #
+            # No translation for character and it is outside the range of the
+            # VFD character set, so just show an 'all-on' block
+            #
+            alt = 0xFF
+            value = alt
         self.buffer.extend( ( 0x03, value ) ) # Display character prefix
 
     #
