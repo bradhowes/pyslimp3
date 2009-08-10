@@ -142,10 +142,10 @@ class DisplayGenerator( object ):
     def digit9( self ): return self.digit( 9 )
 
 #
-# Generate a 'powered off' display like the original SLIMP3.
+# Generate a 'powered off' display like the original SliMP3.
 #
 class ClockGenerator( DisplayGenerator ):
-    
+
     def __init__( self ):
         DisplayGenerator.__init__( self )
         self.timestamp = datetime.now()
@@ -161,10 +161,16 @@ class ClockGenerator( DisplayGenerator ):
         line2 = now.strftime( '%X' )
         width = max( len( line1 ), len( line2 ) )
         delta = now - self.timestamp
+        
+        #
+        # Move the time every 8 seconds or so.
+        #
         if delta.seconds > 8 or width != self.width:
             self.timestamp = now
             self.width = width
             self.offset = randrange( kDisplayWidth - width )
+            self.line1 = ' ' * ( offset + ( width - len( line1 ) ) / 2 )
+            self.line1 = ' ' * ( offset + ( width - len( line2 ) ) / 2 )
         offset = self.offset
         line1 = ' ' * ( offset + ( width - len( line1 ) ) / 2 ) + line1
         line2 = ' ' * ( offset + ( width - len( line2 ) ) / 2 ) + line2

@@ -22,8 +22,9 @@ from KeyProcessor import *
 
 #
 # Specialization of iTunesSourceGenerator that supports scrolling through a
-# collection of objects. Derived classes must define getListing() to generate
-# the line to show for the current object.
+# collection of objects. Derived classes must define generateWith() to generate
+# the line to show for the current object, and getCollection() to obtain the
+# collection of objects being browsed.
 #
 class Browser( iTunesSourceGenerator ):
 
@@ -44,11 +45,15 @@ class Browser( iTunesSourceGenerator ):
 
     def __init__( self, iTunes, prevLevel ):
         iTunesSourceGenerator.__init__( self, iTunes )
-        self.index = 0
-        self.prevLevel = prevLevel
-        self.reset()
+        self.index = 0          # Index of the current item to show
+        self.prevLevel = prevLevel # Link to the previous Browser object
+        self.reset()               # Initialize to known state
 
     def reset( self ):
+
+        #
+        # Reset the keyboard jump mechanism
+        #
         self.lastDigit = None
         self.digitIndex = 0
         self.nextLevel = None
@@ -63,20 +68,47 @@ class Browser( iTunesSourceGenerator ):
         self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kArrowRight,( kModFirst, ), self.right )
 
+    #
+    # Get the largest index for the brosser.
+    #
     def getMaxIndex( self ): return len( self.getCollection() )
 
+    #
+    # Get the object/value that corresponds to the current index
+    #
     def getCurrentObject( self ): return self.getCollection()[ self.index ]
 
+    #
+    # Generate an overlay that shows X/Y where X is the current index + 1, and
+    # Y is the number of items in the collection
+    #
     def getIndexOverlay( self, prefix = '' ):
         if prefix: prefix += ' '
         return '%s%d/%d' % ( prefix, self.index + 1, self.getMaxIndex() )
 
+    #
+    # Obtain the list of items being browsed.
+    #
+    def getCollection( self ):
+        raise NotImplementedError, 'getCollection'
+
+    #
+    # Obtain a Content object that shows the currently browsed item
+    #
     def generateWith( self, obj ):
         raise NotImplementedError, 'generateWith'
 
+    #
+    # Implement the Display.generate() interface. Returns a Content object that
+    # shows the currently browsed item.
+    #
     def generate( self ):
         return self.generateWith( self.getCurrentObject() )
 
+    #
+    # Set the current browser index. Key invariant (that we do not check) is
+    # that index is always >= 0 and < getMaxIndex()
+    #
     def setIndex( self, value ):
         self.index = value
         self.nextLevel = None
@@ -102,48 +134,77 @@ class Browser( iTunesSourceGenerator ):
         return self
 
     #
-    # Install the previous screen generator.
+    # Use the previous screen generator.
     #
     def left( self ): 
         self.reset()
         return self.prevLevel
 
     #
-    # Does nothing. Derived classes may override.
+    # If there was a previous child browser, show it. Otherwise, invoke
+    # makeNextLevel() and return that.
     #
     def right( self ): 
         if not self.nextLevel:
             self.nextLevel = self.makeNextLevel()
         return self.nextLevel
 
+    #
+    # Create a new child browser for the currently browsed item. Default
+    # implementation does nothing. Derived clases should override to create a
+    # more detailed browser.
+    #
     def makeNextLevel( self ):
         return None
 
+    #
+    # Get the name of the current brows item
+    #
     def getNameAtIndex( self, index ):
         return self.getCollection()[ index ].getName()
 
+    #
+    # Get the key of the current brows item
+    #
     def getKeyAtIndex( self, index ):
         return self.getCollection()[ index ].getKey()
 
     #
     # Override of DisplayGenerator method. If there are 10 or less items, jump
     # to the exact index based on the 'digit' pressed. Otherwise, treat the
-    # given digit as a percentage, and 
+    # given digit as a telephone keypad (similar to Search.py -- see the
+    # commentary there)
     #
     def digit( self, digit ):
         maxIndex = self.getMaxIndex()
         if maxIndex <= 10:
+            
+            #
+            # Just select the entry that matches the digit
+            #
             if digit == 0: digit = 10
             self.setIndex( min( digit, self.getMaxIndex() ) - 1 )
+
         elif digit > 1:
+            
+            #
+            # Get the list of characters that correspond to the pressed digit.
+            #
             values = Browser.kDigits[ digit ]
             if digit == self.lastDigit:
+                
+                #
+                # Repeated key - cycle to the next character
+                #
                 index = self.digitIndex + 1
                 if index == len( values ):
                     index = 0
             else:
                 index = 0
 
+            #
+            # Look for the first item that starts with the keypad character
+            #
             value = values[ index ]
             self.lastDigit = digit
             self.digitIndex = index
