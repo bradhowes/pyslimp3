@@ -63,7 +63,7 @@ class RatingDisplay( iTunesSourceGenerator ):
         rating = self.getRating()
         numStars = rating // 20
         halfStar = ( rating - numStars * 20 ) // 10
-        stars = ( '*' * numStars ) + ( ' %d' % ( numStars,  ) )
+        stars = ( unichr(1000+0x94) * numStars ) + ( ' %d' % ( numStars,  ) )
         if halfStar:
             stars += '.5'
         stars += ' stars'

@@ -157,7 +157,7 @@ class KeyProcessor( object ):
         #
         # Same key?
         #
-        if key == self.lastKey:
+        if key == self.lastKey and self.notifyTimeStamp:
 
             #
             # Update the timestamp so that checkForRelease() will keep running.

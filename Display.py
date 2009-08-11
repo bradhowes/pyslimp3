@@ -169,13 +169,11 @@ class ClockGenerator( DisplayGenerator ):
             self.timestamp = now
             self.width = width
             self.offset = randrange( kDisplayWidth - width )
-            self.line1 = ' ' * ( offset + ( width - len( line1 ) ) / 2 )
-            self.line1 = ' ' * ( offset + ( width - len( line2 ) ) / 2 )
         offset = self.offset
         line1 = ' ' * ( offset + ( width - len( line1 ) ) / 2 ) + line1
         line2 = ' ' * ( offset + ( width - len( line2 ) ) / 2 ) + line2
         return Content( [ line1, line2 ] )
-
+    
 class BlankScreen( DisplayGenerator ):
 
     kEmptyContent = Content( [ '', '' ] )
@@ -208,8 +206,8 @@ class VolumeGenerator( iTunesSourceGenerator ):
     #
     def generate( self ):
         volume = self.source.getVolume()
-        line2 = '%3d ' % ( volume, )
-        line2 += chr( 255 ) * ( volume * ( kDisplayWidth - 4 ) / 100 )
+        line2 = u'%3d ' % ( volume, )
+        line2 += unichr( 1255 ) * ( volume * ( kDisplayWidth - 4 ) / 100 )
         return Content( [ centerAlign( 'Volume' ), line2 ] )
 
     #
