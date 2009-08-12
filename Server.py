@@ -118,6 +118,7 @@ class Server( asyncore.dispatcher ):
 
     def processMessage( self, addr, msg ):
         client = self.clients.getClient( self, addr )
+        client.touch()
         kind = msg[ 0 ]
         if kind == 'h':
             self.processHello( client )
@@ -130,7 +131,7 @@ class Server( asyncore.dispatcher ):
         self.sendDiscoveryResponse( addr )
 
     def processHello( self, client ):
-        client.touch()
+        pass
 
     def processIRMessage( self, client, msg ):
         format = '>cBIBBI6x'

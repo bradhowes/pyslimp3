@@ -123,6 +123,7 @@ class Animator( object ):
                             #
                             self.atEnd = False
                             self.offsets = [ 0 ] * kDisplayHeight
+                            self.holdCounter = Animator.kHoldCount / 2
 
                         else:
 
@@ -146,7 +147,7 @@ class Animator( object ):
                     # Clamp to the amount needed to shift the line to the right
                     # and store.
                     #
-                    offset += 3
+                    offset += 2
                     self.offsets[ index ] = min( offset, shiftNeeded )
 
         return output
