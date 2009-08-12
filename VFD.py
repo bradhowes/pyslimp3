@@ -17,9 +17,20 @@
 # USA.
 #
 
-from array import array
+kPrefixCommand = 0x02
+kPrefixCharacter = 0x03
+kStartCustom = 0x40
+kMessageHeader = [ ord( 'l' ) ] + [ ord( ' ' ) ] * 17
 
-def Dots( v ): return int( v, 2 )
+def Bin( value ): return int( value, 2 )
+
+def Dots( *values ): 
+    bits = [ kPrefixCharacter ] * ( len( values ) * 2 )
+    index = 1
+    for each in values:
+        bits[ index ] = Bin( each )
+        index += 2
+    return tuple( bits )
 
 #
 # Data encoder for the vacuum fluorescent device (VFD) used in the SLIMP3.
@@ -34,374 +45,362 @@ def Dots( v ): return int( v, 2 )
 # VFD, such as accents.
 #
 
-kLetters = { 'A': ( Dots( '01110' ),
-                    Dots( '10001' ),
-                    Dots( '11111' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ) ),
-             'C': ( Dots( '01110' ),
-                    Dots( '10000' ),
-                    Dots( '10000' ),
-                    Dots( '10001' ),
-                    Dots( '01110' ) ),
-             'E': ( Dots( '11111' ),
-                    Dots( '10000' ),
-                    Dots( '11111' ),
-                    Dots( '10000' ),
-                    Dots( '11111' ) ),
-             'G': ( Dots( '01110' ),
-                    Dots( '10000' ),
-                    Dots( '10011' ),
-                    Dots( '10001' ),
-                    Dots( '01110' ) ),
-             'I': ( Dots( '01110' ),
-                    Dots( '00100' ),
-                    Dots( '00100' ),
-                    Dots( '00100' ),
-                    Dots( '01110' ) ),
-             'O': ( Dots( '01110' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '01110' ) ),
-             'S': ( Dots( '01110' ),
-                    Dots( '10000' ),
-                    Dots( '01110' ),
-                    Dots( '00001' ),
-                    Dots( '11110' ) ),
-             'U': ( Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '01110' ) ),
-             'Y': ( Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '01010' ),
-                    Dots( '00100' ),
-                    Dots( '00100' ) ),
-             'N': ( Dots( '10001' ),
-                    Dots( '11001' ),
-                    Dots( '10101' ),
-                    Dots( '10011' ),
-                    Dots( '10001' ) ),
-             'Z': ( Dots( '11111' ),
-                    Dots( '00010' ),
-                    Dots( '00100' ),
-                    Dots( '01000' ),
-                    Dots( '11111' ) ),
-             'a': ( Dots( '01110' ),
-                    Dots( '00001' ),
-                    Dots( '01111' ),
-                    Dots( '10001' ),
-                    Dots( '01111' ) ),
-             'c': ( Dots( '01110' ),
-                    Dots( '10000' ),
-                    Dots( '10000' ),
-                    Dots( '10001' ),
-                    Dots( '01110' ) ),
-             'e': ( Dots( '01110' ),
-                    Dots( '10001' ),
-                    Dots( '11111' ),
-                    Dots( '10000' ),
-                    Dots( '01110' ) ),
-             'g': ( Dots( '01111' ),
-                    Dots( '10001' ),
-                    Dots( '01111' ),
-                    Dots( '00001' ),
-                    Dots( '01110' ) ),
-             'i': ( Dots( '01100' ),
-                    Dots( '00100' ),
-                    Dots( '00100' ),
-                    Dots( '00100' ),
-                    Dots( '01110' ) ),
-             'o': ( Dots( '01110' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '01110' ) ),
-             's': ( Dots( '01110' ),
-                    Dots( '10000' ),
-                    Dots( '01110' ),
-                    Dots( '00001' ),
-                    Dots( '11110' ) ),
-             'u': ( Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10011' ),
-                    Dots( '01100' ) ),
-             'y': ( Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '01111' ),
-                    Dots( '00001' ),
-                    Dots( '01110' ) ),
-             'n': ( Dots( '10110' ),
-                    Dots( '11001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ),
-                    Dots( '10001' ) ),
-             'z': ( Dots( '11111' ),
-                    Dots( '00010' ),
-                    Dots( '00100' ),
-                    Dots( '01000' ),
-                    Dots( '11111' ) ),
-             }
+class CustomCharacters( object ):
 
-kAccents = { '`': ( Dots( '00100' ),
-                    Dots( '00010' ) ),
-             "'": ( Dots( '00010' ),
-                    Dots( '00100' ) ),
-             '^': ( Dots( '00100' ),
-                    Dots( '01010' ) ),
-             'v': ( Dots( '01010' ),
-                    Dots( '00100' ) ),
-             '.': ( Dots( '00100' ),
-                    Dots( '00000' ) ),
-             ':': ( Dots( '01010' ),
-                    Dots( '00000' ) ),
-             '~': ( Dots( '01110' ),
-                    Dots( '00000' ) ),
-             'C': ( Dots( '00100' ),
-                    Dots( '00110' ) ),
-             'c': ( Dots( '00100' ),
-                    Dots( '01100' ) )
-             }
+    kLetters = { 'A': Dots( '01110',
+                            '10001',
+                            '11111',
+                            '10001',
+                            '10001' ),
+                 'C': Dots( '01110',
+                            '10000',
+                            '10000',
+                            '10001',
+                            '01110' ),
+                 'E': Dots( '11111',
+                            '10000',
+                            '11111',
+                            '10000',
+                            '11111' ),
+                 'G': Dots( '01110',
+                            '10000',
+                            '10011',
+                            '10001',
+                            '01110' ),
+                 'I': Dots( '01110',
+                            '00100',
+                            '00100',
+                            '00100',
+                            '01110' ),
+                 'N': Dots( '10001',
+                            '11001',
+                            '10101',
+                            '10011',
+                            '10001' ),
+                 'O': Dots( '01110',
+                            '10001',
+                            '10001',
+                            '10001',
+                            '01110' ),
+                 'S': Dots( '01110',
+                            '10000',
+                            '01110',
+                            '00001',
+                            '11110' ),
+                 'U': Dots( '10001',
+                            '10001',
+                            '10001',
+                            '10001',
+                            '01110' ),
+                 'Y': Dots( '10001',
+                            '10001',
+                            '01010',
+                            '00100',
+                            '00100' ),
+                 'Z': Dots( '11111',
+                            '00010',
+                            '00100',
+                            '01000',
+                            '11111' ),
+                 'a': Dots( '01110',
+                            '00001',
+                            '01111',
+                            '10001',
+                            '01111' ),
+                 'e': Dots( '01110',
+                            '10001',
+                            '11111',
+                            '10000',
+                            '01110' ),
+                 'g': Dots( '01111',
+                            '10001',
+                            '01111',
+                            '00001',
+                            '01110' ),
+                 'i': Dots( '01100',
+                            '00100',
+                            '00100',
+                            '00100',
+                            '01110' ),
+                 'n': Dots( '10110',
+                            '11001',
+                            '10001',
+                            '10001',
+                            '10001' ),
+                 'u': Dots( '10001',
+                            '10001',
+                            '10001',
+                            '10011',
+                            '01100' ),
+                 'y': Dots( '10001',
+                            '10001',
+                            '01111',
+                            '00001',
+                            '01110' ),
+                 }
 
-def makeAccentChar( c, a ):
-    return tuple( list( kAccents[ a ] ) + list( kLetters[ c ] ) )
+    #
+    # Some letters use the same defintion for both cases.
+    #
+    for letter in 'COSZ':
+        kLetters[ letter.lower() ] = kLetters[ letter ]
 
-def makeCedillaChar( c, a ):
-    return tuple( list( kLetters[ c ] ) + list( kAccents[ a ] ) )
+    #
+    # Definitions for diacritical marks
+    #
+    kAccents = { '`': Dots( '00100', # agrave
+                            '00010' ),
+                 "'": Dots( '00010', # acute
+                            '00100' ),
+                 '^': Dots( '00100', # circumflex
+                            '01010' ),
+                 'v': Dots( '01010', # invered circumflex
+                            '00100' ),
+                 '.': Dots( '00100', # dot
+                            '00000' ),
+                 ':': Dots( '01010', # umlaut
+                            '00000' ),
+                 '~': Dots( '01110', # tilde
+                            '00000' ),
+                 'C': Dots( '00100', # reverse cedilla
+                            '00110' ),
+                 'c': Dots( '00100', # cedilla
+                            '01100' )
+                 }
+
+    kCharacterMap = { 0x7E: Dots( '00000', # tilde
+                                  '00000',
+                                  '01000',
+                                  '10101',
+                                  '00010',
+                                  '00000',
+                                  '00000' ),
+
+                      0x82: ord( ',' ),
+                      0x83: ord( 'f' ),
+                      0x84: ord( '"' ),
+
+                      0x85: Dots( '00000', # ...
+                                  '00000',
+                                  '00000',
+                                  '00000',
+                                  '00000',
+                                  '00000',
+                                  '10101' ),
+
+                      0x8A: kAccents[ 'v' ] + kLetters[ 'S' ], # S v
+                      0x8E: kAccents[ 'v' ] + kLetters[ 'Z' ], # Z v
+
+                      0x91: ord( "'" ),
+                      0x92: ord( "'" ),
+                      0x93: ord( '"' ),
+                      0x94: ord( '"' ),
+
+                      0x95: Dots( '00000', # filled circle
+                                  '00100',
+                                  '01110',
+                                  '01110',
+                                  '00100',
+                                  '00000',
+                                  '00000' ),
+
+                      0x96: ord( '-' ),
+                      0x97: ord( '-' ),
+
+                      0x98: Dots( '01000', # raised tilde
+                                  '10101',
+                                  '00010',
+                                  '00000',
+                                  '00000',
+                                  '00000',
+                                  '00000' ),
+
+                      0x9A: kAccents[ 'v' ] + kLetters[ 's' ], # s v
+                      0x9E: kAccents[ 'v' ] + kLetters[ 'z' ], # z v
+
+                      0x9F: kAccents[ ':' ] + kLetters[ 'Y' ], # Y umlaut
+
+                      0xC0: kAccents[ '`' ] + kLetters[ 'A' ], # A grave
+                      0xC1: kAccents[ "'" ] + kLetters[ 'A' ], # A acute
+                      0xC2: kAccents[ '^' ] + kLetters[ 'A' ], # A circumflex
+                      0xC3: kAccents[ '~' ] + kLetters[ 'A' ], # A tilde
+                      0xC4: kAccents[ ':' ] + kLetters[ 'A' ], # A umlaut
+                      0xC5: kAccents[ '.' ] + kLetters[ 'A' ], # A ring
+
+                      0xC6: Dots( '00111', # AE ligature
+                                  '01100',
+                                  '10100',
+                                  '10111',
+                                  '11100',
+                                  '10100',
+                                  '10111' ),
+
+                      0xC7: kLetters[ 'C' ] + kAccents[ 'c' ], # C cedilla
+
+                      0xC8: kAccents[ '`' ] + kLetters[ 'E' ], # E grave
+                      0xC9: kAccents[ "'" ] + kLetters[ 'E' ], # E acute
+                      0xCA: kAccents[ '^' ] + kLetters[ 'E' ], # E circumflex
+                      0xCB: kAccents[ ':' ] + kLetters[ 'E' ], # E umlaut
+
+                      0xCC: kAccents[ '`' ] + kLetters[ 'I' ], # I grave
+                      0xCD: kAccents[ "'" ] + kLetters[ 'I' ], # I acute
+                      0xCE: kAccents[ '^' ] + kLetters[ 'I' ], # I circumflex
+                      0xCF: kAccents[ ':' ] + kLetters[ 'I' ], # I umlaut
+                      
+                      0xD1: kAccents[ '~' ] + kLetters[ 'N' ], # N tilde
+
+                      0xD2: kAccents[ '`' ] + kLetters[ 'O' ], # O grave
+                      0xD3: kAccents[ "'" ] + kLetters[ 'O' ], # O acute
+                      0xD4: kAccents[ '^' ] + kLetters[ 'O' ], # O circumflex
+                      0xD5: kAccents[ '~' ] + kLetters[ 'O' ], # O tilde
+                      0xD6: kAccents[ ':' ] + kLetters[ 'O' ], # O umlaut
+
+                      0xD8: Dots( '00001', # O slash
+                                  '01110',
+                                  '10011',
+                                  '10101',
+                                  '11001',
+                                  '01110',
+                                  '10000' ),
+
+                      0xD9: kAccents[ '`' ] + kLetters[ 'U' ], # U grave
+                      0xDA: kAccents[ "'" ] + kLetters[ 'U' ], # U acute
+                      0xDB: kAccents[ '^' ] + kLetters[ 'U' ], # U circumflex
+                      0xDC: kAccents[ ':' ] + kLetters[ 'U' ], # U umlaut
+
+                      0xDD: kAccents[ "'" ] + kLetters[ 'Y' ], # Y acute
+
+                      0xDF: Dots( '00000', # sharp s
+                                  '01110',
+                                  '10001',
+                                  '11110',
+                                  '10001',
+                                  '11110',
+                                  '10000' ),
+
+                      0xE0: kAccents[ '`' ] + kLetters[ 'a' ], # a grave
+                      0xE1: kAccents[ "'" ] + kLetters[ 'a' ], # a acute
+                      0xE2: kAccents[ '^' ] + kLetters[ 'a' ], # a circumflex
+                      0xE3: kAccents[ '~' ] + kLetters[ 'a' ], # a tilde
+                      0xE4: kAccents[ ':' ] + kLetters[ 'a' ], # a umlaut
+                      0xE5: kAccents[ '.' ] + kLetters[ 'a' ], # a ring
+
+                      0xE6: Dots( '00000', # ae ligature
+                                  '00000',
+                                  '11010',
+                                  '00101',
+                                  '11111',
+                                  '10100',
+                                  '11111' ),
+
+                      0xE7: kLetters[ 'c' ] + kAccents[ 'c' ], # c cedilla
+
+                      0xE8: kAccents[ '`' ] + kLetters[ 'e' ], # E grave
+                      0xE9: kAccents[ "'" ] + kLetters[ 'e' ], # E acute
+                      0xEA: kAccents[ '^' ] + kLetters[ 'e' ], # E circumflex
+                      0xEB: kAccents[ ':' ] + kLetters[ 'e' ], # E umlaut
+
+                      0xEC: kAccents[ '`' ] + kLetters[ 'i' ], # I grave
+                      0xED: kAccents[ "'" ] + kLetters[ 'i' ], # I acute
+                      0xEE: kAccents[ '^' ] + kLetters[ 'i' ], # I circumflex
+                      0xEF: kAccents[ ':' ] + kLetters[ 'i' ], # I umlaut
+                      
+                      0xF1: kAccents[ '~' ] + kLetters[ 'n' ], # n tilde
+
+                      0xF2: kAccents[ '`' ] + kLetters[ 'o' ], # o grave
+                      0xF3: kAccents[ "'" ] + kLetters[ 'o' ], # o acute
+                      0xF4: kAccents[ '^' ] + kLetters[ 'o' ], # o circumflex
+                      0xF5: kAccents[ '~' ] + kLetters[ 'o' ], # o tilde
+                      0xF6: kAccents[ ':' ] + kLetters[ 'o' ], # o umlaut
+
+                      0xF8: Dots( '00001', # o slash
+                                  '01110',
+                                  '10011',
+                                  '10101',
+                                  '11001',
+                                  '01110',
+                                  '10000' ),
+
+                      0xF9: kAccents[ '`' ] + kLetters[ 'u' ], # u grave
+                      0xFA: kAccents[ "'" ] + kLetters[ 'u' ], # u acute
+                      0xFB: kAccents[ '^' ] + kLetters[ 'u' ], # u circumflex
+                      0xFC: kAccents[ ':' ] + kLetters[ 'u' ], # u umlaut
+
+                      0xFD: kAccents[ "'" ] + kLetters[ 'y' ], # y acute
+                      0xFF: kAccents[ ':' ] + kLetters[ 'y' ], # y umlaut
+
+                      }
+
+    def __init__( self ):
+        self.lookup = {}
+        self.inuse = []
+
+    def translate( self, value ):
+        alt = self.kCharacterMap.get( value )
+        if alt is None:
+            return value
+        if type( alt ) is type( 0 ):
+            print '* ', hex( value ), alt
+            return alt
+        index = self.lookup.get( alt )
+        if index is None:
+            index = len( self.inuse )
+            self.inuse.append( alt )
+            self.lookup[ alt ] = index
+        print '* ', hex( value ), index
+        return index
+
+    def addMaps( self, buffer ):
+        index = 0
+        for each in self.inuse:
+            buffer.extend( ( kPrefixCommand, kStartCustom + index * 8 ) )
+            buffer.extend( each )
+            buffer.extend( ( kPrefixCharacter, 0 ) ) # 'underline' line
+
+class Buffer( object ):
+    
+    def __init__( self, initializer = '' ):
+        from array import array
+        self.buffer = array( 'B', initializer )
+
+    def addCommand( self, cmd, value = None ):
+        if value is None:
+            self.buffer.extend( ( kPrefixCommand, cmd ) )
+        else:
+            self.buffer.extend( ( kPrefixCommand, cmd, kPrefixCharacter,
+                                  value ) )
+        
+    def addCharacter( self, value ):
+        self.buffer.extend( ( kPrefixCharacter, value ) )
+
+    def extend( self, value ):
+        if isinstance( value, Buffer ):
+            self.buffer.extend( value.buffer )
+        else:
+            self.buffer.extend( value )
+
+    def getData( self ): return self.buffer.tostring()
+
+    def __len__( self ): return len( self.buffer )
 
 class VFD( object ):
 
     kMinBrightness = 0          # Minimum brightness level for the display
     kMaxBrightness = 3          # Maximum brightness level for the display
 
-    kCustomChars = {}
-    for letter in 'AEIOUaeiou':
-        for accent in "`'^v.:~":
-            kCustomChars[ letter + accent ] = makeAccentChar( letter, accent )
-
-    for letter in 'Nn':
-        for accent in "'v~":
-            kCustomChars[ letter + accent ] = makeAccentChar( letter, accent )
-
-    for letter in 'CcSs':
-        for accent in "'v":
-            kCustomChars[ letter + accent ] = makeAccentChar( letter, accent )
-            
-    for letter in 'Zz':
-        for accent in "'.v":
-            kCustomChars[ letter + accent ] = makeAccentChar( letter, accent )
-
-    for letter in 'Gg':
-        kCustomChars[ letter + accent ] = makeAccentChar( letter, 'v' )
-
-    for letter in 'AaEe':
-        kCustomChars[ letter + accent ] = makeCedillaChar( letter, 'C' )
-
-    for letter in 'CcSs':
-        kCustomChars[ letter + accent ] = makeCedillaChar( letter, 'c' )
-
-    kCustomChars[ 'O/' ] = ( Dots( '00001' ),
-                             Dots( '01110' ),
-                             Dots( '10011' ),
-                             Dots( '10101' ),
-                             Dots( '11001' ),
-                             Dots( '01110' ),
-                             Dots( '10000' ) )
-
-    kCustomChars[ 'SS' ] = ( Dots( '00000' ),
-                             Dots( '01110' ),
-                             Dots( '10001' ),
-                             Dots( '11110' ),
-                             Dots( '10001' ),
-                             Dots( '11110' ),
-                             Dots( '10000' ) )
-
-    #
-    # Latin-1 characters to VFD device character set (non-Japanese version). We
-    # are using internal Python Unicode strings, and the first 256 charcters in
-    # Unicode match those in latin-1 encodings. So, we offer a translation of
-    # Latin-1 characters into matching (or closely matching) VFD characters.
-    # Works pretty well.
-    #
-    kG57128 = { 165: 250, # yen sign
-                166: 124, # broken bar
-                171: 34,  # left angle quotes
-                173: 45,  # soft hyphen
-                180: 219, # spacing acute
-                187: 34,  # right angle quotes
-                191: 235, # inverted question mark
-                192: 180, # A grave
-                193: 179, # A acute
-                194: 211, # A circumflex
-                195: 178, # A tilde
-                196: 241, # A umlaut
-                197: 209, # A ring
-                198: 206, # AE ligature
-                199: 201, # C cedilla
-                200: 184, # E grave
-                201: 183, # E acute
-                202: 214, # E circumflex
-                203: 247, # E umlaut
-                204: 240, # I grave
-                205: 176, # I acute
-                206: 208, # I circumflex
-                207: 177, # I umlaut
-                208: 203, # ETH
-                209: 222, # N tilde
-                210: 175, # O grave
-                211: 191, # O acute
-                212: 223, # O circumflex
-                213: 207, # O tilde
-                214: 239, # O umlaut
-                215: 120, # multiplication sign
-                216: 189, # O slash
-                217: 182, # U grave
-                218: 181, # U acute
-                219: 244, # U circumflex
-                220: 229, # U umlaut
-                221: 188, # Y acute
-                222: 251, # THORN
-                223: 226, # sharp s
-                224: 164, # a grave
-                225: 163, # a acute
-                226: 195, # a circumflex
-                227: 162, # a tilde
-                228: 225, # a umlaut
-                229: 193, # a ring
-                230: 190, # ae ligature
-                231: 201, # c cedilla
-                232: 168, # e grave
-                233: 167, # e acute
-                234: 198, # e circumflex
-                235: 231, # e umlaut
-                236: 224, # i grave
-                237: 160, # i acute
-                238: 192, # i circumflex
-                239: 161, # i umlaut
-                240: 187, # eth
-                241: 238, # n tilde
-                242: 175, # o grave
-                243: 191, # o acute
-                244: 223, # o circumflex
-                245: 207, # o tilde
-                246: 239, # o umlaut
-                247: 47,  # division sign
-                248: 189, # o slash
-                249: 166, # u grave
-                250: 165, # u acute
-                251: 228, # u circumflex
-                252: 245, # u umlaut
-                253: 172, # y acute
-                254: 251, # thorn
-                255: 204, # y umlaut
-
-                8216: 39, # left single-quote
-                8217: 39, # right single-quote
-                8218: 44, # comma
-                8219: 39, # reversed right single-quote
-                8220: 34, # left double-quote
-                8221: 34, # right double-quote
-                }
-
-    #
-    # Latin-1 characters to VFD device character set (non-Japanese version). We
-    # are using internal Python Unicode strings, and the first 256 charcters in
-    # Unicode match those in latin-1 encodings. So, we offer a translation of
-    # Latin-1 characters into matching (or closely matching) VFD characters.
-    # Works pretty well.
-    #
-    kG57131 = { 166: 0x98, # broken bar
-                171: ord('"'),  # left angle quotes
-                173: ord('-'),  # soft hyphen
-                180: ord("'"), # spacing acute
-                187: ord('"'),  # right angle quotes
-                191: ord('?'), # inverted question mark
-                192: 0x81, # A grave
-                193: 0x81, # A acute
-                194: 0x82, # A circumflex
-                195: 0x82, # A tilde
-                196: 0x80, # A umlaut
-                197: 0x81, # A ring
-                198: 0x90, # AE ligature
-                199: 0x99, # C cedilla
-                200: ord('E'), # E grave
-                201: ord('E'), # E acute
-                202: ord('E'), # E circumflex
-                203: ord('E'), # E umlaut
-                204: ord('I'), # I grave
-                205: ord('I'), # I acute
-                206: ord('I'), # I circumflex
-                207: ord('I'), # I umlaut
-                209: ord('N'), # N tilde
-                210: ord('O'), # O grave
-                211: ord('O'), # O acute
-                212: ord('O'), # O circumflex
-                213: ord('O'), # O tilde
-                214: 0x86, # O umlaut
-                215: 0xa5, # multiplication sign
-                216: 0x88, # O slash
-                217: ord('U'), # U grave
-                218: ord('U'), # U acute
-                219: ord('U'), # U circumflex
-                220: 0x8a, # U umlaut
-                221: ord('Y'), # Y acute
-                223: 0xe2, # sharp s
-                224: 0x84, # a grave
-                225: 0x83, # a acute
-                226: 0x84, # a circumflex
-                227: 0x83, # a tilde
-                228: 0xe1, # a umlaut
-                229: 0x84, # a ring
-                230: 0x91, # ae ligature
-                231: 0x99, # c cedilla
-                232: ord('e'), # e grave
-                233: ord('e'), # e acute
-                234: ord('e'), # e circumflex
-                235: ord('e'), # e umlaut
-                236: ord('i'), # i grave
-                237: ord('i'), # i acute
-                238: ord('i'), # i circumflex
-                239: ord('i'), # i umlaut
-                241: 0xee, # n tilde
-                242: ord('o'), # o grave
-                243: ord('o'), # o acute
-                244: ord('o'), # o circumflex
-                245: ord('o'), # o tilde
-                246: 0xef, # o umlaut
-                247: 0xfd,  # division sign
-                248: 0x89, # o slash
-                249: ord('u'), # u grave
-                250: ord('u'), # u acute
-                251: ord('u'), # u circumflex
-                252: 0xf5, # u umlaut
-                253: ord('y'), # y acute
-                255: ord('y'), # y umlaut
-
-                8216: ord("'"), # left single-quote
-                8217: ord("'"), # right single-quote
-                8218: ord(','), # comma
-                8219: ord('"'), # reversed right single-quote
-                8220: ord('"'), # left double-quote
-                8221: ord('"'), # right double-quote
-                }
-
     def __init__( self, brightness ):
         self.brightness = 3
-        self.reset()
         self.setBrightness( brightness )
 
     #
     # Initialize a new array buffer for recording bytes
     #
-    def reset( self ):
-        kInit = [ ord( 'l' ) ]
-        kInit.extend( [ ord( ' ' ) ] * 17 )
-        self.buffer = array( 'B', kInit )
+    def makeBuffers( self ):
+        self.customCharacters = CustomCharacters()
+        return Buffer( kMessageHeader ), Buffer()
 
-    def getBrightness( self ): return self.brightness
+    def getBrightness( self ): 
+        return self.brightness
 
     #
     # Set the display's brightness level, clamping the new value between
@@ -411,7 +410,6 @@ class VFD( object ):
     def setBrightness( self, value ):
         self.brightness = max( min( value, self.kMaxBrightness ),
                                self.kMinBrightness )
-        print 'brightness', self.brightness
 
     #
     # Apply a delta value to the current brightness setting.
@@ -419,39 +417,24 @@ class VFD( object ):
     def changeBrightness( self, delta ):
         self.setBrightness( self.brightness + delta )
 
-    #
-    # Add a VFD command to the buffer.
-    #
-    def _addCommand( self, cmd ):
-        self.buffer.extend( ( 0x02, cmd ) ) # Command character prefix
-
     def translate( self, value ):
 
         #
         # See if there is a translation to use for the given value.
         #
-        alt = self.kG57131.get( value, None )
+        alt = self.customCharacters.translate( value )
         if alt is None:
-            if value >= 1032 and value <= 1255:
-                alt = value - 1000
-            elif value > 255 or value < 32:
+            if value > 255 or value < 32:
                 alt = 255
-        if alt:
-            # print '* substituting', alt, 'for', value
+        if alt is not None:
             value = alt
         return value
-
-    #
-    # Add a display character to the buffer.
-    #
-    def _addCharacter( self, value ):
-        self.buffer.extend( ( 0x03, value ) ) # Display character prefix
 
     #
     # Make sure a given string of text is exactly 40 characters in length,
     # truncating or adding spaces if necessary.
     #
-    def _padLine( self, line ):
+    def padLine( self, line ):
         if len( line ) == 40:
             return line
         return line[ 0 : 40 ] + ' ' * ( 40 - len( line ) )
@@ -460,41 +443,72 @@ class VFD( object ):
     # Generate a new client message containing display text.
     #
     def build( self, lines, cursor = None ):
-        self.reset()
+
+        buffer, text = self.makeBuffers()
 
         #
-        # Initialize the device, setting its brightness
+        # DEBUG: buffer starts out with 18 characters in it
         #
-        self._addCommand( 0x33 )
-        self._addCommand( 0x00 )
-        self._addCommand( 0x30 )
-        self._addCharacter( self.kMaxBrightness - self.brightness )
+        # print len( buffer )
+
+        #
+        # Initialize the device, setting its brightness and clearing the
+        # display
+        #
+        buffer.addCommand( 0x33 )
+        buffer.addCommand( 0x00 )
+        buffer.addCommand( 0x30, self.kMaxBrightness - self.brightness )
+
+        #
+        # DEBUG: buffer now has 26 characters in it
+        #
+        # print 'len( buffer )', len( buffer )
+
+        #
+        # Translate the characters of the first line.
+        #
+        for c in self.padLine( lines[ 0 ] ):
+            text.addCharacter( self.translate( ord( c ) ) )
+
+        #
+        # Move the cursor to the second line.
+        #
+        text.addCommand( 0xC0 )
+
+        #
+        # Translate the characters of the second line.
+        #
+        for c in self.padLine( lines[ 1 ] ):
+            text.addCharacter( self.translate( ord( c ) ) )
+
+        #
+        # Done processing the text data. Add any custom character maps to the
+        # buffer before we add the translated display data.
+        #
+        self.customCharacters.addMaps( buffer )
+        
+        #
+        # DEBUG: buffer now has 26 + 18 * N characters in it, where N is
+        # the number of custom characters added by our CustomCharacter object
+        #
+        # print 'len( buffer )', len( buffer )
 
         #
         # Clear the display
         #
-        self._addCommand( 0x06 ) # Entry mode (increment address, cursor)
-        self._addCommand( 0x02 ) # Clear and cursor home (first line) 
+        buffer.addCommand( 0x06 ) # Entry mode (increment address, cursor)
+        buffer.addCommand( 0x02 ) # Clear and cursor home (first line) 
 
         #
-        # Add the characters of the first line
+        # Add the characters to display.
         #
-        for c in self._padLine( lines[ 0 ] ):
-            self._addCharacter( self.translate( ord( c ) ) )
-
-        self._addCommand( 0xC0 ) # Move the cursor to the second line
-
-        #
-        # Add the characters of the second line
-        #
-        for c in self._padLine( lines[ 1 ] ):
-            self._addCharacter( self.translate( ord( c ) ) )
+        buffer.extend( text )
 
         #
         # Position and reveal the cursor if asked to.
         #
         if cursor is None or cursor < 0 or cursor > 80:
-            self._addCommand( 0x0C ) # Display on, cursor off
+            buffer.addCommand( 0x0C ) # Display on, cursor off
         else:
 
             if cursor < 40:
@@ -502,15 +516,14 @@ class VFD( object ):
                 #
                 # Position the cursor on the first line
                 #
-                self._addCommand( 0x80 + cursor )
+                buffer.addCommand( 0x80 + cursor )
             else:
                 
                 #
                 # Position the cursor on the second line
                 #
-                self._addCommand( 0xC0 + ( cursor - 40 ) )
+                buffer.addCommand( 0xC0 + ( cursor - 40 ) )
 
-            self._addCommand( 0x0E ) # Display on, cursor on
-            # self._addCommand( 0x0F ) # Display on, cursor on, blink
+            buffer.addCommand( 0x0E ) # Display on, cursor on
 
-        return self.buffer.tostring()
+        return buffer.getData()

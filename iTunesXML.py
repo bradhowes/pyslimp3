@@ -255,7 +255,7 @@ class iTunesXML( object ):
     #
     def load( self, path ):
 
-        print '... loading XML file', path
+        print( '... loading XML file', path )
         startTime = datetime.now()
 
         parser = XMLParser( path )
@@ -388,15 +388,15 @@ class iTunesXML( object ):
         #
         if 0:
             library = self.getLibrary()
-            print '...validating loaded track IDs'
+            print( '...validating loaded track IDs' )
             for artist in artistList:
                 for album in artist.getAlbums():
                     for track in album.getTracks():
                         if library.tracks[ appscript.its.persistent_ID ==
                                            track.getID() ].name()[0] != \
                                            track.getName():
-                            print '*** track ID mismatch', track.getID(), \
-                                track.getName()
+                            print( '*** track ID mismatch', track.getID(),
+                                   track.getName() )
 
         #
         # Now install the new data structures.
@@ -434,7 +434,7 @@ class iTunesXML( object ):
         self.loadedTime = datetime.now()
         duration = self.loadedTime - startTime
 
-        print '...finished in', duration.seconds, 'seconds'
+        print( '...finished in', duration.seconds, 'seconds' )
 
     def getGenreNames( self ): return self.genreNames
     def getGenreCount( self ): return len( self.genreNames )
@@ -702,10 +702,10 @@ class iTunesXML( object ):
 
     def doPlayPlaylist( self, playlist, trackIndex ):
         if playlist is None:
-            print '*** NULL playlist'
+            print( '*** NULL playlist' )
         elif trackIndex >= len( playlist.tracks.get() ):
-            print '*** invalid trackIndex:', trackIndex, \
-                len( playlist.tracks.get() )
+            print( '*** invalid trackIndex:', trackIndex,
+                   len( playlist.tracks.get() ) )
         else:
             playlist.tracks[ trackIndex + 1 ].play()
 
