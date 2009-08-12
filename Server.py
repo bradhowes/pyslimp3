@@ -19,8 +19,7 @@
 
 from os import stat
 from stat import *
-import array, asyncore, cPickle, socket, struct, subprocess, threading, \
-    traceback, urllib
+import array, asyncore, cPickle, socket, struct, traceback
 import ClientPersistence, Display, IR, iTunesXML, Timer
 
 #
@@ -32,10 +31,9 @@ class Server( asyncore.dispatcher ):
 
     kDefaultPort = 3483
     kSaveClientStateInterval = 10 # seconds
-    kLoopPollTimeout = 0.010
-    kReceiveBufferSize = 256
-    kLibraryLoadCheckInterval = 15   # seconds
-    kLibraryReloadInterval = 30 * 60 # 30 minutes
+    kLoopPollTimeout = 0.010      # Maximum amount of time to give to asyncore
+    kReceiveBufferSize = 2048     # 2K should be enough for everyone...
+    kLibraryLoadCheckInterval = 15 # seconds
 
     def __init__( self ):
         asyncore.dispatcher.__init__( self )
@@ -52,45 +50,15 @@ class Server( asyncore.dispatcher ):
 
     def makeITunesManager( self ):
         self.iTunes = iTunesXML.iTunesXML()
-        self.iTunesLoad()
+        self.iTunes.load()
+        self.addTimer( self.kLibraryLoadCheckInterval, self.reloadCheck )
+
+    def reloadCheck( self ):
+        self.iTunes.reloadCheck()
+        self.addTimer( self.kLibraryLoadCheckInterval, self.reloadCheck )
 
     def makeTimerManager( self ):
         self.timerManager = Timer.TimerManager()
-
-    def iTunesLoad( self ):
-
-        #
-        # Get the location of the iTunes XML file. Apparently we can get it
-        # from the MacOS X defaults database. Look ma! No error checking!
-        #
-        pipe = subprocess.Popen( ['defaults', 'read', 'com.apple.iapps',
-                                  'iTunesRecentDatabases' ], 
-                                 stdout = subprocess.PIPE )
-        content = pipe.communicate()[ 0 ]
-        lines = content.split()
-        location = eval( lines[ 1 ] )
-
-        #
-        # Convert the (file:) URL from above into a local file path.
-        #
-        self.filename, headers = urllib.urlretrieve( location )
-        self.iTunes.load( self.filename )
-        if self.loader:
-            self.loader.join()
-            self.loader = None
-        self.loadTimeStamp = stat( self.filename )[ ST_MTIME ]
-        self.loader = None
-
-    def iTunesLoadCheck( self ):
-        when = stat( self.filename )[ ST_MTIME ]
-        if self.loadTimeStamp is None:
-            delta = self.kLibraryReloadInterval
-        else:
-            delta = when - self.loadTimeStamp
-        if delta >= self.kLibraryReloadInterval and self.loader is None:
-            self.loader = threading.Thread( target = self.iTunesLoad )
-            self.loader.start()
-        self.addTimer( self.kLibraryLoadCheckInterval, self.iTunesLoadCheck )
 
     def makeDispatcher( self, port = kDefaultPort ):
         if self.socket:

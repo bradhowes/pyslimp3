@@ -17,9 +17,11 @@
 # USA.
 #
 
-import appscript
+import appscript, subprocess, threading, urllib
 from bisect import bisect_left
 from datetime import datetime
+from os import stat
+from stat import *
 import xml.parsers.expat
 from OrderedItem import OrderedItem
 
@@ -82,7 +84,6 @@ class Playlist( OrderedItem ):
 class Track( object ):
     def __init__( self, track ):
         self.track = track
-        # self.id = int( track.get( 'Track ID' ) )
         self.id = str( track.get( 'Persistent ID' ) )
         self.index = int( track.get( 'Track Number', '-1' ) )
         self.name = track.get( 'Name', '' )
@@ -223,13 +224,43 @@ class XMLParser( object ):
 #
 class iTunesXML( object ):
 
+    #
+    # The minimum amount of time that must elapse before we will reload the
+    # iTunes XML file.
+    #
+    kLibraryReloadInterval = 60 * 5 # 5 minutes
+    
+    #
+    # The name of the playlist we use for playback
+    #
     kOurPlaylistName = 'MBJB'
 
+    #
+    # Transitions from one repeat mode to the next.
+    #
     kRepeatTransitions = { appscript.k.off: appscript.k.all,
                            appscript.k.all: appscript.k.one,
                            appscript.k.one: appscript.k.off }
 
     def __init__( self ):
+
+        #
+        # Get the location of the iTunes XML file. Apparently we can get it
+        # from the MacOS X defaults database. Look ma! No error checking!
+        #
+        pipe = subprocess.Popen( ['defaults', 'read', 'com.apple.iapps',
+                                  'iTunesRecentDatabases' ], 
+                                 stdout = subprocess.PIPE )
+        content = pipe.communicate()[ 0 ]
+        lines = content.split()
+        location = eval( lines[ 1 ] )
+
+        #
+        # Convert the (file:) URL from above into a local file path.
+        #
+        self.xmlFilePath, headers = urllib.urlretrieve( location )
+        self.backgroundLoader = None
+        self.loadedTimeStamp = None
 
         #
         # Establish an AppleScript connection to the iTunes application
@@ -246,19 +277,63 @@ class iTunesXML( object ):
         self.genreNames = []    # Found genre names
         self.playlistNames = [] # Names of the playlists found in iTunes
 
+    def reloadCheck( self ):
+
+        #
+        # See if the modified timestamp of the XML file is later than the time
+        # stamp of the last load. If not, don't continue.
+        #
+        when = datetime.fromtimestamp( stat( self.xmlFilePath )[ ST_MTIME ] )
+        if when <= self.loadedTimeStamp:
+            return
+
+        #
+        # Only reload if kLibraryReloadInterval seconds has passed since the
+        # last reload.
+        #
+        delta = datetime.now() - self.loadedTimeStamp
+        if delta.seconds < self.kLibraryReloadInterval:
+            return
+
+        #
+        # See if we have a background thread running. If so, don't continue.
+        #
+        if self.backgroundLoader:
+            if self.backgroundLoader.isAlive():
+                return
+
+            #
+            # Reap the thread.
+            #
+            self.backgroundLoader.join()
+
+        #
+        # Create a background loader thread and start it.
+        #
+        self.backgroundLoader = threading.Thread( target = self.load )
+        self.backgroundLoader.start()
+
+    #
+    # Obtain an AppleScript object that refers to the iTunes application
+    #
     def getApp( self ): return appscript.app( 'iTunes' )
 
+    #
+    # Obtain an AppleScript object that refers to the main iTunes library.
+    # *** FIXME: make universal. I think this is only valid for US or
+    # English-speaking countries.
+    #
     def getLibrary( self ): return self.getApp().library_playlists[ 'Library' ]
 
     #
     # Load the iTunes XML file at a given path.
     #
-    def load( self, path ):
+    def load( self ):
 
-        print( '... loading XML file', path )
+        print( '... loading XML file', self.xmlFilePath )
         startTime = datetime.now()
 
-        parser = XMLParser( path )
+        parser = XMLParser( self.xmlFilePath )
         rawTracks = parser.getTracks()
 
         tracks = {}
@@ -370,10 +445,13 @@ class iTunesXML( object ):
                     alias.addAlbum( album )
 
             #
-            # Add the track to the album.
+            # Add the track to the album. Place it under its persistent ID as
+            # well as its track ID. The former is more stable, while the latter
+            # is still used for playlists.
             #
             track = Track( track )
             tracks[ track.getID() ] = track
+            tracks[ track.track.get( 'Track ID' ) ] = track
             album.addTrack( track )
 
         #
@@ -414,6 +492,9 @@ class iTunesXML( object ):
         self.genreMap = genreMap
         self.genreNames = genreNames
 
+        #
+        # Create Playlist objects to represent meaningful playlists.
+        #
         playlistList = []
         for each in parser.getPlaylists():
             if each.get( 'Master', False ): continue
@@ -421,20 +502,21 @@ class iTunesXML( object ):
             items = each.get( 'Playlist Items', [] )
             if len( items ) == 0: continue
             playlist = Playlist( each.get( 'Name' ) )
-            playlistList.append( playlist )
             for item in items:
                 trackId = item[ 'Track ID' ]
                 track = tracks.get( trackId )
                 if track:
                     playlist.tracks.append( track )
+            if playlist.getTrackCount() > 0:
+                playlistList.append( playlist )
 
         playlistList.sort()
         self.playlistList = playlistList
 
-        self.loadedTime = datetime.now()
-        duration = self.loadedTime - startTime
+        self.loadedTimeStamp = datetime.now()
+        duration = self.loadedTimeStamp - startTime
 
-        print( '...finished in', duration.seconds, 'seconds' )
+        print( '... finished in', duration.seconds, 'seconds' )
 
     def getGenreNames( self ): return self.genreNames
     def getGenreCount( self ): return len( self.genreNames )
@@ -689,7 +771,6 @@ class iTunesXML( object ):
     #
     def playlistAddTrack( self, playlist, track ):
         self.getLibrary().tracks[ 
-#            appscript.its.database_ID == track.getID() ].duplicate(
             appscript.its.persistent_ID == track.getID() ].duplicate(
             to = playlist )
 
@@ -734,21 +815,33 @@ class iTunesXML( object ):
         self.playlistAddAlbum( playlist, album )
         self.doPlayPlaylist( playlist, trackIndex )
 
+    #
+    # Obtain the current rating for the given album.
+    #
     def getAlbumRating( self, album ):
         id = album.getTrack( 0 ).getID()
         return self.getLibrary().tracks[ 
             appscript.its.persistent_ID == id ].album_rating.get()[ 0 ]
 
+    #
+    # Set a new rating for the given album.
+    #
     def setAlbumRating( self, album, rating ):
         id = album.getTrack( 0 ).getID()
         self.getLibrary().tracks[ 
             appscript.its.persistent_ID == id ].album_rating.set( rating )
 
+    #
+    # Obtain the current rating for the given track.
+    #
     def getTrackRating( self, track ):
         id = track.getID()
         return self.getLibrary().tracks[ 
             appscript.its.persistent_ID == id ].rating.get()[ 0 ]
 
+    #
+    # Set a new rating for the given track
+    #
     def setTrackRating( self, track, rating ):
         id = track.getID()
         self.getLibrary().tracks[ 
