@@ -21,6 +21,10 @@ from KeyProcessor import *
 
 remoteId = 0x0
 
+#
+# These values were obtained from Logitech's SLIMP3_Server_v3.1b5/IR/jvc_dvd.ir
+# file.
+#
 mapping = {
     0x0000f776 : kDigit0,
     0x0000f786 : kDigit1,

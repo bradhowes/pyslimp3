@@ -26,10 +26,7 @@ class IR( object ):
     def __init__( self ):
         self.remoteMaps = {}
         for each in self.remotes:
-            self.addRemote( each.remoteId, each.mapping )
-
-    def addRemote( self, remoteId, mapping ):
-        self.remoteMaps[ remoteId ] = mapping
+            self.remoteMaps[ each.remoteId ] = each.mapping
 
     def lookup( self, remoteId, code ):
         return self.remoteMaps[ remoteId ].get( code )
