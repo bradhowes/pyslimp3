@@ -246,7 +246,15 @@ class CustomCharacters( object ):
                       0xCD: kAccents[ "'" ] + kLetters[ 'I' ], # I acute
                       0xCE: kAccents[ '^' ] + kLetters[ 'I' ], # I circumflex
                       0xCF: kAccents[ ':' ] + kLetters[ 'I' ], # I umlaut
-                      
+
+                      0xD0: Dots( '11100', # Eth
+                                  '10010',
+                                  '10001',
+                                  '11001',
+                                  '10001',
+                                  '10010',
+                                  '11100' ),
+
                       0xD1: kAccents[ '~' ] + kLetters[ 'N' ], # N tilde
 
                       0xD2: kAccents[ '`' ] + kLetters[ 'O' ], # O grave
@@ -254,7 +262,14 @@ class CustomCharacters( object ):
                       0xD4: kAccents[ '^' ] + kLetters[ 'O' ], # O circumflex
                       0xD5: kAccents[ '~' ] + kLetters[ 'O' ], # O tilde
                       0xD6: kAccents[ ':' ] + kLetters[ 'O' ], # O umlaut
-
+                      0xD7: Dots( '00000', # multiplication symbol
+                                  '00000',
+                                  '01010',
+                                  '00100',
+                                  '01010',
+                                  '00000',
+                                  '00000' ),
+                                  
                       0xD8: Dots( '00001', # O slash
                                   '01110',
                                   '10011',
@@ -305,6 +320,14 @@ class CustomCharacters( object ):
                       0xEE: kAccents[ '^' ] + kLetters[ 'i' ], # I circumflex
                       0xEF: kAccents[ ':' ] + kLetters[ 'i' ], # I umlaut
                       
+                      0xF0: Dots( '01100', # eth
+                                  '00010',
+                                  '01111',
+                                  '10001',
+                                  '10001',
+                                  '10001',
+                                  '01110' ),
+
                       0xF1: kAccents[ '~' ] + kLetters[ 'n' ], # n tilde
 
                       0xF2: kAccents[ '`' ] + kLetters[ 'o' ], # o grave
@@ -312,6 +335,14 @@ class CustomCharacters( object ):
                       0xF4: kAccents[ '^' ] + kLetters[ 'o' ], # o circumflex
                       0xF5: kAccents[ '~' ] + kLetters[ 'o' ], # o tilde
                       0xF6: kAccents[ ':' ] + kLetters[ 'o' ], # o umlaut
+
+                      0xF7: Dots( '00000', # division symbol
+                                  '00000',
+                                  '00100',
+                                  '11111',
+                                  '00100',
+                                  '00000',
+                                  '00000' ),
 
                       0xF8: Dots( '00001', # o slash
                                   '01110',
@@ -340,14 +371,14 @@ class CustomCharacters( object ):
         if alt is None:
             return value
         if type( alt ) is type( 0 ):
-            print '* ', hex( value ), alt
+            # print '* ', hex( value ), alt
             return alt
-        index = self.lookup.get( alt )
+        index = self.lookup.get( value )
         if index is None:
             index = len( self.inuse )
             self.inuse.append( alt )
-            self.lookup[ alt ] = index
-        print '* ', hex( value ), index
+            self.lookup[ value ] = index
+        # print '* ', hex( value ), index
         return index
 
     def addMaps( self, buffer ):
@@ -356,6 +387,7 @@ class CustomCharacters( object ):
             buffer.extend( ( kPrefixCommand, kStartCustom + index * 8 ) )
             buffer.extend( each )
             buffer.extend( ( kPrefixCharacter, 0 ) ) # 'underline' line
+            index += 1
 
 class Buffer( object ):
     
@@ -422,12 +454,11 @@ class VFD( object ):
         #
         # See if there is a translation to use for the given value.
         #
-        alt = self.customCharacters.translate( value )
-        if alt is None:
-            if value > 255 or value < 32:
-                alt = 255
-        if alt is not None:
-            value = alt
+        value = self.customCharacters.translate( value )
+        if value > 1000 and value < 1255:
+            value -= 1000
+        if value > 255:
+            value = 255
         return value
 
     #

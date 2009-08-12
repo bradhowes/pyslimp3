@@ -140,11 +140,11 @@ class Client( object ):
         self.lastHardwareMessageReceived = datetime.now()
 
     #
-    # Determine if we have not received a message in the last 30 seconds.
+    # Determine if we have not received a message in the last 60 seconds.
     #
     def isStale( self, when ):
         delta = when - self.lastHardwareMessageReceived
-        return delta.seconds > 30
+        return delta.seconds > 60
 
     #
     # Close the client connection
@@ -153,7 +153,10 @@ class Client( object ):
         if self.socket is not None:
             self.socket.close()
             self.socket = None
-            self.server.removeClient( self )
+        self.server.removeTimer( self.refreshTimer )
+        self.server.removeTimer( self.overlayTimer )
+        del self.keyProcessor
+        self.keyProcessor = None
 
     #
     # Install a DisplayGenerator object as the source of our display. Clears

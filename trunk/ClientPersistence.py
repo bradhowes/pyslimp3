@@ -51,6 +51,8 @@ class ClientPersistence( object ):
                 stale.append( key )
 
         for key in stale:
+            client = self.clients[ key ]
+            client.close()
             del self.clients[ key ]
 
         if changed:
