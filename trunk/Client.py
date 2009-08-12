@@ -51,20 +51,14 @@ class Client( object ):
     #
     kOverlayDuration = 3.0      # seconds
 
-    def __init__( self ):
+    def __init__( self, server, addr, state ):
+        self.server = server
+        self.hardwareAddress = addr
         self.isOn = False
         self.brightness = VFD.kMaxBrightness
-        self.server = None
-
-    def initialize( self, server, clientKey ):
-        if self.server: return
-        self.server = server
-        self.clientKey = clientKey
-        self.hardwareAddress = eval( clientKey )
         self.iTunes = server.iTunes
         self.keyProcessor = KeyProcessor( server, self )
         self.socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-        self.emit = self.socket.sendto
         self.lastHardwareMessageReceived = datetime.now()
         self.overlayGenerator = None
         self.overlayTimer = None
@@ -73,24 +67,20 @@ class Client( object ):
         self.animator = Animator()
         self.vfd = VFD( self.brightness )
         self.fillKeyMap()
+        if state:
+            self.brightness = state[ 'brightness' ]
+            self.isOn = state[ 'isOn' ]
         if self.isOn:
             self.powerOn()
         else:
             self.powerOff()
         self.refreshDisplay()
 
-    def __getstate__( self ):
+    def getState( self ):
         settings = {}
         settings[ 'brightness' ] = self.brightness
         settings[ 'isOn' ] = self.isOn
         return settings
-
-    def __setstate__( self, state ):
-        self.brightness = state[ 'brightness' ]
-        self.isOn = state[ 'isOn' ]
-        self.server = None
-
-    def getKey( self ): return self.clientKey
 
     #
     # Create the mapping from key codes to methods for global methods, those
@@ -272,11 +262,14 @@ class Client( object ):
         # encoding. Emit the encoded result to the SLIMP3 device.
         #
         self.animator.setContent( content )
+        data = self.vfd.build( self.animator.render() )
+
         try:
-            lines = self.animator.render()
-            self.emit( self.vfd.build( lines ), self.hardwareAddress )
+            rc = self.socket.sendto( data, self.hardwareAddress )
+            if rc != len( data ):
+                print( '*** failed to send', len( data ), 'bytes -', rc )
         except socket.error:
-            pass
+            print( '*** failed to send to client', self.hardwareAddress )
 
     #
     # Process raw IR key event from client. Let the KeyProcessor instance

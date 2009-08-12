@@ -17,7 +17,6 @@
 # USA.
 #
 
-from datetime import datetime
 from os import stat
 from stat import *
 import array, asyncore, cPickle, socket, struct, subprocess, threading, \
@@ -59,7 +58,6 @@ class Server( asyncore.dispatcher ):
         self.timerManager = Timer.TimerManager()
 
     def iTunesLoad( self ):
-        print "Server.iTunesLoad"
 
         #
         # Get the location of the iTunes XML file. Apparently we can get it
@@ -126,7 +124,7 @@ class Server( asyncore.dispatcher ):
         elif kind == 'i':
             self.processIRMessage( client, msg )
         else:
-            print( 'unknown message type:', kind )
+            print( '*** unknown message type:', kind )
 
     def processDiscovery( self, addr ):
         self.sendDiscoveryResponse( addr )
@@ -144,7 +142,7 @@ class Server( asyncore.dispatcher ):
             try:
                 client.processKeyEvent( timeStamp, key )
             except:
-                print '*** failed to process IR message'
+                print( '*** failed to process IR message' )
                 traceback.print_exc()
 
     def handle_connect( self ): pass

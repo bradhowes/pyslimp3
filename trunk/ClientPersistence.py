@@ -26,27 +26,49 @@ class ClientPersistence( object ):
     def __init__( self ):
         self.path = 'pyslimp3.pkl'
         self.clients = {}
+        self.settings = {}
         self.restore()
 
     def save( self ):
-        cPickle.dump( self.clients, open( self.path, 'wb' ) )
+        now = datetime.now()
+        changed = False
+        stale = []
+        
+        #
+        # Visit all of the clients looking for changed state or staleness
+        #
+        for key, client in self.clients.items():
+            state = client.getState()
+            prev = self.settings.get( key[ 0 ], None )
+            if prev is None:
+                self.settings[ key[ 0 ] ] = state
+                changed = True
+            elif prev != state:
+                prev.update( state )
+                changed = True
+            elif client.isStale( now ):
+                print( '*** detected stale client', key )
+                stale.append( key )
+
+        for key in stale:
+            del self.clients[ key ]
+
+        if changed:
+            print( '... saving updated Client settings' )
+            cPickle.dump( self.settings, open( self.path, 'wb' ) )
 
     def restore( self ):
         try:
-            self.clients = cPickle.load( open( self.path ) )
+            self.settings = cPickle.load( open( self.path ) )
+            print( '... restored', len( self.settings ), 'settings:',
+                   self.settings.keys() )
         except IOError:
             pass
 
     def getClient( self, server, addr ):
-        key = repr( addr )
-        client = self.clients.get( key, None )
+        client = self.clients.get( addr, None )
         if client is None:
-            client = Client.Client()
-            self.clients[ key ] = client
-        if not client.server:
-            client.initialize( server, key )
+            state = self.settings.get( addr[ 0 ], None )
+            client = Client.Client( server, addr, state )
+            self.clients[ addr ] = client
         return client
-
-    def deleteClient( self, addr ):
-        key = repr( addr )
-        self.clients[ key ] = None
