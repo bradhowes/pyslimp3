@@ -79,6 +79,7 @@ class Server( asyncore.dispatcher ):
 
     def handle_read( self ):
         msg, addr = self.socket.recvfrom( self.kReceiveBufferSize )
+        # print( len( msg ), addr )
         if msg[ 0 ] == 'd':
             self.processDiscovery( addr )
         else:
@@ -88,13 +89,13 @@ class Server( asyncore.dispatcher ):
         client = self.clients.getClient( self, addr )
         client.touch()
         kind = msg[ 0 ]
-        if kind == 'h':
+        if kind == 'h' or kind == 'd':
             self.processHello( client )
         elif kind == 'i':
             self.processIRMessage( client, msg )
         else:
             print( '*** unknown message type:', kind )
-
+ 
     def processDiscovery( self, addr ):
         self.sendDiscoveryResponse( addr )
 
