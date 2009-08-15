@@ -418,10 +418,10 @@ class Buffer( object ):
 class VFD( object ):
 
     kMinBrightness = 0          # Minimum brightness level for the display
-    kMaxBrightness = 3          # Maximum brightness level for the display
+    kMaxBrightness = 4          # Maximum brightness level for the display
 
     def __init__( self, brightness ):
-        self.brightness = 3
+        self.brightness = self.kMaxBrightness
         self.setBrightness( brightness )
 
     #
@@ -442,6 +442,7 @@ class VFD( object ):
     def setBrightness( self, value ):
         self.brightness = max( min( value, self.kMaxBrightness ),
                                self.kMinBrightness )
+        print( value, self.brightness )
 
     #
     # Apply a delta value to the current brightness setting.
@@ -488,18 +489,22 @@ class VFD( object ):
         #
         buffer.addCommand( 0x33 )
         buffer.addCommand( 0x00 )
-        buffer.addCommand( 0x30, self.kMaxBrightness - self.brightness )
 
-        #
-        # DEBUG: buffer now has 26 characters in it
-        #
+        if self.brightness:
+            buffer.addCommand( 0x30, self.kMaxBrightness - self.brightness )
+        else:
+            buffer.addCommand( 0x30, 0 )
+
         # print 'len( buffer )', len( buffer )
 
         #
         # Translate the characters of the first line.
         #
         for c in self.padLine( lines[ 0 ] ):
-            text.addCharacter( self.translate( ord( c ) ) )
+            if self.brightness:
+                text.addCharacter( self.translate( ord( c ) ) )
+            else:
+                text.addCharacter( ord( ' ' ) )
 
         #
         # Move the cursor to the second line.
@@ -510,7 +515,10 @@ class VFD( object ):
         # Translate the characters of the second line.
         #
         for c in self.padLine( lines[ 1 ] ):
-            text.addCharacter( self.translate( ord( c ) ) )
+            if self.brightness:
+                text.addCharacter( self.translate( ord( c ) ) )
+            else:
+                text.addCharacter( ord( ' ' ) )
 
         #
         # Done processing the text data. Add any custom character maps to the

@@ -23,9 +23,9 @@ import VFD
 
 kServerAddress = ( 'localhost', 3483 )
 
-sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-sock.bind( ( '', 0 ) )
-connected = False
+# sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+# sock.bind( ( '', 0 ) )
+# connected = False
 
 keymap = { 'q': 0x0000f702,     # Power
            ',': 0x0000c0f8,     # Volume down
@@ -64,7 +64,7 @@ keymap = { 'q': 0x0000f702,     # Power
            }
 
 class KeyReader( asyncore.file_dispatcher ):
-    
+
     def __init__( self, sim ):
         asyncore.file_dispatcher.__init__( self, sys.stdin.fileno() )
         self.sim = sim
