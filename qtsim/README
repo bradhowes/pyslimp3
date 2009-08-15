@@ -1,0 +1,12 @@
+To build:
+
+    % qmake
+    % make
+
+To run (Macintosh):
+
+    % open qtsim.app
+
+To run (Linux):
+
+    % ./qtsim
