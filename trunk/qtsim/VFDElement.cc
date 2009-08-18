@@ -84,6 +84,12 @@ VFDElement::setSpacing( int value )
 }
 
 void
+VFDElement::setBrightness( int brightness )
+{
+    brightness_ = brightness;
+}
+
+void
 VFDElement::setData( VFDElementData* data )
 {
     setData( data, brightness_ );

@@ -58,6 +58,7 @@ public slots:
     void setBackgroundColor( QColor color );
     void setPixelSize( int value );
     void setSpacing( int value );
+    void setBrightness( int brightness );
     void setData( VFDElementData* data );
     void setData( VFDElementData* data, int brightness );
 

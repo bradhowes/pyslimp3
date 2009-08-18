@@ -57,20 +57,27 @@ private:
 
     void mousePressEvent( QMouseEvent* event );
     void writeMessage( size_t count );
-    void updateDisplay( qint64 size );
+    void updateDisplay();
     void sendKeyMessage( uint32_t when, uint32_t keyCode );
     void writeInteger( uint32_t value, size_t offset );
-    void dumpBuffer( qint64 size );
+    void dumpBuffer();
     void clearDisplay();
+    void setDisplay( const std::string& line1, const std::string& line2 );
+    size_t processEntry( size_t index );
+    size_t processCharacter( size_t index );
+    size_t processCommand( size_t index );
+    size_t processBrightness( size_t index );
+    size_t processCustomDefinition( size_t index );
 
     QTime timeSource_;
     Remote* remote_;
     QList<VFDElementData*> bits_;
-    QList<VFDElement*> row1_;
-    QList<VFDElement*> row2_;
+    QList<VFDElement*> elements_;
+    int elementIndex_;
     QTimer* timer_;
     QUdpSocket* serverSocket_;
     unsigned char buffer_[ 2048 ];
+    size_t bufferSize_;
     QHostAddress serverAddress_;
     QDateTime lastTimeStamp_;
 };
