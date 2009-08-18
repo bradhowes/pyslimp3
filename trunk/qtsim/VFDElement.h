@@ -41,6 +41,7 @@ public:
 
     VFDElement( QWidget* parent = 0 );
 
+    int getBrightness() const { return brightness_; }
     QColor getOnColor() const { return onColor_; }
     QColor getOffColor() const { return offColor_; }
     QColor getBackgroundColor() const { return backgroundColor_; }
@@ -57,6 +58,7 @@ public slots:
     void setBackgroundColor( QColor color );
     void setPixelSize( int value );
     void setSpacing( int value );
+    void setData( VFDElementData* data );
     void setData( VFDElementData* data, int brightness );
 
 private:
