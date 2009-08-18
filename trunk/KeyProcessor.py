@@ -114,19 +114,24 @@ class KeyProcessor( object ):
         self.timerManager = timerManager
         self.notifier = notifier
         self.releaseTimer = None
-        self.reset()
+        self.reset( True )
 
     #
-    # Reset the key processor to a known state.
+    # Reset the key processor to a known state. If there is an active
+    # releaseTimer, we set the silenced flag but leave everything else alone,
+    # and let the checkForRelease() method clean up for us. This is done so
+    # that screen changes caused by remote commands won't inherit key release
+    # or repeat events.
     #
-    def reset( self ):
-        self.firstTimeStamp = None
-        self.lastTimeStamp = None
-        self.emittedHeldKey = False
-        self.lastKey = None
-        if self.releaseTimer:
-            self.releaseTimer.deactivate()
-            self.releaseTimer = None
+    def reset( self, force = False ):
+        if force or self.releaseTimer is None:
+            self.silenced = False
+            self.lastKey = None
+            self.firstTimeStamp = None
+            self.lastTimeStamp = None
+            self.emittedHeldKey = False
+        else:
+            self.silenced = True
 
     #
     # Process a new raw key event from a remote controller. Depending on what
@@ -135,6 +140,10 @@ class KeyProcessor( object ):
     #
     def process( self, timeStamp, key ):
 
+        #
+        # Override timestamp from SliMP3 message. Makes an (gross?) assumption
+        # that UDP latencies from the SliMP3 to us are low.
+        #
         timeStamp = datetime.now()
 
         #
@@ -170,12 +179,20 @@ class KeyProcessor( object ):
                 self.notify( kModRepeat )
 
         else:
+            
+            #
+            # If we have an active releaseTimer, manually fire it. Make sure
+            # that it will think that the previous key was released.
+            #
             if self.releaseTimer:
                 self.lastTimeStamp = self.releaseTimeStamp
-                self.releaseTimer.deactivate()
-                self.checkForRelease()
+                self.releaseTimer.fire()
             else:
-                self.reset()
+                self.reset( True )
+
+            #
+            # New key press.
+            #
             self.lastKey = key
             self.firstTimeStamp = timeStamp
             self.lastTimeStamp = timeStamp
@@ -203,13 +220,20 @@ class KeyProcessor( object ):
             self.startReleaseTimer( self.lastTimeStamp )
             return
 
-        if self.emittedHeldKey:
-            self.notify( kModReleaseHeld )
-        else:
-            self.notify( kModRelease )
+        #
+        # Honor the silenced attribute so that we don't emit keCode events
+        # inside a new screen.
+        #
+        if not self.silenced:
+            if self.emittedHeldKey:
+                self.notify( kModReleaseHeld )
+            else:
+                self.notify( kModRelease )
 
-        self.releaseTimer = None
-        self.reset()
+        #
+        # Make sure reset
+        #
+        self.reset( True )
 
     #
     # Notify the notifier object that a new keyCode event has taken place.

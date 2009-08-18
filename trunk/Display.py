@@ -233,7 +233,9 @@ class VolumeGenerator( iTunesSourceGenerator ):
     # iTunes volume values 0-100
     #
     def digit( self, digit ):
-        self.source.setVolume( int( digit * 100.0 / 9.0 + 0.5 ) )
+        if digit == 0:
+            digit = 10
+        self.source.setVolume( digit * 10 )
         return self
 
 #

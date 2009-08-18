@@ -488,8 +488,7 @@ class CustomCharacters( object ):
         for each in self.inuse:
             buffer.extend( ( kPrefixCommand, kStartCustom + index * 8 ) )
             buffer.extend( each )
-            if len( each ) == 7:
-                buffer.extend( ( kPrefixCharacter, 0 ) ) # 'underline' line
+            buffer.extend( ( kPrefixCharacter, 0 ) ) # 'underline' line
             index += 1
 
 class Buffer( object ):
