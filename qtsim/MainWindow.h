@@ -21,7 +21,9 @@
 //
 
 #include <QtCore/QTime>
+#include <QtCore/QDateTime>
 #include <QtGui/QMainWindow>
+#include <QtNetwork/QHostAddress>
 
 class QTimer;
 class QUdpSocket;
@@ -55,20 +57,22 @@ private:
 
     void mousePressEvent( QMouseEvent* event );
     void writeMessage( size_t count );
-    void updateDisplay();
+    void updateDisplay( qint64 size );
     void sendKeyMessage( uint32_t when, uint32_t keyCode );
     void writeInteger( uint32_t value, size_t offset );
+    void dumpBuffer( qint64 size );
+    void clearDisplay();
 
     QTime timeSource_;
-    int lastTimeStamp_;
     Remote* remote_;
     QList<VFDElementData*> bits_;
     QList<VFDElement*> row1_;
     QList<VFDElement*> row2_;
     QTimer* timer_;
     QUdpSocket* serverSocket_;
-    char buffer_[ 2048 ];
-    bool foundServer_;
+    unsigned char buffer_[ 2048 ];
+    QHostAddress serverAddress_;
+    QDateTime lastTimeStamp_;
 };
 
 #endif

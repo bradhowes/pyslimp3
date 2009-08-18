@@ -18,6 +18,7 @@
 //
 
 #include <arpa/inet.h>
+#include <iomanip>
 #include <iostream>
 
 #include <QtCore/QTimer>
@@ -164,10 +165,11 @@ static const VFDElementData::RawDef definitions[] = {
 MainWindow::MainWindow()
     : QWidget(), timeSource_(), remote_( new Remote ), bits_(), row1_(),
       row2_(), timer_( new QTimer( this ) ),
-      serverSocket_( new QUdpSocket( this ) ), foundServer_( false )
+      serverSocket_( new QUdpSocket( this ) ),
+      serverAddress_( QHostAddress::Broadcast ),
+      lastTimeStamp_( QDateTime::currentDateTime() )
 {
     timeSource_.start();
-    lastTimeStamp_ = timeSource_.elapsed();
 
     QPalette p( palette() );
     p.setColor( QPalette::Background, Qt::black );
@@ -181,8 +183,6 @@ MainWindow::MainWindow()
 	bits_.push_back( data );
     }
 
-    int bitIndex = 48;
-
     QVBoxLayout* rows = new QVBoxLayout;
     rows->setContentsMargins( 40, 40, 40, 40 );
     rows->setSizeConstraint( QLayout::SetFixedSize );
@@ -194,7 +194,7 @@ MainWindow::MainWindow()
     row1->setSpacing( 4 );
     for ( int index = 0; index < 40; ++index ) {
 	VFDElement* w = new VFDElement( this );
-	w->setData( bits_[ bitIndex++ ], index % 4 );
+	w->setData( bits_[ 32 ] );
 	row1->addWidget( w );
 	row1_.push_back( w );
     }
@@ -205,7 +205,7 @@ MainWindow::MainWindow()
     row2->setSpacing( 4 );
     for ( int index = 0; index < 40; ++index ) {
 	VFDElement* w = new VFDElement( this );
-	w->setData( bits_[ bitIndex++ ], index % 4 );
+	w->setData( bits_[ 32 ] );
 	row2->addWidget( w );
 	row2_.push_back( w );
     }
@@ -271,12 +271,21 @@ MainWindow::writeInteger( uint32_t value, size_t offset )
 void
 MainWindow::emitHeartbeat()
 {
-    if ( foundServer_ ) {
-	emitHello();
+    if ( serverAddress_ != QHostAddress::Broadcast ) {
+	QDateTime now( QDateTime::currentDateTime() );
+	if ( lastTimeStamp_.secsTo( now ) > 30 ) {
+	    std::clog << "*** detected stale server\n";
+	    serverAddress_ = QHostAddress::Broadcast;
+	    clearDisplay();
+	    lastTimeStamp_ = now;
+	}
+	else {
+	    emitHello();
+	    return;
+	}
     }
-    else {
-	emitDiscovery();
-    }
+
+    emitDiscovery();
 }
 
 void
@@ -299,23 +308,53 @@ void
 MainWindow::readMessage()
 {
     while ( serverSocket_->hasPendingDatagrams() ) {
-	qint64 size = serverSocket_->readDatagram( buffer_, 2048 );
+	qint64 size = serverSocket_->readDatagram( (char*)buffer_, 4096,
+						   &serverAddress_ );
 	if ( size > 0 ) {
+	    lastTimeStamp_ = QDateTime::currentDateTime();
 	    switch ( buffer_[ 0 ] ) {
-	    case 'D': foundServer_ = true; emitHello(); break;
-	    case 'l': updateDisplay(); break;
+	    case 'D':
+		std::clog << "server host: "
+			  << serverAddress_.toString().toStdString()
+			  << std::endl;
+		emitHello();
+		break;
+
+	    case 'l':
+		// dumpBuffer( size );
+		updateDisplay( size );
+		break;
 	    }
+	}
+	else {
+	    std::clog << "*** readDatagram returned " << size
+		      << std::endl;
 	}
     }
 }
 
 void
-MainWindow::updateDisplay()
+MainWindow::dumpBuffer( qint64 size )
+{
+    qint64 index = 0;
+    std::clog << std::hex;
+    while ( index < size ) {
+	std::clog << std::setw( 2 ) << int( buffer_[ index++ ] ) << ' ';
+	if ( ( index % 16 ) == 0 ) std::clog << '\n';
+    }
+
+    std::clog << std::dec;
+
+    if ( ( index % 16 ) > 0 ) std::clog << '\n';
+}
+
+void
+MainWindow::updateDisplay( qint64 size )
 {
     int brightness = buffer_[ 25 ];
 
     //
-    // !!! FIXME: kinda hacky 
+    // !!! FIXME: very hacky 
     //
     int bufferIndex = 26;	// Start of the character data.
 
@@ -354,6 +393,7 @@ MainWindow::updateDisplay()
     // line.
     //
     int elementIndex = 0;
+
     while ( buffer_[ bufferIndex ] == 0x03 ) { // character data
 	unsigned int c = buffer_[ bufferIndex + 1 ];
 	if ( c > 128 ) c = 128;
@@ -377,10 +417,19 @@ MainWindow::updateDisplay()
 }
 
 void
+MainWindow::clearDisplay()
+{
+    for ( int index = 0; index < 40; ++index ) {
+	row1_[ index ]->setData( bits_[ 32 ] );
+	row2_[ index ]->setData( bits_[ 32 ] );
+    }
+}
+
+void
 MainWindow::writeMessage( size_t count )
 {
-    qint64 size = serverSocket_->writeDatagram( buffer_, count,
-						QHostAddress::LocalHost, 3483 );
+    qint64 size = serverSocket_->writeDatagram( (char*)buffer_, count,
+						serverAddress_, 3483 );
     if ( size == -1 )
 	std::clog << "*** failed writeDatagram\n";
 }

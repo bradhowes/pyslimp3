@@ -84,8 +84,15 @@ VFDElement::setSpacing( int value )
 }
 
 void
+VFDElement::setData( VFDElementData* data )
+{
+    setData( data, brightness_ );
+}
+
+void
 VFDElement::setData( VFDElementData* data, int brightness )
 {
+    brightness_ = brightness;
     if ( data_ ) data_->disconnect( this );
     data_ = data;
     if ( data_ ) connect( data_, SIGNAL( changed() ), SLOT( update() ) );
