@@ -162,10 +162,13 @@ static const VFDElementData::RawDef definitions[] = {
 };
 
 MainWindow::MainWindow()
-    : QWidget(), remote_( new Remote ), bits_(), row1_(), row2_(),
-      timer_( new QTimer( this ) ), serverSocket_( new QUdpSocket( this ) ),
-      foundServer_( false )
+    : QWidget(), timeSource_(), remote_( new Remote ), bits_(), row1_(),
+      row2_(), timer_( new QTimer( this ) ),
+      serverSocket_( new QUdpSocket( this ) ), foundServer_( false )
 {
+    timeSource_.start();
+    lastTimeStamp_ = timeSource_.elapsed();
+
     QPalette p( palette() );
     p.setColor( QPalette::Background, Qt::black );
     p.setColor( QPalette::Window, Qt::black );
@@ -177,8 +180,6 @@ MainWindow::MainWindow()
 	VFDElementData* data = new VFDElementData( *ptr++ );
 	bits_.push_back( data );
     }
-
-    std::cout << "bits_.size(): " << bits_.size() << std::endl;
 
     int bitIndex = 48;
 
@@ -241,11 +242,8 @@ MainWindow::mousePressEvent( QMouseEvent* )
 void
 MainWindow::sendKey( uint32_t keyCode )
 {
-    static double kTicksPerSecond = 625000.0;
-    // std::clog << "sendKey: " << keyCode << std::endl;
-    sendKeyMessage( 0x000112233, keyCode );
-    sendKeyMessage( int( ( 0x000112233 + 0.100 ) * kTicksPerSecond ),
-		    keyCode );
+    int msecs = timeSource_.elapsed();
+    sendKeyMessage( msecs, keyCode );
 }
 
 void
@@ -302,7 +300,6 @@ MainWindow::readMessage()
 {
     while ( serverSocket_->hasPendingDatagrams() ) {
 	qint64 size = serverSocket_->readDatagram( buffer_, 2048 );
-	// std::clog << "readMessage: " << size << std::endl;
 	if ( size > 0 ) {
 	    switch ( buffer_[ 0 ] ) {
 	    case 'D': foundServer_ = true; emitHello(); break;
@@ -316,8 +313,6 @@ void
 MainWindow::updateDisplay()
 {
     int brightness = buffer_[ 25 ];
-    std::clog << "brightness: " << int( buffer_[ 25 ] ) << ' ' << brightness
-	      << std::endl;
 
     //
     // !!! FIXME: kinda hacky 

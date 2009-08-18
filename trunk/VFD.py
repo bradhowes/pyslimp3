@@ -32,6 +32,14 @@ def Dots( *values ):
         index += 2
     return tuple( bits )
 
+class IndexGenerator( object ):
+    def __init__( self, value ):
+        self.next = value
+    def __call__( self ):
+        value = self.next
+        self.next = value + 1
+        return value
+
 #
 # Data encoder for the vacuum fluorescent device (VFD) used in the SLIMP3.
 # Builds a SLIMP3 'l' (ell) message for the client. The format depicted here
@@ -167,6 +175,20 @@ class CustomCharacters( object ):
                  'c': Dots( '00100', # cedilla
                             '01100' )
                  }
+
+    indices = IndexGenerator( 1000 )
+    kVolumeBar0 = indices()     # Empty volume block
+    kVolumeBar1 = indices()
+    kVolumeBar2 = indices()
+    kVolumeBar3 = indices()
+    kVolumeBar4 = indices()
+    kVolumeBar5 = indices()
+    kVolumeBarBegin = indices()
+    kVolumeBarEnd = indices()
+
+    kRatingEmpty = indices()
+    kRatingFilled = indices()
+    kRatingHalf = indices()
 
     kCharacterMap = { 0x7E: Dots( '00000', # tilde
                                   '00000',
@@ -360,6 +382,86 @@ class CustomCharacters( object ):
                       0xFD: kAccents[ "'" ] + kLetters[ 'y' ], # y acute
                       0xFF: kAccents[ ':' ] + kLetters[ 'y' ], # y umlaut
 
+                      #
+                      # Volume bar characters
+                      #
+                      kVolumeBar1: Dots( '11111',
+                                         '00000',
+                                         '10000',
+                                         '10000',
+                                         '10000',
+                                         '00000',
+                                         '11111' ),
+                      kVolumeBar2: Dots( '11111',
+                                         '00000',
+                                         '11000',
+                                         '11000',
+                                         '11000',
+                                         '00000',
+                                         '11111' ),
+                      kVolumeBar3: Dots( '11111',
+                                         '00000',
+                                         '11100',
+                                         '11100',
+                                         '11100',
+                                         '00000',
+                                         '11111' ),
+                      kVolumeBar4: Dots( '11111',
+                                         '00000',
+                                         '11110',
+                                         '11110',
+                                         '11110',
+                                         '00000',
+                                         '11111' ),
+                      kVolumeBar5: Dots( '11111',
+                                         '00000',
+                                         '11111',
+                                         '11111',
+                                         '11111',
+                                         '00000',
+                                         '11111' ),
+                      kVolumeBar0: Dots( '11111',
+                                         '00000',
+                                         '00000',
+                                         '00000',
+                                         '00000',
+                                         '00000',
+                                         '11111' ),
+                      kVolumeBarBegin: Dots( '00000',
+                                             '00001',
+                                             '00011',
+                                             '00011',
+                                             '00011',
+                                             '00001',
+                                             '00000' ),
+                      kVolumeBarEnd: Dots( '00000',
+                                           '10000',
+                                           '11000',
+                                           '11000',
+                                           '11000',
+                                           '10000',
+                                           '00000' ),
+                      kRatingEmpty: Dots( '01010',
+                                          '10101',
+                                          '10001',
+                                          '10001',
+                                          '10001',
+                                          '01010',
+                                          '00100', ),
+                      kRatingHalf: Dots( '01010',
+                                         '10001',
+                                         '10001',
+                                         '11111',
+                                         '11111',
+                                         '01110',
+                                         '00100', ),
+                      kRatingFilled: Dots( '01010',
+                                           '11111', 
+                                           '11111',
+                                           '11111',
+                                           '11111',
+                                           '01110',
+                                           '00100', ),
                       }
 
     def __init__( self ):
@@ -386,7 +488,8 @@ class CustomCharacters( object ):
         for each in self.inuse:
             buffer.extend( ( kPrefixCommand, kStartCustom + index * 8 ) )
             buffer.extend( each )
-            buffer.extend( ( kPrefixCharacter, 0 ) ) # 'underline' line
+            if len( each ) == 7:
+                buffer.extend( ( kPrefixCharacter, 0 ) ) # 'underline' line
             index += 1
 
 class Buffer( object ):
@@ -401,7 +504,7 @@ class Buffer( object ):
         else:
             self.buffer.extend( ( kPrefixCommand, cmd, kPrefixCharacter,
                                   value ) )
-        
+
     def addCharacter( self, value ):
         self.buffer.extend( ( kPrefixCharacter, value ) )
 

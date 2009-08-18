@@ -608,10 +608,21 @@ class iTunesXML( object ):
     # Application volume controls. NOTE: for some reason unable to change
     # iTunes volume by delta of 1.
     #
-    def getVolume( self ): return self.getApp().sound_volume.get()
-    def setVolume( self, value ): self.getApp().sound_volume.set( value )
+    def getVolume( self ): 
+        value = int( self.getApp().sound_volume.get() )
+        return value
+
+    def setVolume( self, value ):
+        self.getApp().sound_volume.set( value )
+
     def adjustVolume( self, delta ): 
-        self.setVolume( self.getVolume() + delta )
+        adjustment = delta
+        old = self.getVolume()
+        if ( old == 0 and delta < 0 ) or ( old == 100 and delta > 0 ):
+            return
+        while old == self.getVolume():
+            self.setVolume( old + delta )
+            delta += adjustment
 
     #
     # Application mute controls.
@@ -819,9 +830,21 @@ class iTunesXML( object ):
     # Obtain the current rating for the given album.
     #
     def getAlbumRating( self, album ):
-        id = album.getTrack( 0 ).getID()
-        return self.getLibrary().tracks[ 
-            appscript.its.persistent_ID == id ].album_rating.get()[ 0 ]
+        track = album.getTrack( 0 )
+        id = track.getID()
+        track = self.getLibrary().tracks[ 
+            appscript.its.persistent_ID == id ].get()[ 0 ]
+        rating = track.album_rating.get()
+        ratingKind = track.album_rating_kind.get()
+        
+        #
+        # If the user's album rating is 0, iTunes may return to us a computed
+        # value based on ratings of the album's tracks. We want to ignore such
+        # a rating for our purposes.
+        #
+        if repr( ratingKind ) == 'k.computed':
+            rating = 0
+        return rating
 
     #
     # Set a new rating for the given album.
@@ -832,12 +855,25 @@ class iTunesXML( object ):
             appscript.its.persistent_ID == id ].album_rating.set( rating )
 
     #
-    # Obtain the current rating for the given track.
+    # Obtain the current rating for the given track AND the current rating for
+    # the track's album
     #
     def getTrackRating( self, track ):
         id = track.getID()
-        return self.getLibrary().tracks[ 
-            appscript.its.persistent_ID == id ].rating.get()[ 0 ]
+        track = self.getLibrary().tracks[ 
+            appscript.its.persistent_ID == id ].get()[ 0 ]
+        rating = track.rating.get()
+        ratingKind = track.rating_kind.get()
+
+        #
+        # If the user's track rating is 0, iTunes may return to us the rating
+        # value assigned to the track's album. We want to ignore such a rating
+        # for our purposes.
+        #
+        if repr( ratingKind ) == 'k.computed':
+            rating = 0
+        albumRating = track.album_rating.get()
+        return rating, albumRating
 
     #
     # Set a new rating for the given track

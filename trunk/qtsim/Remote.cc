@@ -51,6 +51,15 @@ static Remote::KeyCodeMap::value_type inits[] = {
     Remote::KeyCodeMap::value_type( "volumeDown", 0xf7f8 ),
     Remote::KeyCodeMap::value_type( "brightnessUp", 0xf70d ),
     Remote::KeyCodeMap::value_type( "brightnessDown", 0xf78d ),
+    Remote::KeyCodeMap::value_type( "disp", 0xf703 ),
+    Remote::KeyCodeMap::value_type( "guide", 0xf7b6 ),
+    Remote::KeyCodeMap::value_type( "menu", 0xf783 ),
+    Remote::KeyCodeMap::value_type( "pip", 0xf7f6 ),
+    Remote::KeyCodeMap::value_type( "rec", 0xf743 ),
+    Remote::KeyCodeMap::value_type( "recall", 0xf7ab ),
+    Remote::KeyCodeMap::value_type( "sleep", 0xf7b3 ),
+    Remote::KeyCodeMap::value_type( "ok", 0xf72b ),
+    Remote::KeyCodeMap::value_type( "mute", 0xc538 ),
     Remote::KeyCodeMap::value_type( "", 0x00 ), // sentinal
 };
 
@@ -96,6 +105,15 @@ Remote::Remote()
     connect( gui_->brightnessUp, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
     connect( gui_->brightnessDown, SIGNAL( clicked() ),
 	     SLOT( buttonPressed() ) );
+    connect( gui_->disp, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->guide, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->menu, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->pip, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->rec, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->recall, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->sleep, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->ok, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    connect( gui_->mute, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
 }
 
 void

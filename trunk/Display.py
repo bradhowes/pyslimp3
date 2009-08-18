@@ -21,6 +21,7 @@ from datetime import datetime
 from random import randrange
 from Content import *
 from KeyProcessor import *
+from VFD import CustomCharacters
 
 #
 # Align text in center of line 
@@ -53,25 +54,26 @@ def formatQuantity( value, singular, plural = None, format = '%d %s' ):
 #
 def getHHMMSS( secs ):
     if secs < 60:
-        return '0:%02d' % secs
+        return u'0:%02d' % secs
     elif secs < 3600:
-        
+
         #
         # Non-zero minutes component
         #
-        mins = secs / 60
+        mins = int( secs / 60 )
         secs -= mins * 60
-        return '%d:%02d' % ( mins, secs )
+        return u'%d:%02d' % ( mins, secs )
+
     else:
-        
+
         #
         # Non-zero hours component
         #
-        hrs = secs / 3600
+        hrs = int( secs / 3600 )
         secs -= hrs * 3600
-        mins = secs / 60
+        mins = int( secs / 60 )
         secs -= mins * 60
-        return '%d:%02d:%02d' % ( hrs, mins, secs )
+        return u'%d:%02d:%02d' % ( hrs, mins, secs )
 
 #
 # Base class of all display generators. Derived classes must override
@@ -192,6 +194,22 @@ class iTunesSourceGenerator( DisplayGenerator ):
         DisplayGenerator.__init__( self )
         self.source = source
 
+def generateProgressIndicator( width, value ):
+    numBars = int( width * 5 * value )
+    fullBars = numBars / 5
+    emptyBars = width - fullBars
+    lastBar = numBars % 5
+    indicator = unichr( CustomCharacters.kVolumeBarBegin )
+    if fullBars > 0:
+        indicator += unichr( CustomCharacters.kVolumeBar5 ) * fullBars
+    if lastBar > 0:
+        indicator += unichr( CustomCharacters.kVolumeBar0 + lastBar )
+        emptyBars -= 1
+    if emptyBars > 0:
+        indicator += unichr( CustomCharacters.kVolumeBar0 ) * emptyBars
+    indicator += unichr( CustomCharacters.kVolumeBarEnd )
+    return indicator
+
 #
 # Volume display generator. Shows the current volume setting as a line of
 # filled blocks.
@@ -206,9 +224,9 @@ class VolumeGenerator( iTunesSourceGenerator ):
     #
     def generate( self ):
         volume = self.source.getVolume()
-        line2 = u'%3d ' % ( volume, )
-        line2 += unichr( 1255 ) * ( volume * ( kDisplayWidth - 4 ) / 100 )
-        return Content( [ centerAlign( 'Volume' ), line2 ] )
+        line2 = u'%3d' % ( volume, )
+        line2 += generateProgressIndicator( 20, volume / 100.0 )
+        return Content( [ centerAlign( 'Volume' ), centerAlign( line2 ) ] )
 
     #
     # Override of DisplayGenerator method. Translate digit values 0-9 into

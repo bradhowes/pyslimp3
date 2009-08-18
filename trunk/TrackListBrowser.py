@@ -21,21 +21,13 @@ from Browser import Browser
 from Content import Content
 from Display import getHHMMSS
 from KeyProcessor import *
+from RatingDisplay import *
 
 #
 # Specialization of Browser that shows a list of tracks associated with an
 # album or playlist. Pressing the 'play' key will start playing at the
 # indicated track
 #
-def trackNameFormatter( track ): 
-    return track.getName()
-
-def trackAlbumNameFormatter( track ): 
-    return trackNameFormatter( track ) + ' - ' + track.getAlbumName()
-
-def trackAlbumArtistNameFormatter( track ): 
-    return trackAlbumNameFormatter( track ) + ' - ' + track.getArtistName()
-
 class TrackListBrowser( Browser ):
 
     def __init__( self, iTunes, prevLevel, trackList ):
@@ -50,6 +42,8 @@ class TrackListBrowser( Browser ):
     def fillKeyMap( self ):
         Browser.fillKeyMap( self )
         self.addKeyMapEntry( kPlay, None, self.play )
+        self.addKeyMapEntry( kPIP, None, self.ratings )
+        self.addKeyMapEntry( kArrowRight, None, self.ratings )
 
     #
     # Show the current track name and duration values
@@ -57,8 +51,8 @@ class TrackListBrowser( Browser ):
     def generateWith( self, obj ): 
         return Content( [ obj.getName(),
                           obj.getAlbumName() + '/' + obj.getArtistName()  ],
-                        [ self.getIndexOverlay(),
-                          getHHMMSS( obj.getDuration() ) ] )
+                        [ getHHMMSS( obj.getDuration() ),
+                          self.getIndexOverlay() ] )
 
     #
     # Begin playback at the current track.
@@ -67,3 +61,9 @@ class TrackListBrowser( Browser ):
         if self.prevLevel:
             return self.prevLevel.play( self.index )
         return None
+
+    #
+    # Show the user ratings for the current track
+    #
+    def ratings( self ):
+        return TrackRatingDisplay( self.source, self, self.getCurrentObject() )

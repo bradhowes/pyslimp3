@@ -48,7 +48,7 @@ class PlaylistBrowser( Browser ):
     #
     def generateWith( self, obj ): 
         return Content( [ obj.getName(),
-                          formatQuantity( obj.getTrackCount(), 'trk', None,
+                          formatQuantity( obj.getTrackCount(), 'track', None,
                                           '(%d %s)' ) ],
                         [ 'Playlist',
                           self.getIndexOverlay() ] )

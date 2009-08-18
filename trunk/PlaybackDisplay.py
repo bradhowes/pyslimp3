@@ -29,50 +29,132 @@ from RatingDisplay import *
 class PlaybackDisplay( iTunesSourceGenerator ):
 
     kPlayerState = { 'k.playing': '',
-                     'k.paused': 'Paused',
-                     'k.stopped': 'Stopped',
+                     'k.paused': 'PAUSE',
+                     'k.stopped': 'STOP',
                      'k.fast_forwarding': 'FFWD',
                      'k.rewinding': 'RWD'
                      }
 
-    def __init__( self, source, prevLevel ):
+    #
+    # Constructor. 
+    #
+    def __init__( self, source, prevLevel, formatterIndex = 0 ):
         iTunesSourceGenerator.__init__( self, source )
         self.prevLevel = prevLevel
+        self.formatterIndex = formatterIndex
+        self.formatters = ( self.getPlayerPositionIndicator,
+                            self.getPlayerPositionElapsed,
+                            self.getPlayerPositionRemaining )
+        self.getPlayerPosition = self.formatters[ self.formatterIndex ]
 
+    def getFormatterIndex( self ):
+        return self.formatterIndex
+
+    #
+    # Override of iTunesSourceGenerator method. Install our own keymap entries.
+    #
     def fillKeyMap( self ):
         iTunesSourceGenerator.fillKeyMap( self )
+        
+        #
+        # If we arrived here from the user pressing the 'Disp' button, allow
+        # them to return to the previous location.
+        #
         self.addKeyMapEntry( kArrowLeft, None, self.left )
+        
+        #
+        # Show and edit the rating for the current track
+        #
         self.addKeyMapEntry( kArrowRight, None, self.ratings )
         self.addKeyMapEntry( kPIP, None, self.ratings )
+
+        #
+        # Stop playing, rewinding to the beginning of track
+        #
         self.addKeyMapEntry( kStop, None, self.stop )
+        
+        #
+        # Start playing if not already
+        #
         self.addKeyMapEntry( kPlay, None, self.play )
+        
+        #
+        # Stop playing, but do not rewind to beginning of track
+        #
         self.addKeyMapEntry( kPause, None, self.pause )
 
+        #
+        # Move to previous track if not held down.
+        #
         self.addKeyMapEntry( kRewind, kModRelease, self.previousTrack )
+        
+        #
+        # Rewind playback position while held down
+        #
         self.addKeyMapEntry( kRewind, kModHeld, self.rewind )
+        
+        #
+        # Resume normal playback once released
+        #
         self.addKeyMapEntry( kRewind, kModReleaseHeld, self.resume )
 
+        #
+        # Move to next track if not held down
+        #
         self.addKeyMapEntry( kFastForward, kModRelease, self.nextTrack )
+        
+        #
+        # Fast-forward playback positiono while held down
+        #
         self.addKeyMapEntry( kFastForward, kModHeld, self.fastForward )
+        
+        #
+        # Resume normal playback once released
+        #
         self.addKeyMapEntry( kFastForward, kModReleaseHeld, self.resume )
 
     #
+    # Install the next available display formatter
+    #
+    def nextPlayerPositionFormatter( self ):
+        self.formatterIndex = ( self.formatterIndex + 1) % \
+            len( self.formatters )
+        self.getPlayerPosition = self.formatters[ self.formatterIndex ]
+
+    #
     # Generate a screen showing what is playing, the current iTunes playback
-    # state, and the playback position in MM:SS.
+    # state, and the playback position.
     #
     def generate( self ):
         track = self.source.getCurrentTrack()
         line1 = '%s - %s' % ( track.getAlbumName(), track.getArtistName() )
         line2 = '%d.%s' % ( track.getIndex(), track.getName() )
+        state = self.getPlayerState( track )
+        return Content( [ line1, 
+                          line2 ],
+                        [ '', 
+                          state ] )
+
+    def getPlayerState( self, track ):
         state = self.kPlayerState.get( self.source.getPlayerState(), '???' )
         if state == '':
             if self.source.getMute():
                 state = 'MUTED'
-        position = getHHMMSS( self.source.getPlayerPosition() )
-        return Content( [ line1, 
-                          line2 ],
-                        [ state, 
-                          position ] )
+        if state == '':
+            state = self.getPlayerPosition( track )
+        return state
+
+    def getPlayerPositionIndicator( self, track ):
+        position = float( self.source.getPlayerPosition() ) / \
+            track.getDuration()
+        return generateProgressIndicator( 10, position )
+
+    def getPlayerPositionElapsed( self, track ):
+        return getHHMMSS( self.source.getPlayerPosition() )
+
+    def getPlayerPositionRemaining( self, track ):
+        return '-' + getHHMMSS( track.getDuration() - 
+                                self.source.getPlayerPosition() )
 
     #
     # Show any previous display.
