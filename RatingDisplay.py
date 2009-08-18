@@ -20,6 +20,7 @@
 from Content import Content
 from Display import *
 from KeyProcessor import *
+from VFD import CustomCharacters
 
 #
 # Temporary (overlay) display of the current user rating for a song or album.
@@ -45,6 +46,9 @@ class RatingDisplay( iTunesSourceGenerator ):
     def left( self ):
         return self.prevLevel
 
+    def setRating( self, value ):
+        raise NotImplementedError, 'RatingDisplay.setRating'
+
     def up( self ):
         value = min( self.getRating() + 10, 100 )
         self.setRating( value )
@@ -55,22 +59,18 @@ class RatingDisplay( iTunesSourceGenerator ):
         self.setRating( value )
         return self
 
-    #
-    # Show current rating as a string of '*' characters representing the number
-    # of 'stars' followed by a numeric value in [0-5]. 
-    #
-    def generate( self ):
-        rating = self.getRating()
-        numStars = rating // 20
-        halfStar = ( rating - numStars * 20 ) // 10
-        stars = ( unichr(1000+0x94) * numStars ) + ( ' %d' % ( numStars,  ) )
+    def generateRatingIndicator( self, rating ):
+        fullStars = rating / 20
+        halfStar = rating - fullStars * 20
+        indicator = u'%d.%d ' % ( fullStars, halfStar / 2, )
+        indicator += unichr( CustomCharacters.kRatingFilled ) * fullStars
+        emptyStars = 5 - fullStars
         if halfStar:
-            stars += '.5'
-        stars += ' stars'
-        return Content( [ self.obj.getName(),
-                          centerAlign( stars ) ],
-                        [ 'Rating', 
-                          '' ] )
+            indicator += unichr( CustomCharacters.kRatingHalf )
+            emptyStars -= 1
+        if emptyStars > 0:
+            indicator += unichr( CustomCharacters.kRatingEmpty ) * emptyStars
+        return indicator
 
     #
     # Override of DisplayGenerator method. Convert digits 0-5 into a rating
@@ -89,18 +89,42 @@ class RatingDisplay( iTunesSourceGenerator ):
 class AlbumRatingDisplay( RatingDisplay ):
     def __init__( self, source, prevLevel, album ):
         RatingDisplay.__init__( self, source, prevLevel, album )
+    def fillKeyMap( self ):
+        RatingDisplay.fillKeyMap( self )
+        self.addKeyMapEntry( kPIP, ( kModFirst, ), self.left )
     def getRating( self ): 
         return self.source.getAlbumRating( self.obj )
     def setRating( self, value ): 
         self.source.setAlbumRating( self.obj, value )
+    def generate( self ):
+        indicator = self.generateRatingIndicator( self.getRating() )
+        return Content( [ self.obj.getName(),
+                          centerAlign( indicator ) ],
+                        [ 'Album Rating', 
+                          '' ] )
 
 #
-# Derviation of RatingDisplay that works with artists.
+# Derviation of RatingDisplay that works with tracks.
 #
 class TrackRatingDisplay( RatingDisplay ):
     def __init__( self, source, prevLevel, track ):
         RatingDisplay.__init__( self, source, prevLevel, track )
+    def fillKeyMap( self ):
+        RatingDisplay.fillKeyMap( self )
+        self.addKeyMapEntry( kPIP, ( kModFirst, ), self.albumRating )
+    def albumRating( self ):
+        album = self.source.getAlbum( self.obj.getAlbumName() )
+        return AlbumRatingDisplay( self.source, self, album )
     def getRating( self ): 
-        return self.source.getTrackRating( self.obj )
+        return self.source.getTrackRating( self.obj )[ 0 ]
     def setRating( self, value ): 
         self.source.setTrackRating( self.obj, value )
+    def generate( self ):
+        trackRating, albumRating = self.source.getTrackRating( self.obj )
+        trackIndicator = self.generateRatingIndicator( trackRating )
+        albumIndicator = self.generateRatingIndicator( albumRating )
+        line2 = 'Track: ' + trackIndicator + ' - Album: ' + albumIndicator
+        return Content( [ self.obj.getName(),
+                          centerAlign( line2 ) ],
+                        [ 'Track Rating', 
+                          '' ] )

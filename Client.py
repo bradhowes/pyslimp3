@@ -60,6 +60,7 @@ class Client( object ):
         self.keyProcessor = KeyProcessor( server, self )
         self.socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
         self.lastHardwareMessageReceived = datetime.now()
+        self.linesGenerator = None
         self.overlayGenerator = None
         self.overlayTimer = None
         self.refreshTimer = None
@@ -67,9 +68,12 @@ class Client( object ):
         self.animator = Animator()
         self.vfd = VFD( self.brightness )
         self.fillKeyMap()
+        self.playbackFormatterIndex = 0
         if state:
             self.brightness = state[ 'brightness' ]
             self.isOn = state[ 'isOn' ]
+            self.playbackFormatterIndex = state.get( 'playbackFormatterIndex',
+                                                     0 )
         if self.isOn:
             self.powerOn()
         else:
@@ -80,6 +84,7 @@ class Client( object ):
         settings = {}
         settings[ 'brightness' ] = self.brightness
         settings[ 'isOn' ] = self.isOn
+        settings[ 'playbackFormatterIndex' ] = self.playbackFormatterIndex
         return settings
 
     #
@@ -238,7 +243,8 @@ class Client( object ):
             delta = datetime.now() - self.lastKeyTimeStamp
             if delta.seconds > self.kPlaybackDisplayRestoreInterval:
                 self.setLinesGenerator( 
-                    PlaybackDisplay( self.iTunes, self.linesGenerator ) )
+                    PlaybackDisplay( self.iTunes, self.linesGenerator,
+                                     self.playbackFormatterIndex ) )
         self.emitDisplay()
 
         #
@@ -339,8 +345,8 @@ class Client( object ):
     #
     # Volume control methods
     #
-    def volumeUp( self ): self.changeVolume( 2 )
-    def volumeDown( self ): self.changeVolume( -2 )
+    def volumeUp( self ): self.changeVolume( 1 )
+    def volumeDown( self ): self.changeVolume( -1 )
     def changeVolume( self, delta ):
         self.iTunes.adjustVolume( delta )
         self.setOverlayGenerator( VolumeGenerator( self.iTunes ) )
@@ -394,7 +400,8 @@ class Client( object ):
         if track is None:
             generator = browser
         else:
-            generator = PlaybackDisplay( self.iTunes, browser )
+            generator = PlaybackDisplay( self.iTunes, browser, 
+                                         self.playbackFormatterIndex )
         self.setLinesGenerator( generator )
 
     def powerOff( self ):
@@ -413,7 +420,12 @@ class Client( object ):
             track = self.iTunes.getCurrentTrack()
             if track is not None:
                 self.setLinesGenerator(
-                    PlaybackDisplay( self.iTunes, self.linesGenerator ) )
+                    PlaybackDisplay( self.iTunes, self.linesGenerator,
+                                     self.playbackFormatterIndex ) )
+        else:
+            self.linesGenerator.nextPlayerPositionFormatter()
+            self.playbackFormatterIndex = \
+                self.linesGenerator.getFormatterIndex()
 
     #
     # Install a TopBrowser screen generator.

@@ -20,6 +20,7 @@
 // USA.
 //
 
+#include <QtCore/QTime>
 #include <QtGui/QMainWindow>
 
 class QTimer;
@@ -58,6 +59,8 @@ private:
     void sendKeyMessage( uint32_t when, uint32_t keyCode );
     void writeInteger( uint32_t value, size_t offset );
 
+    QTime timeSource_;
+    int lastTimeStamp_;
     Remote* remote_;
     QList<VFDElementData*> bits_;
     QList<VFDElement*> row1_;

@@ -99,16 +99,6 @@ def makeKeyCodes( key, mods ):
 class KeyProcessor( object ):
 
     #
-    # The timestamp values in the key messages have a frequency of 625 kHz
-    #
-    kTicsPerSecond = 625000.0
-    
-    #
-    # Maximum timestamp value in seconds
-    #
-    kMaxTimeStamp = 0xFFFFFFFF / kTicsPerSecond
-
-    #
     # Minimum amount of time in seconds a key must be held down in order for it
     # to be considered for processing.
     #
@@ -124,20 +114,19 @@ class KeyProcessor( object ):
         self.timerManager = timerManager
         self.notifier = notifier
         self.releaseTimer = None
-        self.lastTimeStamp = None
         self.reset()
 
     #
     # Reset the key processor to a known state.
     #
     def reset( self ):
-        self.notifyTimeStamp = None
+        self.firstTimeStamp = None
+        self.lastTimeStamp = None
         self.emittedHeldKey = False
+        self.lastKey = None
         if self.releaseTimer:
-            self.silenced = True
-        else:
-            self.silenced = False
-            self.lastKey = None
+            self.releaseTimer.deactivate()
+            self.releaseTimer = None
 
     #
     # Process a new raw key event from a remote controller. Depending on what
@@ -146,18 +135,12 @@ class KeyProcessor( object ):
     #
     def process( self, timeStamp, key ):
 
-        #
-        # Convert 625 kHz counter value into seconds.
-        #
-        timeStamp = timeStamp / self.kTicsPerSecond
-        if self.lastTimeStamp is None:
-            self.lastTimeStamp = timeStamp
-            return
+        timeStamp = datetime.now()
 
         #
         # Same key?
         #
-        if key == self.lastKey and self.notifyTimeStamp:
+        if key == self.lastKey:
 
             #
             # Update the timestamp so that checkForRelease() will keep running.
@@ -167,9 +150,8 @@ class KeyProcessor( object ):
             #
             # Calculate how long the key has been held down for.
             #
-            delta = timeStamp - self.notifyTimeStamp
-            if delta < 0:
-                delta += self.kMaxTimeStamp
+            delta = timeStamp - self.firstTimeStamp
+            delta = delta.seconds + delta.microseconds / 1000000.0
 
             #
             # If we have yet to emit the 'kModHeld' modifier, check to see if
@@ -187,21 +169,27 @@ class KeyProcessor( object ):
                 #
                 self.notify( kModRepeat )
 
-        elif self.releaseTimer is None:
-            self.reset()
+        else:
+            if self.releaseTimer:
+                self.lastTimeStamp = self.releaseTimeStamp
+                self.releaseTimer.deactivate()
+                self.checkForRelease()
+            else:
+                self.reset()
             self.lastKey = key
+            self.firstTimeStamp = timeStamp
             self.lastTimeStamp = timeStamp
-            self.startReleaseTimer( timeStamp, 2 * self.kMinPressThreshold )
+            self.startReleaseTimer( timeStamp )
             self.notify( kModFirst )
 
     #
     # Start a timer that will invoke checkForRelease() after kMinPressThreshold
     # seconds.
     #
-    def startReleaseTimer( self, timeStamp, delta ):
+    def startReleaseTimer( self, timeStamp ):
         self.releaseTimeStamp = timeStamp
-        self.releaseTimer = self.timerManager.addTimer( delta, 
-                                                        self.checkForRelease )
+        self.releaseTimer = self.timerManager.addTimer( 
+            self.kMinPressThreshold * 2, self.checkForRelease )
 
     #
     # Check if a release event has occured and if so notify the notifier.
@@ -212,8 +200,7 @@ class KeyProcessor( object ):
         # If an event was received since we last checked, try again.
         #
         if self.lastTimeStamp != self.releaseTimeStamp:
-            self.startReleaseTimer( self.lastTimeStamp, 
-                                    self.kMinPressThreshold )
+            self.startReleaseTimer( self.lastTimeStamp )
             return
 
         if self.emittedHeldKey:
@@ -229,6 +216,5 @@ class KeyProcessor( object ):
     #
     def notify( self, modifier ):
         keyCode = makeKeyCode( self.lastKey, modifier )
-        print 'notify', keyCode
+        print( 'notify', keyCode )
         self.notifier.processKeyCode( keyCode )
-        self.notifyTimeStamp = self.lastTimeStamp
