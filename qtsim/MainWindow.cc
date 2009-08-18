@@ -163,8 +163,8 @@ static const VFDElementData::RawDef definitions[] = {
 };
 
 MainWindow::MainWindow()
-    : QWidget(), timeSource_(), remote_( new Remote ), bits_(), row1_(),
-      row2_(), timer_( new QTimer( this ) ),
+    : QWidget(), timeSource_(), remote_( new Remote ), bits_(), elements_(),
+      timer_( new QTimer( this ) ),
       serverSocket_( new QUdpSocket( this ) ),
       serverAddress_( QHostAddress::Broadcast ),
       lastTimeStamp_( QDateTime::currentDateTime() )
@@ -196,7 +196,7 @@ MainWindow::MainWindow()
 	VFDElement* w = new VFDElement( this );
 	w->setData( bits_[ 32 ] );
 	row1->addWidget( w );
-	row1_.push_back( w );
+	elements_.push_back( w );
     }
 
     QHBoxLayout* row2 = new QHBoxLayout;
@@ -207,7 +207,7 @@ MainWindow::MainWindow()
 	VFDElement* w = new VFDElement( this );
 	w->setData( bits_[ 32 ] );
 	row2->addWidget( w );
-	row2_.push_back( w );
+	elements_.push_back( w );
     }
 
     rows->addLayout( row1 );
@@ -310,6 +310,8 @@ MainWindow::readMessage()
     while ( serverSocket_->hasPendingDatagrams() ) {
 	qint64 size = serverSocket_->readDatagram( (char*)buffer_, 4096,
 						   &serverAddress_ );
+	bufferSize_ = size;
+	// std::clog << "bufferSize: " << bufferSize_ << std::endl;
 	if ( size > 0 ) {
 	    lastTimeStamp_ = QDateTime::currentDateTime();
 	    switch ( buffer_[ 0 ] ) {
@@ -321,8 +323,8 @@ MainWindow::readMessage()
 		break;
 
 	    case 'l':
-		// dumpBuffer( size );
-		updateDisplay( size );
+		// dumpBuffer();
+		updateDisplay();
 		break;
 	    }
 	}
@@ -334,94 +336,140 @@ MainWindow::readMessage()
 }
 
 void
-MainWindow::dumpBuffer( qint64 size )
+MainWindow::dumpBuffer()
 {
-    qint64 index = 0;
+    size_t index = 0;
     std::clog << std::hex;
-    while ( index < size ) {
+    while ( index < bufferSize_ ) {
 	std::clog << std::setw( 2 ) << int( buffer_[ index++ ] ) << ' ';
 	if ( ( index % 16 ) == 0 ) std::clog << '\n';
     }
 
     std::clog << std::dec;
-
     if ( ( index % 16 ) > 0 ) std::clog << '\n';
 }
 
 void
-MainWindow::updateDisplay( qint64 size )
+MainWindow::updateDisplay()
 {
-    int brightness = buffer_[ 25 ];
+    // std::clog << "updateDisplay\n";
+    size_t index = 18;
+    while ( index < bufferSize_ ) {
+	index = processEntry( index );
+    }
+}
 
-    //
-    // !!! FIXME: very hacky 
-    //
-    int bufferIndex = 26;	// Start of the character data.
+size_t
+MainWindow::processEntry( size_t index )
+{
+    if ( index + 1 < bufferSize_ ) {
+	// std::clog << "processEntry: " << int( buffer_[ index ] ) << std::endl;
+	switch ( buffer_[ index ] ) {
+	case 0x02: return processCommand( index + 1 ); break;
+	case 0x03: return processCharacter( index + 1 ); break;
+	default: std::clog << "*** unknown prefix - " << int( buffer_[ index ] )
+			   << "\n"; break;
+	};
+    }
+    return bufferSize_;
+}
 
-    //
-    // See if there are custom characters to load.
-    //
-    while ( buffer_[ bufferIndex + 1 ] != 0x06 ) {
+size_t
+MainWindow::processCharacter( size_t index )
+{
+    int c = buffer_[ index++ ];
+    if ( c >= bits_.size() ) c = 32;
+    if ( elementIndex_ < elements_.size() ) {
+	// std::clog << "processCharacter: " << c << ' ' << elementIndex_
+	// << std::endl;
+	elements_[ elementIndex_++ ]->setData( bits_[ c ] );
+    }
+    return index;
+}
 
-	//
-	// Extract the custom character index (0-31)
-	//
-	uint32_t bitsIndex = buffer_[ bufferIndex + 1 ];
-	bitsIndex = ( bitsIndex - 0x40 ) / 8;
-
-	//
-	// Extract the bit settings
-	//
-	std::vector<int> bits;
-	for ( int z = 0; z < 8; ++z )
-	    bits.push_back( buffer_[ bufferIndex + 3 + z * 2 ] );
-
-	//
-	// Update the VFDElementData object that corresponds to the custom
-	// index.
-	//
-	if ( bitsIndex < 32 )
-	    bits_[ bitsIndex ]->setBits( bits );
-
-	bufferIndex += 18;	// Move to next entry
+size_t
+MainWindow::processCommand( size_t index )
+{
+    // std::clog << "processCommand: " << int( buffer_[ index ] ) << std::endl;
+    switch ( buffer_[ index ] ) {
+    case 0x33: clearDisplay(); return index + 1;
+    case 0x30: return processBrightness( index + 1 );
+    case 0x06: return index + 1;
+    case 0x02: elementIndex_ = 0; return index + 1;
+    case 0xC0: elementIndex_ = 40; return index + 1;
+    case 0x0C: return index + 1;
+    default: break;
     }
 
-    bufferIndex += 4;		// Skip over the clear and home commands
+    if ( buffer_[ index ] & 0x40 ) 
+	return processCustomDefinition( index );
+
+    return index + 1;
+}
+
+size_t
+MainWindow::processBrightness( size_t index )
+{
+    if ( index + 1 < bufferSize_ && buffer_[ index ] == 0x03 ) {
+	int brightness = buffer_[ index + 1 ];
+	// std::clog << "processBrightness: " << brightness << std::endl;
+	for ( int z = 0; z < elements_.size(); ++z )
+	    elements_[ z ]->setBrightness( brightness );
+    }
+    return index + 2;
+}
+
+size_t
+MainWindow::processCustomDefinition( size_t index )
+{
+    //
+    // Extract the custom character index (0-31)
+    //
+    uint32_t bitsIndex = buffer_[ index++ ];
+
+    bitsIndex = ( bitsIndex - 0x40 ) / 8;
+    // std::clog << "processCustomDefinition: " << bitsIndex << std::endl;
+
+    std::vector<int> bits;
 
     //
-    // Assign the appropriate VFDElementData to each VFDElement in the first
-    // line.
+    // Extract the bit settings
     //
-    int elementIndex = 0;
-
-    while ( buffer_[ bufferIndex ] == 0x03 ) { // character data
-	unsigned int c = buffer_[ bufferIndex + 1 ];
-	if ( c > 128 ) c = 128;
-	row1_[ elementIndex++ ]->setData( bits_[ c ], brightness );
-	bufferIndex += 2;
+    while ( index + 1 < bufferSize_ && buffer_[ index ] == 0x03 ) {
+	bits.push_back( buffer_[ index + 1 ] );
+	index += 2;
     }
 
-    bufferIndex += 2;		// Skip over the next line command
+    while ( bits.size() < 8 )
+	bits.push_back( 0 );
 
-    //
-    // Assign the appropriate VFDElementData to each VFDElement in the second
-    // line.
-    //
-    elementIndex = 0;
-    while ( buffer_[ bufferIndex ] == 0x03 ) { // character data
-	unsigned int c = buffer_[ bufferIndex + 1 ];
-	if ( c > 128 ) c = 128;
-	row2_[ elementIndex++ ]->setData( bits_[ c ], brightness );
-	bufferIndex += 2;
-    }
+    if ( bitsIndex < 32 )
+	bits_[ bitsIndex ]->setBits( bits );
+
+    return index;
 }
 
 void
 MainWindow::clearDisplay()
 {
     for ( int index = 0; index < 40; ++index ) {
-	row1_[ index ]->setData( bits_[ 32 ] );
-	row2_[ index ]->setData( bits_[ 32 ] );
+	elements_[ index ]->setData( bits_[ 32 ] );
+    }
+}
+
+void
+MainWindow::setDisplay( const std::string& line1, const std::string& line2 )
+{
+    for ( size_t index = 0; index < line1.size() && index < 40; ++index ) {
+	int c = line1[ index ];
+	if ( c < 32 or c >= bits_.size() ) c = 32;
+	elements_[ index ]->setData( bits_[ line1[ index ] ] );
+    }
+
+    for ( size_t index = 0; index < line2.size() && index < 40; ++index ) {
+	int c = line1[ index ];
+	if ( c < 32 or c >= bits_.size() ) c = 32;
+	elements_[ index + 40 ]->setData( bits_[ line2[ index ] ] );
     }
 }
 
