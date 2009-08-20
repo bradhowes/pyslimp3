@@ -220,10 +220,10 @@ class CustomCharacters( object ):
 
                       0x95: Dots( '00000', # filled circle
                                   '00100',
-                                  '01110',
-                                  '01110',
+                                  '00000',
                                   '00100',
                                   '00000',
+                                  '00100',
                                   '00000' ),
 
                       0x96: ord( '-' ),
@@ -544,7 +544,6 @@ class VFD( object ):
     def setBrightness( self, value ):
         self.brightness = max( min( value, self.kMaxBrightness ),
                                self.kMinBrightness )
-        print( value, self.brightness )
 
     #
     # Apply a delta value to the current brightness setting.

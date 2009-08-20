@@ -81,9 +81,12 @@ def getHHMMSS( secs ):
 #
 class DisplayGenerator( object ):
 
-    def __init__( self ):
+    def __init__( self, client ):
+        self.client = client
         self.keyMap = {}
         self.fillKeyMap()
+
+    def getClient( self ): return self.client
 
     #
     # Determine if this display generator is a temporary overlay. Derived
@@ -148,8 +151,8 @@ class DisplayGenerator( object ):
 #
 class ClockGenerator( DisplayGenerator ):
 
-    def __init__( self ):
-        DisplayGenerator.__init__( self )
+    def __init__( self, client ):
+        DisplayGenerator.__init__( self, client )
         self.timestamp = datetime.now()
         self.offset = 0
         self.width = 0
@@ -190,9 +193,12 @@ class BlankScreen( DisplayGenerator ):
 # Base class for all display generators that utilize iTunes as a data source.
 #
 class iTunesSourceGenerator( DisplayGenerator ):
-    def __init__( self, source ):
-        DisplayGenerator.__init__( self )
-        self.source = source
+
+    def __init__( self, client ):
+        DisplayGenerator.__init__( self, client )
+        self.source = client.getSource()
+
+    def getSource( self ): return self.source
 
 def generateProgressIndicator( width, value ):
     numBars = int( width * 5 * value )
@@ -216,8 +222,8 @@ def generateProgressIndicator( width, value ):
 #
 class VolumeGenerator( iTunesSourceGenerator ):
 
-    def __init__( self, source ):
-        iTunesSourceGenerator.__init__( self, source )
+    def __init__( self, client ):
+        iTunesSourceGenerator.__init__( self, client )
 
     #
     # Generate display content.

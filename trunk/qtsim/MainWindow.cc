@@ -276,7 +276,6 @@ MainWindow::emitHeartbeat()
 	if ( lastTimeStamp_.secsTo( now ) > 30 ) {
 	    std::clog << "*** detected stale server\n";
 	    serverAddress_ = QHostAddress::Broadcast;
-	    clearDisplay();
 	    lastTimeStamp_ = now;
 	}
 	else {
@@ -291,6 +290,7 @@ MainWindow::emitHeartbeat()
 void
 MainWindow::emitDiscovery()
 {
+    setDisplay( "Looking for server...", "" );
     buffer_[ 0 ] = 'd';
     for ( int index = 1; index < 18; ++index ) buffer_[ index ] = 0;
     writeMessage( 18 );
@@ -452,7 +452,7 @@ MainWindow::processCustomDefinition( size_t index )
 void
 MainWindow::clearDisplay()
 {
-    for ( int index = 0; index < 40; ++index ) {
+    for ( int index = 0; index < elements_.size(); ++index ) {
 	elements_[ index ]->setData( bits_[ 32 ] );
     }
 }
@@ -476,8 +476,22 @@ MainWindow::setDisplay( const std::string& line1, const std::string& line2 )
 void
 MainWindow::writeMessage( size_t count )
 {
-    qint64 size = serverSocket_->writeDatagram( (char*)buffer_, count,
-						serverAddress_, 3483 );
-    if ( size == -1 )
-	std::clog << "*** failed writeDatagram\n";
+    while ( 1 ) {
+
+	qint64 size = serverSocket_->writeDatagram( (char*)buffer_, count,
+						    serverAddress_, 3483 );
+	if ( size == -1 ) {
+	    std::clog << "*** failed writeDatagram\n";
+	    if ( serverAddress_ == QHostAddress::Broadcast ) {
+		serverAddress_ = QHostAddress::LocalHost;
+		continue;
+	    }
+	    else if ( serverAddress_ != QHostAddress::LocalHost ) {
+		serverAddress_ = QHostAddress::Broadcast;
+		continue;
+	    }
+	}
+
+	break;
+    }
 }

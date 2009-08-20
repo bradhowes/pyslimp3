@@ -20,6 +20,11 @@
 from random import randrange
 from Content import *
 
+#
+# Base class for all screen savers. Defines the interface for Animator to use
+# to update the display of an active screen saver. Derived classes must
+# implement the updateDisplay() method.
+#
 class ScreenSaverBase( object ):
 
     def __init__( self, content ):

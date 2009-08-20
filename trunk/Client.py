@@ -38,7 +38,7 @@ class Client( object ):
     # Frequency of display updates
     #
     kRefreshInterval = 0.25     # seconds
-    
+
     #
     # How long to wait before we revert to a PlaybackDisplay display generator
     # when iTunes is playing.
@@ -51,11 +51,10 @@ class Client( object ):
     #
     kOverlayDuration = 3.0      # seconds
 
-    def __init__( self, server, addr, state ):
+    def __init__( self, server, addr, settings ):
         self.server = server
         self.hardwareAddress = addr
-        self.isOn = False
-        self.brightness = VFD.kMaxBrightness
+        self.settings = settings
         self.iTunes = server.iTunes
         self.keyProcessor = KeyProcessor( server, self )
         self.socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
@@ -66,26 +65,20 @@ class Client( object ):
         self.refreshTimer = None
         self.lastKeyTimeStamp = datetime.now() - timedelta( seconds = 1000 )
         self.animator = Animator()
-        self.vfd = VFD( self.brightness )
+        self.vfd = VFD( settings.getBrightness() )
         self.fillKeyMap()
-        self.playbackFormatterIndex = 0
-        if state:
-            self.brightness = state[ 'brightness' ]
-            self.isOn = state[ 'isOn' ]
-            self.playbackFormatterIndex = state.get( 'playbackFormatterIndex',
-                                                     0 )
-        if self.isOn:
+        if settings.getIsOn():
             self.powerOn()
         else:
             self.powerOff()
         self.refreshDisplay()
 
-    def getState( self ):
-        settings = {}
-        settings[ 'brightness' ] = self.brightness
-        settings[ 'isOn' ] = self.isOn
-        settings[ 'playbackFormatterIndex' ] = self.playbackFormatterIndex
-        return settings
+    def getSettings( self ): return self.settings
+
+    def settingsAreDirty( self ):
+        return self.settings.isDirty()
+
+    def getSource( self ): return self.iTunes
 
     #
     # Create the mapping from key codes to methods for global methods, those
@@ -111,7 +104,7 @@ class Client( object ):
             # Global state manipulation
             #
             ( kMute, self.toggleMute ),
-            ( kShuffle, self.toggleShuffle ),
+            ( kOK, self.toggleShuffle ),
             ( kRepeat, self.toggleRepeat ),
             ( kPower, self.togglePower ),
 
@@ -120,7 +113,7 @@ class Client( object ):
             #
             ( kDisplay, self.showPlaying ),
             ( kMenuHome, self.showTopBrowser ),
-            
+
             #
             # Simple iTunes control
             #
@@ -233,7 +226,7 @@ class Client( object ):
     # it out. 
     #
     def refreshDisplay( self ):
-        
+
         #
         # If iTunes is currently playing and the current display generator is
         # not a PlaybackDisplay, see if we should force it to be.
@@ -243,7 +236,7 @@ class Client( object ):
             delta = datetime.now() - self.lastKeyTimeStamp
             if delta.seconds > self.kPlaybackDisplayRestoreInterval:
                 self.setLinesGenerator( 
-                    PlaybackDisplay( self.iTunes, self.linesGenerator,
+                    PlaybackDisplay( self, self.linesGenerator,
                                      self.playbackFormatterIndex ) )
         self.emitDisplay()
 
@@ -290,6 +283,7 @@ class Client( object ):
         if self.animator.screenSaverActivated():
             self.animator.removeScreenSaver()
             self.emitDisplay()
+            self.keyProcessor.reset()
         else:
             self.keyProcessor.process( timeStamp, key )
 
@@ -349,64 +343,63 @@ class Client( object ):
     def volumeDown( self ): self.changeVolume( -1 )
     def changeVolume( self, delta ):
         self.iTunes.adjustVolume( delta )
-        self.setOverlayGenerator( VolumeGenerator( self.iTunes ) )
+        self.setOverlayGenerator( VolumeGenerator( self ) )
 
     #
     # Brightness control methods
     #
     def brightnessUp( self ):   
         self.vfd.changeBrightness( 1 )
-        self.brightness = self.vfd.getBrightness()
+        self.settings.setBrightness( self.vfd.getBrightness() )
 
     def brightnessDown( self ): 
         self.vfd.changeBrightness( -1 )
-        self.brightness = self.vfd.getBrightness()
+        self.settings.setBrightness( self.vfd.getBrightness() )
 
     #
     # Toggle iTUnes MUTE state
     #
     def toggleMute( self ):
         self.iTunes.toggleMute()
-        self.setOverlayGenerator( MuteStateGenerator( self.iTunes ) )
+        self.setOverlayGenerator( MuteStateGenerator( self ) )
 
     #
     # Toggle iTUnes shuffle state for a playlist
     #
     def toggleShuffle( self ):
         self.iTunes.toggleShuffle()
-        self.setOverlayGenerator( ShuffleStateGenerator( self.iTunes ) )
+        self.setOverlayGenerator( ShuffleStateGenerator( self ) )
 
     #
     # Cycle throught the iTunes repeat state for a playlist
     #
     def toggleRepeat( self ):
         self.iTunes.toggleRepeat()
-        self.setOverlayGenerator( RepeatStateGenerator( self.iTunes ) )
+        self.setOverlayGenerator( RepeatStateGenerator( self ) )
 
     #
     # Toggle the 'power' button, showing a clock display ala SLIMP3 when the
     # power is 'off'.
     #
     def togglePower( self ):
-        if self.isOn == False:
+        if self.settings.getIsOn() == False:
             self.powerOn()
         else:
             self.powerOff()
 
     def powerOn( self ):
-        self.isOn = True
-        browser = TopBrowser( self.iTunes )
+        self.settings.setIsOn( True )
+        browser = TopBrowser( self )
         track = self.iTunes.getCurrentTrack()
         if track is None:
             generator = browser
         else:
-            generator = PlaybackDisplay( self.iTunes, browser, 
-                                         self.playbackFormatterIndex )
+            generator = PlaybackDisplay( self, browser )
         self.setLinesGenerator( generator )
 
     def powerOff( self ):
-        self.isOn = False
-        self.setLinesGenerator( ClockGenerator() )
+        self.settings.setIsOn( False )
+        self.setLinesGenerator( ClockGenerator( self ) )
         try:
             self.iTunes.stop()
         except:
@@ -416,20 +409,19 @@ class Client( object ):
     # Install a PlaybackDisplay screen generator if not currently active.
     #
     def showPlaying( self ):
+        if self.overlayGenerator:
+            self.clearOverlay()
+            return
+
         if not isinstance( self.linesGenerator, PlaybackDisplay ):
             track = self.iTunes.getCurrentTrack()
             if track is not None:
                 self.setLinesGenerator(
-                    PlaybackDisplay( self.iTunes, self.linesGenerator,
-                                     self.playbackFormatterIndex ) )
-        else:
-            self.linesGenerator.nextPlayerPositionFormatter()
-            self.playbackFormatterIndex = \
-                self.linesGenerator.getFormatterIndex()
+                    PlaybackDisplay( self, self.linesGenerator ) )
 
     #
     # Install a TopBrowser screen generator.
     #
     def showTopBrowser( self ):
         if not isinstance( self.linesGenerator, TopBrowser ):
-            self.setLinesGenerator( TopBrowser( self.iTunes ) )
+            self.setLinesGenerator( TopBrowser( self ) )

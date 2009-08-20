@@ -38,22 +38,34 @@ class PlaybackDisplay( iTunesSourceGenerator ):
     #
     # Constructor. 
     #
-    def __init__( self, source, prevLevel, formatterIndex = 0 ):
-        iTunesSourceGenerator.__init__( self, source )
+    def __init__( self, client, prevLevel ):
+        iTunesSourceGenerator.__init__( self, client )
         self.prevLevel = prevLevel
-        self.formatterIndex = formatterIndex
-        self.formatters = ( self.getPlayerPositionIndicator,
+        self.formatters = ( self.getPlayerTrackIndex,
                             self.getPlayerPositionElapsed,
-                            self.getPlayerPositionRemaining )
-        self.getPlayerPosition = self.formatters[ self.formatterIndex ]
+                            self.getPlayerPositionRemaining,
+                            self.getEmptyString )
+        
+        #
+        # Obtain the last formatter setting in use.
+        #
+        self.setFormatterIndex(
+            client.getSettings().getPlaybackFormatterIndex() )
 
-    def getFormatterIndex( self ):
-        return self.formatterIndex
+    def setFormatterIndex( self, value ):
+        if value < 0: 
+            value = 0
+        elif value >= len( self.formatters ):
+            value = len( self.formatters ) - 1
+        self.formatterIndex = value
+        self.client.getSettings().setPlaybackFormatterIndex( value )
+        self.getPlayerPosition = self.formatters[ value ]
 
     #
     # Override of iTunesSourceGenerator method. Install our own keymap entries.
     #
     def fillKeyMap( self ):
+
         iTunesSourceGenerator.fillKeyMap( self )
         
         #
@@ -113,13 +125,18 @@ class PlaybackDisplay( iTunesSourceGenerator ):
         #
         self.addKeyMapEntry( kFastForward, kModReleaseHeld, self.resume )
 
+        #
+        # Use the next available dislay formatter
+        #
+        self.addKeyMapEntry( kDisplay, kModFirst, 
+                             self.nextPlayerPositionFormatter )
+
     #
     # Install the next available display formatter
     #
     def nextPlayerPositionFormatter( self ):
-        self.formatterIndex = ( self.formatterIndex + 1) % \
-            len( self.formatters )
-        self.getPlayerPosition = self.formatters[ self.formatterIndex ]
+        self.setFormatterIndex( ( self.formatterIndex + 1 ) %
+                                len( self.formatters ) )
 
     #
     # Generate a screen showing what is playing, the current iTunes playback
@@ -127,13 +144,13 @@ class PlaybackDisplay( iTunesSourceGenerator ):
     #
     def generate( self ):
         track = self.source.getCurrentTrack()
-        line1 = '%s - %s' % ( track.getAlbumName(), track.getArtistName() )
-        line2 = '%d.%s' % ( track.getIndex(), track.getName() )
+        line1 = track.getAlbumName() + unichr( 0x95 ) + track.getArtistName()
+        line2 = track.getName()
         state = self.getPlayerState( track )
         return Content( [ line1, 
                           line2 ],
-                        [ '', 
-                          state ] )
+                        [ state, 
+                          self.getPlayerPosition( track ) ] )
 
     def getPlayerState( self, track ):
         state = self.kPlayerState.get( self.source.getPlayerState(), '???' )
@@ -141,13 +158,20 @@ class PlaybackDisplay( iTunesSourceGenerator ):
             if self.source.getMute():
                 state = 'MUTED'
         if state == '':
-            state = self.getPlayerPosition( track )
+            state = self.getPlayerPositionIndicator( track )
         return state
+
+    def getEmptyString( self, track ):
+        return ''
+
+    def getPlayerTrackIndex( self, track ):
+        return '%d/%d' % ( track.track.index(), 
+                           self.source.getActivePlaylistSize() )
 
     def getPlayerPositionIndicator( self, track ):
         position = float( self.source.getPlayerPosition() ) / \
             track.getDuration()
-        return generateProgressIndicator( 10, position )
+        return generateProgressIndicator( 7, position )
 
     def getPlayerPositionElapsed( self, track ):
         return getHHMMSS( self.source.getPlayerPosition() )
@@ -165,7 +189,7 @@ class PlaybackDisplay( iTunesSourceGenerator ):
         return self
 
     def ratings( self ):
-        return TrackRatingDisplay( self.source, self,
+        return TrackRatingDisplay( self.client, self,
                                    self.source.getCurrentTrack() )
 
     #

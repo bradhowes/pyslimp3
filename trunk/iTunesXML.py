@@ -123,6 +123,9 @@ class ActiveTrack( object ):
     def hash( self ): return self.index
     def __cmp__( self, other ): return cmp( self.index, other.index )
 
+#
+# Parser for the iTunes Music Library.xml file.
+#
 class XMLParser( object ):
 
     def __init__( self, path ):
@@ -130,12 +133,11 @@ class XMLParser( object ):
         #
         # Install XML parser hooks
         #
-        # self.parser = xml.parsers.expat.ParserCreate( 'utf-8' )
         self.parser = xml.parsers.expat.ParserCreate()
         self.parser.StartElementHandler = self.startElement
         self.parser.EndElementHandler = self.endElement
         self.parser.CharacterDataHandler = self.characterData
-        
+
         #
         # Initialize XML parser containers
         #
@@ -154,6 +156,10 @@ class XMLParser( object ):
     #
     def startElement( self, name, atts ):
         self.value = ''
+        
+        #
+        # Create a new container if appropriate
+        #
         if name == 'dict':
             container = {}
         elif name == 'array':
@@ -161,6 +167,10 @@ class XMLParser( object ):
         else:
             return
 
+        #
+        # Link the new container into an existing one: append to the end of a
+        # list or add to a dictionary with the last key value.
+        #
         if self.stack is None:
             self.container = container
         elif self.key is not None:
@@ -169,6 +179,9 @@ class XMLParser( object ):
         else:
             self.container.append( container )
 
+        #
+        # Update stack of open containers
+        #
         self.stack = ( self.container, self.stack )
         self.container = container
 
@@ -181,21 +194,28 @@ class XMLParser( object ):
             self.key = self.value
             self.value = ''
             return
+        
+        #
+        # Convert various elements or values to native values.
+        #
         if name == 'true':
             self.value = True
         elif name == 'false':
             self.value = False
         elif name == 'integer':
             self.value = int( self.value )
-        elif name == 'array':
-            self.container, self.stack = self.stack
-            self.value = ''
-            return
-        elif name == 'dict':
+        elif name in ( 'array', 'dict' ):
+
+            #
+            # Container closed. Pop stack to get back previous container
+            #
             self.container, self.stack = self.stack
             self.value = ''
             return
 
+        #
+        # Insert value into current open container if there is one.
+        #
         if self.container is not None:
             if self.key is not None:
                 self.container[ self.key ] = self.value
@@ -664,6 +684,9 @@ class iTunesXML( object ):
         except appscript.reference.CommandError:
             pass
         return self.getPlaylistObject( self.kOurPlaylistName, True )
+
+    def getActivePlaylistSize( self ):
+        return len( self.getActivePlaylistObject().tracks() )
 
     #
     # Obtain current track. If there is not one, then return the last track

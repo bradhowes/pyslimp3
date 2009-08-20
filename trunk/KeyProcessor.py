@@ -44,7 +44,7 @@ kDisplay = 'display'
 kGuide = 'guide'
 kMenuHome = 'menuHome'
 kMute = 'mute'
-kShuffle = 'shuffle'
+kOK = 'ok'
 kPause = 'pause'
 kPIP = 'pip'
 kPlay = 'play'
@@ -99,16 +99,16 @@ def makeKeyCodes( key, mods ):
 class KeyProcessor( object ):
 
     #
-    # Minimum amount of time in seconds a key must be held down in order for it
-    # to be considered for processing.
+    # How often to check for a key release. This should be long enough to
+    # eliminate false positives but short enough to stop repeated key events.
     #
-    kMinPressThreshold = 0.128
-    
+    kReleaseCheckThreshold = 0.256 # seconds
+
     #
     # Minimum amount of time in seconds a key must be held down in order for it
     # to be considered 'held'
     #
-    kHoldPressThreshold = 0.512
+    kHoldPressThreshold = 0.512 # seconds
 
     def __init__( self, timerManager, notifier ):
         self.timerManager = timerManager
@@ -200,13 +200,13 @@ class KeyProcessor( object ):
             self.notify( kModFirst )
 
     #
-    # Start a timer that will invoke checkForRelease() after kMinPressThreshold
-    # seconds.
+    # Start a timer that will invoke checkForRelease() after
+    # kReleaseCheckThreshold seconds.
     #
     def startReleaseTimer( self, timeStamp ):
         self.releaseTimeStamp = timeStamp
         self.releaseTimer = self.timerManager.addTimer( 
-            self.kMinPressThreshold * 2, self.checkForRelease )
+            self.kReleaseCheckThreshold, self.checkForRelease )
 
     #
     # Check if a release event has occured and if so notify the notifier.

@@ -31,8 +31,8 @@ from TrackListBrowser import *
 #
 class AlbumListBrowser( Browser ):
 
-    def __init__( self, source, prevLevel, albumList = None ):
-        Browser.__init__( self, source, prevLevel )
+    def __init__( self, client, prevLevel, albumList = None ):
+        Browser.__init__( self, client, prevLevel )
         self.albumList = albumList
 
     def getCollection( self ): 
@@ -48,15 +48,12 @@ class AlbumListBrowser( Browser ):
         self.addKeyMapEntry( kPlay, None, self.play )
         self.addKeyMapEntry( kPIP, None, self.ratings )
 
-    def getNameAtIndex( self, index ):
-        return self.getCollection()[ index ].getName()
-
     #
     # Show the current album name and track count
     #
     def generateWith( self, obj ):
-        return Content( [ obj.getName(),
-                          obj.getArtistName() ],
+        return Content( [ obj.getArtistName(),
+                          obj.getName() ],
                         [ 'Album',
                           self.getIndexOverlay() ] )
 
@@ -65,7 +62,7 @@ class AlbumListBrowser( Browser ):
     #
     def makeNextLevel( self ):
         obj = self.getCurrentObject()
-        return TrackListBrowser( self.source, self, obj.getTracks() )
+        return TrackListBrowser( self.client, self, obj.getTracks() )
 
     #
     # Begin playback at the start of the album (or at the track at the given
@@ -73,7 +70,10 @@ class AlbumListBrowser( Browser ):
     #
     def play( self, trackIndex = 0 ): 
         self.source.playAlbum( self.getCurrentObject(), trackIndex )
-        return PlaybackDisplay( self.source, self )
+        return PlaybackDisplay( self.client, self )
 
+    #
+    # Show ratings editor for the album
+    #
     def ratings( self ):
-        return AlbumRatingDisplay( self.source, self, self.getCurrentObject() )
+        return AlbumRatingDisplay( self.client, self, self.getCurrentObject() )

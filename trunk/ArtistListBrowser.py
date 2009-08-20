@@ -55,11 +55,11 @@ class ArtistListBrowser( Browser ):
     #
     def makeNextLevel( self ):
         obj = self.getCurrentObject()
-        return AlbumListBrowser( self.source, self, obj.getAlbums() )
+        return AlbumListBrowser( self.client, self, obj.getAlbums() )
 
     #
     # Begin playback at the start of the first albumn
     #
     def play( self ):
         self.source.playArtist( self.getCurrentObject() )
-        return PlaybackDisplay( self.source, self )
+        return PlaybackDisplay( self.client, self )

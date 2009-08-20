@@ -30,8 +30,8 @@ from RatingDisplay import *
 #
 class TrackListBrowser( Browser ):
 
-    def __init__( self, iTunes, prevLevel, trackList ):
-        Browser.__init__( self, iTunes, prevLevel )
+    def __init__( self, client, prevLevel, trackList ):
+        Browser.__init__( self, client, prevLevel )
         self.trackList = trackList
 
     def getCollection( self ): return self.trackList
@@ -49,9 +49,10 @@ class TrackListBrowser( Browser ):
     # Show the current track name and duration values
     #
     def generateWith( self, obj ): 
-        return Content( [ obj.getName(),
-                          obj.getAlbumName() + '/' + obj.getArtistName()  ],
-                        [ getHHMMSS( obj.getDuration() ),
+        return Content( [ obj.getAlbumName() + unichr( 0x95 ) + 
+                          obj.getArtistName(),
+                          obj.getName() ],
+                        [ 'Track',
                           self.getIndexOverlay() ] )
 
     #
@@ -66,4 +67,4 @@ class TrackListBrowser( Browser ):
     # Show the user ratings for the current track
     #
     def ratings( self ):
-        return TrackRatingDisplay( self.source, self, self.getCurrentObject() )
+        return TrackRatingDisplay( self.client, self, self.getCurrentObject() )

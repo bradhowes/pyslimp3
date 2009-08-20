@@ -22,6 +22,7 @@ from ArtistListBrowser import ArtistListBrowser
 from Content import *
 from Display import *
 from KeyProcessor import *
+from TextEntry import *
 
 #
 # Generic search term entry and display for album and artist searching. Uses
@@ -49,152 +50,30 @@ from KeyProcessor import *
 # the search. Press the left-arrow to erase the last character position; if
 # there are no more, show the previous browser screen.
 #
-class Searcher( iTunesSourceGenerator ):
+class Searcher( TextEntry ):
 
-    kBlock = '_'                # Character to show at the next position
-
-    #
-    # Characters to cycle through for a given digit (eg. pressing '2' three
-    # times will leave a 'C' showing)
-    #
-    kDigits = [ '',
-                '1234567890',
-                'ABC2',
-                'DEF3',
-                'GHI4', 
-                'JKL5',
-                'MNO6',
-                'PQRS7',
-                'TUV8',
-                'WXYZ9' ]
-
-    def __init__( self, iTunes, prevLevel, tag ):
-        iTunesSourceGenerator.__init__( self, iTunes ) 
+    def __init__( self, client, prevLevel, tag ):
+        TextEntry.__init__( self, client, prevLevel, tag + ' Search Query:' ) 
         self.tag = tag
-        self.prevLevel = prevLevel
-        self.reset()
-
-    #
-    # Override of iTunesSourceGenerator.fillKeyMap. Enable all arrow keys
-    #
-    def fillKeyMap( self ):
-        iTunesSourceGenerator.fillKeyMap( self )
-        self.addKeyMapEntry( kArrowUp, ( kModFirst, kModRepeat ), self.up )
-        self.addKeyMapEntry( kArrowDown, ( kModFirst, kModRepeat ), self.down )
-        self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
-        self.addKeyMapEntry( kArrowRight, ( kModFirst, ), self.right )
 
     #
     # Reset the search parameters to an initial state
     #
     def reset( self ):
-        self.searchText = self.kBlock
-        self.lastDigit = None
-        self.digitIndex = 0
-        self.stack = None
+        TextEntry.reset( self )
         self.nextLevel = None
-
-    #
-    # Generate the search screen
-    #
-    def generate( self ):
-        pos = len( self.searchText ) + kDisplayWidth - 1
-        return Content( [ self.tag + ' Search Query:',
-                          self.searchText ] )
 
     def updateLastCharacter( self, value ):
-        self.searchText = self.searchText[ : -1 ] + value
+        TextEntry.updateLastCharacter( self, value )
         self.nextLevel = None
 
-    #
-    # Show the next character in the current position.
-    #
-    def up( self ):
-        value = self.searchText[ -1 ]
-        if value == 'Z':
-            value = '0'
-        elif value == '9' or value == self.kBlock:
-            value = 'A'
-        else:
-            value = chr( ord( value ) + 1 )
-        self.updateLastCharacter( value )
-        return self
-
-    #
-    # Show the previous character in the current position.
-    #
-    def down( self ):
-        value = self.searchText[ -1 ]
-        if value == 'A':
-            value = '9'
-        elif value == '0' or value == self.kBlock:
-            value = 'Z'
-        else:
-            value = chr( ord( value ) - 1 )
-        self.updateLastCharacter( value )
-        return self
-
-    #
-    # Process digit keys in a way similar to some text message input systems,
-    # where pressing the same digit key cycles through the letters associated
-    # with the key.
-    #
-    def digit( self, digit ):
-
-        #
-        # Treat zero as a reset.
-        #
-        if digit == 0:
-            self.reset()
-            return self
-
-        values = self.kDigits[ digit ]
-        if digit == self.lastDigit:
-            index = self.digitIndex + 1
-            if index == len( values ):
-                index = 0
-        else:
-            index = 0
-        value = values[ index ]
-        self.digitIndex = index
-        self.lastDigit = digit
-        self.updateLastCharacter( value )
-        return self
-
-    #
-    # Add a character to the search term. If done twice in a row, execute the
-    # search and show the results.
-    #
-    def right( self ):
-
-        #
-        # If the last character is not a 'new' character, then save the current
-        # state digit processing state and add a 'new' character
-        #
-        if self.searchText[ -1 ] != self.kBlock:
-            self.stack = ( self.lastDigit, self.digitIndex, self.stack )
-            self.searchText += self.kBlock
-            self.lastDigit = None
-            self.digitIndex = 0
-            return self
-
-        #
-        # Execute a search, but only if we have at least 2 characters
-        #
-        if len( self.searchText ) < 3:
-            return self
-
+    def accept( self, text ):
         if self.nextLevel:
             return self.nextLevel
-
-        #
-        # Strip off the 'new' character
-        #
-        searchText = self.searchText[ : -1 ]
-        print 'search text:', searchText
-        found = self.searchFor( searchText )
+        print 'search text:', text
+        found = self.searchFor( text )
         if found is None:
-            found = NoneFound( self, self.tag, searchText )
+            found = NoneFound( self.client, self, self.tag, text )
         self.nextLevel = found
         return found
 
@@ -203,14 +82,9 @@ class Searcher( iTunesSourceGenerator ):
     # level.
     #
     def left( self ):
-        if len( self.searchText ) == 1:
-            self.searchText = self.kBlock
-            return self.prevLevel
-        self.searchText = self.searchText[ : -1 ]
-        self.lastDigit, self.digitIndex, self.stack = self.stack
         self.nextLevel = None
-        return self
-    
+        return TextEntry.left( self )
+
     def searchFor( self ):
         raise NotImplementedError, 'searchFor'
 
@@ -219,22 +93,22 @@ class Searcher( iTunesSourceGenerator ):
 #
 class AlbumSearcher( Searcher ):
 
-    def __init__( self, iTunes, prevLevel ):
-        Searcher.__init__( self, iTunes, prevLevel, 'Album' ) 
+    def __init__( self, client, prevLevel ):
+        Searcher.__init__( self, client, prevLevel, 'Album' ) 
 
     def searchFor( self, text ):
-        found = self.source.searchForAlbum( text )
+        found = self.client.iTunes.searchForAlbum( text )
         if len( found ) == 0: return None
-        return AlbumSearchResults( self.source, self, found )
+        return AlbumSearchResults( self.client, self, found )
 
 #
 # Specialization of AlbumListBrowser that browses the results of the last
 # search.
 #
 class AlbumSearchResults( AlbumListBrowser ):
-    
-    def __init__( self, source, prev, found ):
-        AlbumListBrowser.__init__( self, source, prev )
+
+    def __init__( self, client, prevLevel, found ):
+        AlbumListBrowser.__init__( self, client, prevLevel )
         self.found = found
 
     def getCollection( self ): return self.found
@@ -254,9 +128,9 @@ class ArtistSearcher( Searcher ):
         Searcher.__init__( self, iTunes, prevLevel, 'Artist' ) 
 
     def searchFor( self, text ):
-        found = self.source.searchForArtist( text )
+        found = self.client.iTunes.searchForArtist( text )
         if len( found ) == 0: return None
-        return ArtistSearchResults( self.source, self, found )
+        return ArtistSearchResults( self.client, self, found )
 
 #
 # Specialization of ArtstListBrowser that browses the results of the last
@@ -264,8 +138,8 @@ class ArtistSearcher( Searcher ):
 #
 class ArtistSearchResults( ArtistListBrowser ):
     
-    def __init__( self, source, prev, found ):
-        ArtistListBrowser.__init__( self, source, prev )
+    def __init__( self, client, prevLevel, found ):
+        ArtistListBrowser.__init__( self, client, prevLevel )
         self.found = found
 
     def getCollection( self ): return self.found
@@ -283,8 +157,8 @@ class ArtistSearchResults( ArtistListBrowser ):
 #
 class NoneFound( DisplayGenerator ):
 
-    def __init__( self, prevLevel, context, term ): 
-        DisplayGenerator.__init__( self )
+    def __init__( self, client, prevLevel, context, term ): 
+        DisplayGenerator.__init__( self, client )
         self.context = context
         self.term = term
         self.prevLevel = prevLevel
