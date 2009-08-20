@@ -33,9 +33,6 @@ class GenreListBrowser( Browser ):
 
     def getCollection( self ): return self.source.getGenreNames()
 
-    def getNameAtIndex( self, index ):
-        return self.getCollection()[ index ].getName()
-
     def generateWith( self, obj ): 
         genre = self.source.getGenre( obj )
         return Content( [ obj.getName(),
@@ -47,4 +44,4 @@ class GenreListBrowser( Browser ):
     def makeNextLevel( self ): 
         obj = self.getCurrentObject()
         genre = self.source.getGenre( obj )
-        return AlbumListBrowser( self.source, self, genre )
+        return AlbumListBrowser( self.client, self, genre )

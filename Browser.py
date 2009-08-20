@@ -43,8 +43,8 @@ class Browser( iTunesSourceGenerator ):
                 'TUV',
                 'WXYZ' ]
 
-    def __init__( self, iTunes, prevLevel ):
-        iTunesSourceGenerator.__init__( self, iTunes )
+    def __init__( self, client, prevLevel ):
+        iTunesSourceGenerator.__init__( self, client )
         self.index = 0          # Index of the current item to show
         self.prevLevel = prevLevel # Link to the previous Browser object
         self.reset()               # Initialize to known state
@@ -156,12 +156,6 @@ class Browser( iTunesSourceGenerator ):
     #
     def makeNextLevel( self ):
         return None
-
-    #
-    # Get the name of the current brows item
-    #
-    def getNameAtIndex( self, index ):
-        return self.getCollection()[ index ].getName()
 
     #
     # Get the key of the current brows item

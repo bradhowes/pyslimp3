@@ -49,7 +49,7 @@ mapping = {
     0x0000f783 : kMenuHome,
     0x0000c038 : kMute,
     0x0000c538 : kMute,
-    0x0000f72b : kShuffle,
+    0x0000f72b : kOK,
     0x0000f7b2 : kPause,
     0x0000f7f6 : kPIP,          # this is the PIP button on this remote
     0x0000f732 : kPlay,

@@ -22,6 +22,7 @@ from Content import Content
 from Display import *
 from KeyProcessor import *
 from PlaybackDisplay import PlaybackDisplay
+from TextEntry import *
 from TrackListBrowser import *
 
 #
@@ -31,9 +32,9 @@ from TrackListBrowser import *
 #
 class PlaylistBrowser( Browser ):
 
-    def __init__( self, iTunes, prevLevel ):
-        Browser.__init__( self, iTunes, prevLevel )
-        
+    def __init__( self, client, prevLevel ):
+        Browser.__init__( self, client, prevLevel )
+
     def getCollection( self ): return self.source.getPlaylistList()
 
     #
@@ -42,11 +43,12 @@ class PlaylistBrowser( Browser ):
     def fillKeyMap( self ):
         Browser.fillKeyMap( self )
         self.addKeyMapEntry( kPlay, None, self.play )
+        self.addKeyMapEntry( kRecord, None, self.create )
 
     #
     # Show the current playlist name and track count
     #
-    def generateWith( self, obj ): 
+    def generateWith( self, obj ):
         return Content( [ obj.getName(),
                           formatQuantity( obj.getTrackCount(), 'track', None,
                                           '(%d %s)' ) ],
@@ -60,7 +62,7 @@ class PlaylistBrowser( Browser ):
         obj = self.getCurrentObject()
         if obj.getTrackCount() == 0:
             return None
-        return TrackListBrowser( self.source, self, obj.getTracks() )
+        return TrackListBrowser( self.client, self, obj.getTracks() )
 
     #
     # Begin playback at the start of the playlist (or at the track at the given
@@ -68,4 +70,12 @@ class PlaylistBrowser( Browser ):
     #
     def play( self, trackIndex = 0 ): 
         self.source.playPlaylist( self.getCurrentObject(), trackIndex )
-        return PlaybackDisplay( self.source, self )
+        return PlaybackDisplay( self.client, self )
+
+    def create( self ):
+        return TextEntry( self.client, self, 'New Playlist Name:', 2,
+                          self.accept )
+
+    def accept( self, name ):
+        print( 'new playlist name:', name )
+        return self

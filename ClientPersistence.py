@@ -20,31 +20,35 @@
 import cPickle
 from datetime import datetime
 import Client
+import Settings
 
+#
+# Maintainer of client settings. Uses cPickle to save/restore setting
+# dictionaries for Client objecs. Writes to disk when a setting changes.
+#
 class ClientPersistence( object ):
 
-    def __init__( self ):
-        self.path = 'pyslimp3.pkl'
-        self.clients = {}
-        self.settings = {}
+    def __init__( self, path = 'pyslimp3.pkl' ):
+        self.path = path
+        self.clients = {}       # Mapping of active Client objects
+        self.settings = {}      # Mapping of available Settings objects
         self.restore()
 
+    #
+    # If any Client settings have changed, write the entire collection to disk.
+    # Also, detect any Client objects that have not received any heartbeats
+    # since some amount of time and cull them.
+    #
     def save( self ):
         now = datetime.now()
         changed = False
         stale = []
-        
+
         #
         # Visit all of the clients looking for changed state or staleness
         #
         for key, client in self.clients.items():
-            state = client.getState()
-            prev = self.settings.get( key[ 0 ], None )
-            if prev is None:
-                self.settings[ key[ 0 ] ] = state
-                changed = True
-            elif prev != state:
-                prev.update( state )
+            if client.settingsAreDirty():
                 changed = True
             elif client.isStale( now ):
                 print( '*** detected stale client', key )
@@ -59,6 +63,9 @@ class ClientPersistence( object ):
             print( '... saving updated Client settings' )
             cPickle.dump( self.settings, open( self.path, 'wb' ) )
 
+    #
+    # Read the last saved collection of Settings objects.
+    #
     def restore( self ):
         try:
             self.settings = cPickle.load( open( self.path ) )
@@ -67,10 +74,28 @@ class ClientPersistence( object ):
         except IOError:
             pass
 
+    #
+    # For a given host/port IP address pair, locate a Client object. If none
+    # found, create a new one.
+    #
     def getClient( self, server, addr ):
-        client = self.clients.get( addr, None )
+        key = addr[ 0 ]
+        client = self.clients.get( key, None )
         if client is None:
-            state = self.settings.get( addr[ 0 ], None )
-            client = Client.Client( server, addr, state )
-            self.clients[ addr ] = client
+
+            #
+            # Get the settings object last seen for this address. If not found,
+            # create a new one with default values.
+            #
+            settings = self.settings.get( key, None )
+            if settings is None:
+                settings = Settings.Settings()
+                self.settings[ key ] = settings
+
+            #
+            # Create new Client object for the address.
+            #
+            client = Client.Client( server, addr, settings )
+            self.clients[ key ] = client
+
         return client
