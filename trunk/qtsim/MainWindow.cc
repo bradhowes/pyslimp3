@@ -23,6 +23,7 @@
 
 #include <QtCore/QTimer>
 #include <QtGui/QHBoxLayout>
+#include <QtGui/QKeyEvent>
 #include <QtNetwork/QUdpSocket>
 
 #include "MainWindow.h"
@@ -230,6 +231,8 @@ MainWindow::MainWindow()
     connect( timer_, SIGNAL( timeout() ), SLOT( emitHeartbeat() ) );
 
     emitDiscovery();
+
+    setFocusPolicy( Qt::StrongFocus );
 }
 
 void
@@ -495,3 +498,12 @@ MainWindow::writeMessage( size_t count )
 	break;
     }
 }
+
+void
+MainWindow::keyPressEvent( QKeyEvent* event )
+{
+    std::clog << "keyPressEvent: " << event->key() << ' '
+	      << event->modifiers() << std::endl;
+    remote_->simulateButtonPressed( event->key() );
+}
+

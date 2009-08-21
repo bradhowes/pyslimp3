@@ -29,8 +29,8 @@ from RatingDisplay import *
 class PlaybackDisplay( iTunesSourceGenerator ):
 
     kPlayerState = { 'k.playing': '',
-                     'k.paused': 'PAUSE',
-                     'k.stopped': 'STOP',
+                     'k.paused': 'PAUSED',
+                     'k.stopped': 'STOPPED',
                      'k.fast_forwarding': 'FFWD',
                      'k.rewinding': 'RWD'
                      }
@@ -159,6 +159,8 @@ class PlaybackDisplay( iTunesSourceGenerator ):
                 state = 'MUTED'
         if state == '':
             state = self.getPlayerPositionIndicator( track )
+        else:
+            state = unichr( 0x85 ) + state + unichr( 0x85 )
         return state
 
     def getEmptyString( self, track ):
@@ -228,8 +230,16 @@ class PlaybackDisplay( iTunesSourceGenerator ):
         return self
 
     #
-    # Use the '0' key to restart the current track.
+    # Use the '0' key to restart the current track. Otherwise, treat as an
+    # index of the track to play (1-9).
     #
-    def digit0( self ):
-        self.source.beginTrack()
+    def digit( self, digit ):
+        source = self.source
+        if digit == 0:
+            source.beginTrack()
+        else:
+            count = source.getActivePlaylistSize()
+            if digit <= count:
+                source.doPlayPlaylist( source.getActivePlaylistObject(),
+                                       digit - 1 )
         return self

@@ -68,6 +68,7 @@ private:
     size_t processCommand( size_t index );
     size_t processBrightness( size_t index );
     size_t processCustomDefinition( size_t index );
+    void keyPressEvent( QKeyEvent* event );
 
     QTime timeSource_;
     Remote* remote_;

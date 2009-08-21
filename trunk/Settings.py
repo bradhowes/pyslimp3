@@ -71,8 +71,14 @@ class Settings( object ):
             if not self.dict.has_key( key ):
                 self.setValue( key, value )
 
+    #
+    # Obtain the current value for a given key.
+    #
     def getValue( self, key ): return self.dict[ key ]
 
+    #
+    # Change the value for a given key, flagging this object as being dirty.
+    #
     def setValue( self, key, value ): 
         old = self.dict.get( key, None )
         self.dict[ key ] = value
