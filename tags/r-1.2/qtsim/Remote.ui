@@ -1,0 +1,632 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Remote</class>
+ <widget class="QWidget" name="Remote">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>311</width>
+    <height>598</height>
+   </rect>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Remote Control</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="power">
+       <property name="toolTip">
+        <string>Power on/off</string>
+       </property>
+       <property name="text">
+        <string>Power</string>
+       </property>
+       <property name="shortcut">
+        <string>Q</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="one">
+       <property name="toolTip">
+        <string>1</string>
+       </property>
+       <property name="text">
+        <string>1</string>
+       </property>
+       <property name="shortcut">
+        <string>1</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="two">
+       <property name="toolTip">
+        <string>2</string>
+       </property>
+       <property name="text">
+        <string>2</string>
+       </property>
+       <property name="shortcut">
+        <string>2</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="three">
+       <property name="toolTip">
+        <string>3</string>
+       </property>
+       <property name="text">
+        <string>3</string>
+       </property>
+       <property name="shortcut">
+        <string>3</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="four">
+       <property name="toolTip">
+        <string>4</string>
+       </property>
+       <property name="text">
+        <string>4</string>
+       </property>
+       <property name="shortcut">
+        <string>4</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="five">
+       <property name="toolTip">
+        <string>5</string>
+       </property>
+       <property name="text">
+        <string>5</string>
+       </property>
+       <property name="shortcut">
+        <string>5</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="six">
+       <property name="toolTip">
+        <string>6</string>
+       </property>
+       <property name="text">
+        <string>6</string>
+       </property>
+       <property name="shortcut">
+        <string>6</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="seven">
+       <property name="toolTip">
+        <string>7</string>
+       </property>
+       <property name="text">
+        <string>7</string>
+       </property>
+       <property name="shortcut">
+        <string>7</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QPushButton" name="eight">
+       <property name="toolTip">
+        <string>8</string>
+       </property>
+       <property name="text">
+        <string>8</string>
+       </property>
+       <property name="shortcut">
+        <string>8</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QPushButton" name="nine">
+       <property name="toolTip">
+        <string>9</string>
+       </property>
+       <property name="text">
+        <string>9</string>
+       </property>
+       <property name="shortcut">
+        <string>9</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QPushButton" name="zero">
+       <property name="toolTip">
+        <string>0</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+       <property name="shortcut">
+        <string>0</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QPushButton" name="pip">
+       <property name="text">
+        <string>PIP</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QPushButton" name="enter">
+       <property name="text">
+        <string>ENT</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="spacing">
+      <number>-1</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="rewind">
+       <property name="toolTip">
+        <string>Rewind</string>
+       </property>
+       <property name="text">
+        <string>&lt;&lt;</string>
+       </property>
+       <property name="shortcut">
+        <string>&lt;</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="play">
+       <property name="toolTip">
+        <string>Play</string>
+       </property>
+       <property name="text">
+        <string>Play</string>
+       </property>
+       <property name="shortcut">
+        <string>P</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="fastForward">
+       <property name="toolTip">
+        <string>Fast-forward</string>
+       </property>
+       <property name="text">
+        <string>&gt;&gt;</string>
+       </property>
+       <property name="shortcut">
+        <string>&gt;</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>-1</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="rec">
+       <property name="text">
+        <string>Rec</string>
+       </property>
+       <property name="shortcut">
+        <string>R</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="stop">
+       <property name="toolTip">
+        <string>Stop</string>
+       </property>
+       <property name="text">
+        <string>Stop</string>
+       </property>
+       <property name="shortcut">
+        <string>Shift+S</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pause">
+       <property name="toolTip">
+        <string>Pause</string>
+       </property>
+       <property name="text">
+        <string>Pause</string>
+       </property>
+       <property name="shortcut">
+        <string>S</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <property name="spacing">
+      <number>-1</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="src">
+       <property name="text">
+        <string>Src</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="disp">
+       <property name="text">
+        <string>Dsp</string>
+       </property>
+       <property name="shortcut">
+        <string>D</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="sleep">
+       <property name="text">
+        <string>Sleep</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="guide">
+       <property name="text">
+        <string>Guide</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="1">
+      <widget class="QPushButton" name="up">
+       <property name="toolTip">
+        <string>Up</string>
+       </property>
+       <property name="text">
+        <string>^</string>
+       </property>
+       <property name="shortcut">
+        <string>Up</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="left">
+       <property name="toolTip">
+        <string>Left</string>
+       </property>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+       <property name="shortcut">
+        <string>Left</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="right">
+       <property name="toolTip">
+        <string>Right</string>
+       </property>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+       <property name="shortcut">
+        <string>Right</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QPushButton" name="down">
+       <property name="toolTip">
+        <string>Down</string>
+       </property>
+       <property name="text">
+        <string>v</string>
+       </property>
+       <property name="shortcut">
+        <string>Down</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QPushButton" name="menu">
+       <property name="text">
+        <string>Menu</string>
+       </property>
+       <property name="shortcut">
+        <string>M</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="ok">
+       <property name="text">
+        <string>OK</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QPushButton" name="volumeUp">
+         <property name="toolTip">
+          <string>Volume increase</string>
+         </property>
+         <property name="text">
+          <string>V+</string>
+         </property>
+         <property name="shortcut">
+          <string>]</string>
+         </property>
+         <property name="autoRepeat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="volumeDown">
+         <property name="toolTip">
+          <string>Volume decrease</string>
+         </property>
+         <property name="text">
+          <string>V-</string>
+         </property>
+         <property name="shortcut">
+          <string>[</string>
+         </property>
+         <property name="autoRepeat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QPushButton" name="brightnessUp">
+         <property name="toolTip">
+          <string>Brightness increase</string>
+         </property>
+         <property name="text">
+          <string>Ch+</string>
+         </property>
+         <property name="shortcut">
+          <string>}</string>
+         </property>
+         <property name="autoRepeat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="brightnessDown">
+         <property name="toolTip">
+          <string>Brightness decrease</string>
+         </property>
+         <property name="text">
+          <string>CH-</string>
+         </property>
+         <property name="shortcut">
+          <string>{</string>
+         </property>
+         <property name="autoRepeat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <item>
+      <widget class="QPushButton" name="mute">
+       <property name="text">
+        <string>Muting</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_9">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="recall">
+       <property name="text">
+        <string>Recall</string>
+       </property>
+       <property name="autoRepeat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

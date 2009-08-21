@@ -1,0 +1,14 @@
+Pyslimp3: the Python SLiMP3-iTunes interface
+
+Project home is at http://code.google.com/p/pyslimp3/
+
+To run the server:
+
+    % python Server.py
+
+To run the basic simulator:
+
+    % python sim.py
+
+There is a graphical simulator now that requires Nokia's Qt library. It is
+found in the qtsim directory. See qtsim/README for more information.
