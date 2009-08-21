@@ -27,7 +27,9 @@ from TrackListBrowser import *
 
 #
 # Specialization of Browser that shows a list of albums. Handles the kPlay
-# keyCode event by asking iTunes to play the active album.
+# keyCode event by asking iTunes to play the active album. Displays either all
+# albums found in iTunes (default) or a subset of those albums associated with
+# a particular artist.
 #
 class AlbumListBrowser( Browser ):
 
@@ -35,6 +37,9 @@ class AlbumListBrowser( Browser ):
         Browser.__init__( self, client, prevLevel )
         self.albumList = albumList
 
+    #
+    # Obtain the collection to browse. Implementation of Browser interface.
+    #
     def getCollection( self ): 
         if self.albumList is None:
             return self.source.getAlbumList()

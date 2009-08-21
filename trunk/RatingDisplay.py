@@ -28,39 +28,65 @@ from VFD import CustomCharacters
 # keys 0-5 to directly set the rating. With the arrow keys, one can set
 # half-stars.
 #
-class RatingDisplay( iTunesSourceGenerator ):
+class RatingDisplay( OverlayDisplay ):
 
     def __init__( self, client, prevLevel, obj, tag ):
-        iTunesSourceGenerator.__init__( self, client )
-        self.prevLevel = prevLevel
+        DisplayGenerator.__init__( self, client, prevLevel )
         self.obj = obj          # The object whose ratings we will muck with
-        self.tag = tag
+        self.tag = tag          # Either 'Track' or 'Album'
 
+    #
+    # Signal that this display generator is a temporary overlay
+    #
     def isOverlay( self ): return True
 
+    #
+    # Allow up/down arrow keys to increment/decrement rating values.
+    #
     def fillKeyMap( self ):
-        iTunesSourceGenerator.fillKeyMap( self )
+        DisplayGenerator.fillKeyMap( self )
         self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kPIP, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kArrowUp, ( kModFirst, kModRepeat ), self.up )
         self.addKeyMapEntry( kArrowDown, ( kModFirst, kModRepeat ), self.down )
 
+    #
+    # Return to the previous display level
+    #
     def left( self ):
         return self.prevLevel
 
+    #
+    # Change the rating to a new value. Derived classes must define
+    #
     def setRating( self, value ):
         raise NotImplementedError, 'RatingDisplay.setRating'
 
+    #
+    # Obtain the current rating. Derived classes must define
+    #
+    def getRating( self ):
+        raise NotImplementedError, 'RatingDisplay.getRating'
+
+    #
+    # Increase the current rating value.
+    #
     def up( self ):
         value = min( self.getRating() + 10, 100 )
         self.setRating( value )
         return self
 
+    #
+    # Decrease the current rating value
+    #
     def down( self ):
         value = max( self.getRating() - 10, 0 )
         self.setRating( value )
         return self
 
+    #
+    # Generate a rating indicator for the given rating value.
+    #
     def generateRatingIndicator( self, rating ):
         fullStars = rating / 20
         halfStar = rating - fullStars * 20
@@ -74,6 +100,9 @@ class RatingDisplay( iTunesSourceGenerator ):
         indicator += u' %d.%d' % ( fullStars, halfStar / 2, )
         return indicator
 
+    #
+    # Generate a display containing the current rating
+    #
     def generate( self ):
         indicator = self.generateRatingIndicator( self.getRating() )
         return Content( [ self.obj.getName(), centerAlign( indicator ) ],
@@ -88,7 +117,7 @@ class RatingDisplay( iTunesSourceGenerator ):
         if digit > 5:
             digit = 5
         rating = digit * 20
-        
+
         #
         # If calculated rating is already in place, bump it up by 10 to tack on
         # an extra 1/2 star.
@@ -107,13 +136,15 @@ class AlbumRatingDisplay( RatingDisplay ):
         RatingDisplay.__init__( self, client, prevLevel, album, 'Album' )
 
     #
-    # Obtain the current rating for this album
+    # Obtain the current rating for this album. Implementation of RatingDisplay
+    # interface.
     #
     def getRating( self ): 
         return self.source.getAlbumRating( self.obj )
 
     #
-    # Change the rating for this album
+    # Change the rating for this album. Implementation of RatingDisplay
+    # interface.
     #
     def setRating( self, value ): 
         self.source.setAlbumRating( self.obj, value )
@@ -126,9 +157,12 @@ class TrackRatingDisplay( RatingDisplay ):
     def __init__( self, client, prevLevel, track ):
         RatingDisplay.__init__( self, client, prevLevel, track, 'Track' )
 
+    #
+    # Enable PIP or right arrow to show the album's rating.
+    #
     def fillKeyMap( self ):
         RatingDisplay.fillKeyMap( self )
-        
+
         #
         # Allow the user to visit the album's rating editor from the track one
         # via the kPIP or kArrowRight key
@@ -145,13 +179,15 @@ class TrackRatingDisplay( RatingDisplay ):
         return AlbumRatingDisplay( self.client, self.prevLevel, album )
 
     #
-    # Obtain the current rating for this track
+    # Obtain the current rating for this track. Implementation of RatingDisplay
+    # interface.
     #
     def getRating( self ): 
         return self.source.getTrackRating( self.obj )[ 0 ]
 
     #
-    # Change the rating for this track
+    # Change the rating for this track. Implementation of RatingDisplay
+    # interface.
     #
     def setRating( self, value ): 
         self.source.setTrackRating( self.obj, value )

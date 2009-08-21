@@ -37,6 +37,8 @@ class Settings( object ):
                   'isOn': False,
                   'playbackFormatterIndex': 0,
                   'playlistForManipulation': '',
+                  'screenSaverIndex': 1,
+                  'screenSaverTimeout': 300,
                   }
 
     def __init__( self ):

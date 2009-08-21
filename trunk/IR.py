@@ -19,14 +19,31 @@
 
 import JVCRemote
 
+#
+# Container class that holds maps remote control IDs to remote control key code
+# maps. Currently, only one remote control device is defined: JVC. To add a new
+# remote control definition, first import it above, and then add the module to
+# the list of remotes below.
+#
 class IR( object ):
 
+    #
+    # List of supported remote controllers
+    #
     remotes = ( JVCRemote, )
 
+    #
+    # Constructor. Visit each remote control definition and add to the lookup
+    # table remoteMaps.
+    #
     def __init__( self ):
         self.remoteMaps = {}
         for each in self.remotes:
             self.remoteMaps[ each.remoteId ] = each.mapping
 
+    #
+    # Obtain a KeyProcessor key code for a given remote controller ID and
+    # button code.
+    #
     def lookup( self, remoteId, code ):
         return self.remoteMaps[ remoteId ].get( code )

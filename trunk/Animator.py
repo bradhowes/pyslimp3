@@ -19,7 +19,6 @@
 
 from datetime import datetime
 from Display import *
-from ScreenSavers import *
 
 #
 # Renderer of Content contents to make a display. When the content is the same,
@@ -30,15 +29,26 @@ from ScreenSavers import *
 class Animator( object ):
 
     kHoldCount = 10             # Number of renders before animating
-    kScreenSaverTimeout = 5 * 60 # 5 minutes of screen inactivity
 
-    def __init__( self, screenSaverClass = Swapper,
-                  screenSaverTimeout = kScreenSaverTimeout ):
+    def __init__( self, screenSaverClass, screenSaverTimeout ):
         self.content = None
+        self.output = None
         self.screenSaverClass = screenSaverClass
         self.screenSaverTimeout = screenSaverTimeout
         self.reset()
 
+    #
+    # Install a new screen saver class to use, and invoke it if one is already
+    # active.
+    #
+    def setScreenSaverClass( self, screenSaverClass ):
+        self.screenSaverClass = screenSaverClass
+        if self.screenSaver:
+            self.screenSaver = screenSaverClass( self.output )
+
+    #
+    # Reset to known state and remove any active screen saver.
+    #
     def reset( self ):
         self.offsets = [ 0 ] * kDisplayHeight
         self.atEnd = False
@@ -62,19 +72,33 @@ class Animator( object ):
             self.reset()
             self.maxShift = max( shiftsNeeded )
             self.shiftsNeeded = shiftsNeeded
+        #
+        # If lines are the same but the overlays differ, just remove any active
+        # screen saver.
+        #
         elif content.hasDifferentRightOverlays( self.content ):
             self.removeScreenSaver()
+        #
+        # Lines are the same, as are the overlays. Check to see if we should
+        # invoke a screen saver.
+        #
         elif self.screenSaver is None:
             delta = datetime.now()
             delta -= self.activatingTimestamp
             if delta.seconds >= self.screenSaverTimeout:
-                self.screenSaver = self.screenSaverClass( self.output )
+                self.activateScreenSaver()
         self.content = content
+
+    def activateScreenSaver( self ):
+        self.screenSaver = self.screenSaverClass( self.output )
 
     def removeScreenSaver( self ):
         self.activatingTimestamp = datetime.now()
         self.screenSaver = None
 
+    #
+    # Determine if the screen saver is active
+    #
     def screenSaverActivated( self ):
         return self.screenSaver is not None
 

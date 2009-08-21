@@ -31,6 +31,9 @@ from PlaybackDisplay import PlaybackDisplay
 #
 class ArtistListBrowser( Browser ):
 
+    #
+    # Obtain the collection to browse. Implementation of Browser interface.
+    #
     def getCollection( self ): return self.source.getArtistList()
 
     #

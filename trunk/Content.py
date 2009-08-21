@@ -33,13 +33,12 @@ class Content:
 
     #
     # Constructor. The 'lines' value must be a list, as must be 'overlays' if
-    # it is given. The optional 'cursor' value must be a value between 0 and
-    # kDisplayHeight * kDisplayWidth.
+    # it is given.
     #
     def __init__( self, lines, rightOverlays = kBlankOverlays ):
 
         #
-        # Normalize content so that we have kDisplayHeight lines and overlays.
+        # Normalize content so that we have kDisplayHeight lines
         #
         if len( lines ) < kDisplayHeight:
             lines.extend( [ '' ] * ( kDisplayHeight - len( lines ) ) )
@@ -48,6 +47,11 @@ class Content:
         if rightOverlays is None:
             rightOverlays = kBlankOverlays
         elif id( rightOverlays ) is not id( kBlankOverlays ):
+            
+            #
+            # Normalize overlays so that we have kDisplayHeight of them, and
+            # any that are not blank begin with a space
+            #
             count = len( rightOverlays )
             for index in range( count ):
                 if len( rightOverlays[ index ] ):
@@ -69,8 +73,7 @@ class Content:
             self.shiftsNeeded.append( shiftNeeded )
 
     #
-    # Generate an text block from the content. Returns a 2-tuple that contains
-    # the rendered text block and an optional cursor position
+    # Generate an text block from the content. Returns the rendered text block.
     #
     def render( self, offsets = None ):
         output = [ None ] * kDisplayHeight

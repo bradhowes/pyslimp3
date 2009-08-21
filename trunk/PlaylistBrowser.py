@@ -32,9 +32,9 @@ from TrackListBrowser import *
 #
 class PlaylistBrowser( Browser ):
 
-    def __init__( self, client, prevLevel ):
-        Browser.__init__( self, client, prevLevel )
-
+    #
+    # Implementation of Browser interface
+    #
     def getCollection( self ): return self.source.getPlaylistList()
 
     #
@@ -72,10 +72,16 @@ class PlaylistBrowser( Browser ):
         self.source.playPlaylist( self.getCurrentObject(), trackIndex )
         return PlaybackDisplay( self.client, self )
 
+    #
+    # Show a text entry display to obtain a new playlist name.
+    #
     def create( self ):
         return TextEntry( self.client, self, 'New Playlist Name:', 2,
                           self.accept )
 
+    #
+    # Accept the results of the text entry above.
+    #
     def accept( self, name ):
         print( 'new playlist name:', name )
         return self

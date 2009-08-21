@@ -75,7 +75,7 @@ class TextEntry( DisplayGenerator ):
         self.reset()
 
     #
-    # Override of iTunesSourceGenerator.fillKeyMap. Enable all arrow keys
+    # Override of Display method. Enable all arrow keys
     #
     def fillKeyMap( self ):
         DisplayGenerator.fillKeyMap( self )

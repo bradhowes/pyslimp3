@@ -28,11 +28,14 @@ from Display import *
 #
 class GenreListBrowser( Browser ):
 
-    def __init__( self, iTunes, prevLevel ):
-        Browser.__init__( self, iTunes, prevLevel )
-
+    #
+    # Implementation of Browser interface. Returns list of genre names
+    #
     def getCollection( self ): return self.source.getGenreNames()
 
+    #
+    # Obtain the display for the current genre index
+    #
     def generateWith( self, obj ): 
         genre = self.source.getGenre( obj )
         return Content( [ obj.getName(),
@@ -41,6 +44,10 @@ class GenreListBrowser( Browser ):
                         [ 'Genre',
                           self.getIndexOverlay() ] )
 
+    #
+    # Show an AlbumListBrowser with the list of albums associated with the
+    # current genre.
+    #
     def makeNextLevel( self ): 
         obj = self.getCurrentObject()
         genre = self.source.getGenre( obj )
