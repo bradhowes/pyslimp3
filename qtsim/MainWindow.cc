@@ -233,6 +233,7 @@ MainWindow::MainWindow()
     emitDiscovery();
 
     setFocusPolicy( Qt::StrongFocus );
+    setFocus( Qt::ActiveWindowFocusReason );
 }
 
 void
