@@ -33,9 +33,12 @@ class Remote : public QWidget
     Q_OBJECT
 public:
 
-    typedef std::map<QString,uint32_t> KeyCodeMap;
+    typedef std::map<QString,uint32_t> NameKeyCodeMap;
+    typedef std::map<int,uint32_t> KeyKeyCodeMap;
 
     Remote();
+
+    void simulateButtonPressed( uint32_t key );
 
 signals:
 
@@ -47,7 +50,8 @@ public slots:
 
 private:
     Ui::Remote* gui_;
-    KeyCodeMap keyCodes_;
+    NameKeyCodeMap nameKeyCodes_;
+    KeyKeyCodeMap keyKeyCodes_;
 };
 
 #endif
