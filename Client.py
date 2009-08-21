@@ -25,12 +25,14 @@ from Browser import Browser
 from Display import *
 from KeyProcessor import *
 from PlaybackDisplay import PlaybackDisplay
+from ScreenSavers import kScreenSavers
 from TopBrowser import TopBrowser
 from VFD import VFD
 
 #
 # Representation of the state of a remote SLIMP3 device. Manages a socket that
-# communicates to the remote device via UDP messages.
+# communicates to the remote device via UDP messages. There is one Client
+# object per SLiMP3 device found on the network.
 #
 class Client( object ):
 
@@ -56,28 +58,103 @@ class Client( object ):
         self.hardwareAddress = addr
         self.settings = settings
         self.iTunes = server.iTunes
+        
+        #
+        # Create a new key event processor to handle remote control messages.
+        # When a key event occurs, KeyProcessor will invoke our
+        # processKeyCode() method.
+        #
         self.keyProcessor = KeyProcessor( server, self )
+        
+        #
+        # Create a new socket to use for sending out UDP messages to the SLiMP3
+        # device or simulator.
+        #
         self.socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+        
+        #
+        # Maintain a timestamp of the last messages received from a SLiMP3
+        # device or simulator so that we can detect when the device disappears.
+        #
         self.lastHardwareMessageReceived = datetime.now()
+        
+        #
+        # Normal display generator in use by the client
+        #
         self.linesGenerator = None
+
+        #
+        # Overlay display generator for temporary displays such as volume
+        # control or ratings.
+        #
         self.overlayGenerator = None
+        
+        #
+        # When an overlay generator is active, this is a timer that will remove
+        # the overlay after kOverlayDuration seconds
+        #
         self.overlayTimer = None
+        
+        #
+        # Timer used to refresh the SLiMP3 display.
+        #
         self.refreshTimer = None
+
+        #
+        # Time when the user last pressed a key on the remote. Used to
+        # determine when to revert to a PlaybackDisplay display after the user
+        # has moved to another display using the remote control.
+        #
         self.lastKeyTimeStamp = datetime.now() - timedelta( seconds = 1000 )
-        self.animator = Animator()
+
+        #
+        # Create a new display animator to use to render Content objects from
+        # the active display generator.
+        #
+        self.animator = Animator( 
+            kScreenSavers[ settings.getScreenSaverIndex() ],
+            settings.getScreenSaverTimeout() )
+
+        #
+        # Create a new VFD interface used to generate appropriate 'l' type
+        # messages for the SLiMP3 device.
+        #
         self.vfd = VFD( settings.getBrightness() )
+
+        #
+        # Install the key map for this Client, default actions for remote keys
+        # not handled by the active or overlay display generator.
+        #
         self.fillKeyMap()
+        
+        #
+        # Put the SLiMP3 device in the same on/off state it was in when last
+        # seen.
+        #
         if settings.getIsOn():
             self.powerOn()
         else:
             self.powerOff()
+            
+        #
+        # Force a dislay on the device.
+        #
         self.refreshDisplay()
 
+    #
+    # Obtain the Settings object for this client
+    #
     def getSettings( self ): return self.settings
 
+    #
+    # Determine if the Settings object is dirty and needs to be saved to disk.
+    #
     def settingsAreDirty( self ):
         return self.settings.isDirty()
 
+    #
+    # Obtain the appscript object connected to iTunes.
+    #
     def getSource( self ): return self.iTunes
 
     #
@@ -113,6 +190,7 @@ class Client( object ):
             #
             ( kDisplay, self.showPlaying ),
             ( kMenuHome, self.showTopBrowser ),
+            ( kSleep, self.activateScreenSaver ),
 
             #
             # Simple iTunes control
@@ -209,6 +287,9 @@ class Client( object ):
     #
     def clearOverlay( self ):
         if self.overlayGenerator:
+            if self.overlayGenerator.prevLevel:
+                self.setLinesGenerator( self.overlayGenerator.prevLevel )
+                return
 
             #
             # Reset the key processor so that the normal display generator
@@ -280,6 +361,11 @@ class Client( object ):
     #
     def processKeyEvent( self, timeStamp, key ):
         self.lastKeyTimeStamp = datetime.now()
+        
+        #
+        # If a screen saver is active, just eat the key event and get rid of
+        # the screen saver.
+        #
         if self.animator.screenSaverActivated():
             self.animator.removeScreenSaver()
             self.emitDisplay()
@@ -346,32 +432,36 @@ class Client( object ):
         self.setOverlayGenerator( VolumeGenerator( self ) )
 
     #
-    # Brightness control methods
+    # Increase brightness
     #
     def brightnessUp( self ):   
         self.vfd.changeBrightness( 1 )
         self.settings.setBrightness( self.vfd.getBrightness() )
 
+    #
+    # Decrease brightness
+    #
     def brightnessDown( self ): 
         self.vfd.changeBrightness( -1 )
         self.settings.setBrightness( self.vfd.getBrightness() )
 
     #
-    # Toggle iTUnes MUTE state
+    # Toggle iTunes mute state
     #
     def toggleMute( self ):
         self.iTunes.toggleMute()
         self.setOverlayGenerator( MuteStateGenerator( self ) )
 
     #
-    # Toggle iTUnes shuffle state for a playlist
+    # Toggle iTunes shuffle state for a playlist
     #
     def toggleShuffle( self ):
         self.iTunes.toggleShuffle()
         self.setOverlayGenerator( ShuffleStateGenerator( self ) )
 
     #
-    # Cycle throught the iTunes repeat state for a playlist
+    # Cycle throught the iTunes repeat state for a playlist: off, all songs,
+    # one song.
     #
     def toggleRepeat( self ):
         self.iTunes.toggleRepeat()
@@ -387,6 +477,11 @@ class Client( object ):
         else:
             self.powerOff()
 
+    #
+    # Turn 'on' the SLiMP3 device, removing the clock display and showing the
+    # current track using PlaybackDisplay or the TopBrowser display generator
+    # depending on whether there is an active track.
+    #
     def powerOn( self ):
         self.settings.setIsOn( True )
         browser = TopBrowser( self )
@@ -397,6 +492,10 @@ class Client( object ):
             generator = PlaybackDisplay( self, browser )
         self.setLinesGenerator( generator )
 
+    #
+    # Turn 'off' the SLiMP3 device, showing a clock display, just like the
+    # original server software.
+    #
     def powerOff( self ):
         self.settings.setIsOn( False )
         self.setLinesGenerator( ClockGenerator( self ) )
@@ -412,7 +511,6 @@ class Client( object ):
         if self.overlayGenerator:
             self.clearOverlay()
             return
-
         if not isinstance( self.linesGenerator, PlaybackDisplay ):
             track = self.iTunes.getCurrentTrack()
             if track is not None:
@@ -425,3 +523,10 @@ class Client( object ):
     def showTopBrowser( self ):
         if not isinstance( self.linesGenerator, TopBrowser ):
             self.setLinesGenerator( TopBrowser( self ) )
+
+    def setScreenSaverIndex( self, value ):
+        self.settings.setScreenSaverIndex( value )
+        self.animator.setScreenSaverClass( kScreenSavers[ value ] )
+
+    def activateScreenSaver( self ):
+        self.animator.activateScreenSaver()

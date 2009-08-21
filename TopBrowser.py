@@ -24,6 +24,7 @@ from Content import Content
 from GenreListBrowser import GenreListBrowser
 from PlaylistBrowser import PlaylistBrowser
 from Searcher import AlbumSearcher, ArtistSearcher
+from SettingsBrowser import SettingsBrowser
 
 #
 # DynamicEntry derivative that for albums
@@ -92,6 +93,15 @@ class SearchArtists( DynamicEntry ):
         return ArtistSearcher( browser.client, browser )
 
 #
+# DynamicEntry derivative that for playlists
+#
+class Settings( DynamicEntry ):
+    def makeContent( self, browser ): 
+        return [ 'Configuration', 'Settings' ]
+    def makeNextLevel( self, browser ):
+        return SettingsBrowser( browser.client, browser )
+
+#
 # Specialization of Browser that shows the top menu options.
 #
 class TopBrowser( DynamicBrowser ):
@@ -103,4 +113,5 @@ class TopBrowser( DynamicBrowser ):
                                    BrowseGenres(),
                                    BrowsePlaylists(),
                                    SearchAlbums(),
-                                   SearchArtists() ) )
+                                   SearchArtists(),
+                                   Settings(), ) )

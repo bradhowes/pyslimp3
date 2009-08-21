@@ -41,6 +41,9 @@ class DynamicBrowser( Browser ):
         Browser.__init__( self, client, prevLevel )
         self.collection = collection
 
+    #
+    # Implementation of Browser interface. Returns held collection object
+    #
     def getCollection( self ): return self.collection
 
     #

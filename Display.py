@@ -55,6 +55,7 @@ def formatQuantity( value, singular, plural = None, format = '%d %s' ):
 def getHHMMSS( secs ):
     if secs < 60:
         return u'0:%02d' % secs
+
     elif secs < 3600:
 
         #
@@ -81,12 +82,16 @@ def getHHMMSS( secs ):
 #
 class DisplayGenerator( object ):
 
-    def __init__( self, client ):
+    def __init__( self, client, prevLevel = None ):
         self.client = client
+        self.prevLevel = prevLevel
+        self.source = client.getSource()
         self.keyMap = {}
         self.fillKeyMap()
 
     def getClient( self ): return self.client
+
+    def getSource( self ): return self.source
 
     #
     # Determine if this display generator is a temporary overlay. Derived
@@ -98,10 +103,11 @@ class DisplayGenerator( object ):
     # Install handlers for digit keyCode values.
     #
     def fillKeyMap( self ):
+        self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         for digit in range( 10 ):
             key = str( digit )
             proc = getattr( self, 'digit' + key )
-            self.addKeyMapEntry( key, kModFirst, proc )
+            self.addKeyMapEntry( key, ( kModFirst, ), proc )
 
     #
     # Add an entry to the display generator's keymap. Note that there is no
@@ -130,8 +136,17 @@ class DisplayGenerator( object ):
     def generate( self ):
         raise NotImplementedError, 'DisplayGenerator.generate'
 
+    #
+    # Move to a previous display level if given in the constructor. Otherwise,
+    # just return self.
+    #
+    def left( self ):
+        if self.prevLevel:
+            return self.prevLevel
+        return self
+
     # 
-    # Derived classes must override digit() (or the specific digit#() methods)
+    # Derived classes may override digit() (or the specific digit#() methods)
     # to handle digit key events.
     #
     def digit( self, digit ): return None
@@ -145,6 +160,9 @@ class DisplayGenerator( object ):
     def digit7( self ): return self.digit( 7 )
     def digit8( self ): return self.digit( 8 )
     def digit9( self ): return self.digit( 9 )
+
+class OverlayDisplay( DisplayGenerator ):
+    def isOverlay( self ): return True
 
 #
 # Generate a 'powered off' display like the original SliMP3.
@@ -178,7 +196,10 @@ class ClockGenerator( DisplayGenerator ):
         line1 = ' ' * ( offset + ( width - len( line1 ) ) / 2 ) + line1
         line2 = ' ' * ( offset + ( width - len( line2 ) ) / 2 ) + line2
         return Content( [ line1, line2 ] )
-    
+
+#
+# Generate a blank screen.
+#
 class BlankScreen( DisplayGenerator ):
 
     kEmptyContent = Content( [ '', '' ] )
@@ -190,21 +211,43 @@ class BlankScreen( DisplayGenerator ):
         return self.kEmptyContent
 
 #
-# Base class for all display generators that utilize iTunes as a data source.
+# Obtain a Unicode string containing characters that show a 'progress'
+# indicator for a given value using a given number of characters. The width
+# parameter is the number of characters used for the indicator; the total size
+# will be width + 2 due to the start and end indicator caps. The value
+# parameter must be a floating-point value from 0.0 - 1.0.
 #
-class iTunesSourceGenerator( DisplayGenerator ):
-
-    def __init__( self, client ):
-        DisplayGenerator.__init__( self, client )
-        self.source = client.getSource()
-
-    def getSource( self ): return self.source
-
 def generateProgressIndicator( width, value ):
+
+    #
+    # Restrict to range [0.0,1.0]
+    #
+    value = max( min( value, 1.0 ), 0.0 )
+
+    #
+    # Calculate the number of 'on' bars for the given value.
+    #
     numBars = int( width * 5 * value )
+
+    #
+    # There are 5 vertical bars in one character position. Calculate the number
+    # of these full characters
+    #
     fullBars = numBars / 5
+    
+    #
+    # Calculate the number of position with no bars lit
+    #
     emptyBars = width - fullBars
+    
+    #
+    # Calculate the number of bars lit in the last character of the indicator.
+    #
     lastBar = numBars % 5
+    
+    #
+    # Build the indicator.
+    #
     indicator = unichr( CustomCharacters.kVolumeBarBegin )
     if fullBars > 0:
         indicator += unichr( CustomCharacters.kVolumeBar5 ) * fullBars
@@ -214,16 +257,14 @@ def generateProgressIndicator( width, value ):
     if emptyBars > 0:
         indicator += unichr( CustomCharacters.kVolumeBar0 ) * emptyBars
     indicator += unichr( CustomCharacters.kVolumeBarEnd )
+
     return indicator
 
 #
 # Volume display generator. Shows the current volume setting as a line of
 # filled blocks.
 #
-class VolumeGenerator( iTunesSourceGenerator ):
-
-    def __init__( self, client ):
-        iTunesSourceGenerator.__init__( self, client )
+class VolumeGenerator( DisplayGenerator ):
 
     #
     # Generate display content.
@@ -231,6 +272,11 @@ class VolumeGenerator( iTunesSourceGenerator ):
     def generate( self ):
         volume = self.source.getVolume()
         line2 = u'%3d' % ( volume, )
+
+        #
+        # Generate a progress indicator using 20 characters to show current
+        # volume (scaled from [0-100] to [0.0-1.0])
+        #
         line2 += generateProgressIndicator( 20, volume / 100.0 )
         return Content( [ centerAlign( 'Volume' ), centerAlign( line2 ) ] )
 
@@ -247,7 +293,7 @@ class VolumeGenerator( iTunesSourceGenerator ):
 #
 # Base class for display generators that show various iTunes state values.
 #
-class StateGenerator( iTunesSourceGenerator ):
+class StateGenerator( DisplayGenerator ):
 
     #
     # Convert boolean values to text tags
@@ -286,7 +332,12 @@ class ShuffleStateGenerator( StateGenerator ):
 # Repeat mode state display generator.
 #
 class RepeatStateGenerator( StateGenerator ):
+    
+    #
+    # Mapping of iTunes repeat states to strings
+    #
     kTagMapping = { 'k.all': 'ALL', 'k.one': 'SONG', 'k.off': 'OFF' }
+
     def generate( self ):
         return self.makeContent( 
             'Repeat', self.kTagMapping[ repr( self.source.getRepeat() ) ] )

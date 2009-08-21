@@ -155,7 +155,7 @@ class ArtistSearchResults( ArtistListBrowser ):
 # Simple display generate that indicates that there are no matches for a given
 # search term. The only key supported is 'left'
 #
-class NoneFound( DisplayGenerator ):
+class NoneFound( OverlayDisplay ):
 
     def __init__( self, client, prevLevel, context, term ): 
         DisplayGenerator.__init__( self, client )

@@ -17,24 +17,24 @@
 # USA.
 #
 
-from Display import iTunesSourceGenerator
+from Display import DisplayGenerator
 from KeyProcessor import *
 
 #
-# Specialization of iTunesSourceGenerator that supports scrolling through a
-# collection of objects. Derived classes must define generateWith() to generate
-# the line to show for the current object, and getCollection() to obtain the
-# collection of objects being browsed.
+# Specialization of Display that supports scrolling through a collection of
+# objects. Derived classes must define generateWith() to generate the line to
+# show for the current object, and getCollection() to obtain the collection of
+# objects being browsed.
 #
-class Browser( iTunesSourceGenerator ):
+class Browser( DisplayGenerator ):
 
     #
     # Characters to cycle through for a given digit (eg. pressing '2' three
     # times will leave a 'C' showing)
     #
-    kDigits = [ '',
-                '',
-                'ABC',
+    kDigits = [ '',             # 0 digit
+                '',             # 1 digit
+                'ABC',          # 2 digit...
                 'DEF',
                 'GHI', 
                 'JKL',
@@ -43,11 +43,10 @@ class Browser( iTunesSourceGenerator ):
                 'TUV',
                 'WXYZ' ]
 
-    def __init__( self, client, prevLevel ):
-        iTunesSourceGenerator.__init__( self, client )
-        self.index = 0          # Index of the current item to show
-        self.prevLevel = prevLevel # Link to the previous Browser object
-        self.reset()               # Initialize to known state
+    def __init__( self, client, prevLevel, index = 0 ):
+        DisplayGenerator.__init__( self, client, prevLevel )
+        self.index = index      # Index of the current item to show
+        self.reset()            # Initialize to known state
 
     def reset( self ):
 
@@ -62,10 +61,9 @@ class Browser( iTunesSourceGenerator ):
     # Install handlers for the arrow keys.
     #
     def fillKeyMap( self ):
-        iTunesSourceGenerator.fillKeyMap( self )
+        DisplayGenerator.fillKeyMap( self )
         self.addKeyMapEntry( kArrowUp, ( kModFirst, kModRepeat ), self.up )
         self.addKeyMapEntry( kArrowDown, ( kModFirst, kModRepeat ), self.down )
-        self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kArrowRight,( kModFirst, ), self.right )
 
     #
@@ -99,8 +97,8 @@ class Browser( iTunesSourceGenerator ):
         raise NotImplementedError, 'generateWith'
 
     #
-    # Implement the Display.generate() interface. Returns a Content object that
-    # shows the currently browsed item.
+    # Implement the DisplayGenerator.generate() interface. Returns a Content
+    # object that shows the currently browsed item.
     #
     def generate( self ):
         return self.generateWith( self.getCurrentObject() )
@@ -134,11 +132,12 @@ class Browser( iTunesSourceGenerator ):
         return self
 
     #
-    # Use the previous screen generator.
+    # Override of Display method. Reset keyboard jump mechanism before
+    # returning up a level. 
     #
-    def left( self ): 
+    def left( self ):
         self.reset()
-        return self.prevLevel
+        return DisplayGenerator.left( self )
 
     #
     # If there was a previous child browser, show it. Otherwise, invoke

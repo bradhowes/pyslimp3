@@ -49,7 +49,8 @@ class TrackListBrowser( Browser ):
     # Show the current track name and duration values
     #
     def generateWith( self, obj ): 
-        return Content( [ obj.getAlbumName() + unichr( 0x95 ) + 
+        return Content( [ obj.getAlbumName() + 
+                          unichr( CustomCharacters.kDottedVerticalBar ) + 
                           obj.getArtistName(),
                           obj.getName() ],
                         [ 'Track',

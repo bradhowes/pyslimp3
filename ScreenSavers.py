@@ -28,19 +28,38 @@ from Content import *
 class ScreenSaverBase( object ):
 
     def __init__( self, content ):
+
+        #
+        # Obtain a list of the individual characters from the original content.
+        #
         self.original = map( lambda a: list( a ), content )
+        
+        #
+        # Make a copy of the lists to serve as the new display.
+        #
         self.display = self.original[ : ]
 
+    #
+    # Obtain a random character position as (X, Y) where X is a character
+    # offset from [0-kDisplayWidth) and Y is a line number from
+    # [0-kDisplayHeight)
+    #
     def getRandomCharacterPosition( self ):
         value =randrange( kDisplayHeight * kDisplayWidth )
         y = value / kDisplayWidth
         x = value - y * kDisplayWidth
         return x, y
 
+    #
+    # Update the display, and return a list of N strings
+    #
     def render( self ):
         self.updateDisplay()
         return map( lambda a: ''.join( a ), self.display )
 
+    #
+    # Update the screen saver display. Derived classes must define.
+    #
     def updateDisplay( self ):
         raise NotImplementedError, 'updateDisplay'
 
@@ -50,6 +69,8 @@ class ScreenSaverBase( object ):
 class Blanker( ScreenSaverBase ):
 
     kBlankLines = [ ' ' * kDisplayWidth ] * kDisplayHeight
+
+    name = 'Blank Display'
 
     def __init__( self, content ):
         ScreenSaverBase.__init__( self, self.kBlankLines )
@@ -63,6 +84,8 @@ class Blanker( ScreenSaverBase ):
 #
 class Zapper( ScreenSaverBase ):
 
+    name = 'Zap Characters'
+
     def updateDisplay( self ):
         x, y = self.getRandomCharacterPosition()
         if self.display[ y ][ x ] == ' ':
@@ -74,6 +97,8 @@ class Zapper( ScreenSaverBase ):
 # Screensaver that randomly swaps two characters.
 #
 class Swapper( ScreenSaverBase ):
+
+    name = 'Swap Characters'
 
     def updateDisplay( self ):
         x1, y1 = self.getRandomCharacterPosition()
@@ -88,7 +113,15 @@ class Swapper( ScreenSaverBase ):
 #
 class LeftRotater( ScreenSaverBase ):
 
+    name = 'Rotate Left'
+
     def updateDisplay( self ):
         for index in range( kDisplayHeight ):
             line = self.display[ index ]
             self.display[ index ] = line[ index + 1 : ] + line[ : index + 1 ]
+
+kScreenSavers = ( Blanker,
+                  LeftRotater,
+                  Swapper,
+                  Zapper,
+                  )

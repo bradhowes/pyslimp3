@@ -23,13 +23,14 @@ import Client
 import Settings
 
 #
-# Maintainer of client settings. Uses cPickle to save/restore setting
-# dictionaries for Client objecs. Writes to disk when a setting changes.
+# Maintainer of client settings. Uses Python's cPickle module to save/restore
+# setting dictionaries for Client objects. Writes to disk when a setting
+# changes.
 #
 class ClientPersistence( object ):
 
     def __init__( self, path = 'pyslimp3.pkl' ):
-        self.path = path
+        self.path = path        # Location of the pickle file to use
         self.clients = {}       # Mapping of active Client objects
         self.settings = {}      # Mapping of available Settings objects
         self.restore()
