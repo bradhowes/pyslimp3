@@ -24,6 +24,8 @@
 
 class MainWindow;
 
+/** Main application for qtsim. Creates MainWindow.
+*/
 class App : public QApplication
 {
     Q_OBJECT
