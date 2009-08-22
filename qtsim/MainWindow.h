@@ -20,6 +20,7 @@
 // USA.
 //
 
+#include <QtCore/QByteArray>
 #include <QtCore/QTime>
 #include <QtCore/QDateTime>
 #include <QtGui/QMainWindow>
@@ -32,42 +33,80 @@ class Remote;
 class VFDElement;
 class VFDElementData;
 
+/** Main window for the qtsim application. Locates a Pyslimp3 server via UDP
+    broadcast, processes display updates from the server, and sends remote
+    controller key events to the server.
+
+    The display consists of two lines of 40 VFDElement instances that simulate
+    the vaccuum field display found in the original SLiMP3 unit. Each
+    VFDElement has a pointer to a VFDElementData object that defines what bits
+    to illuminate. There is a standard set of 128 characters defined, with the
+    first 32 being customized by the Pyslimp3 server using certain control
+    codes in the display message.
+*/
 class MainWindow : public QWidget
 {
     Q_OBJECT
 public:
 
+    /** Constructor. Creates a Remote floating window, initializes the VFD
+	display, and creates a socket for communicating with a Pyslimp3 server.
+    */
     MainWindow();
 
 public slots:
 
+    /** Slot invoked when the user presses a button on the remote controller
+        window.
+	\param keyCode the SLiMP3 remote control key code to send to
+        the Pyslimp3 server.
+    */
     void sendKey( uint32_t keyCode );
 
 private slots:
 
+    /** Slot invoked when the heartbeat timer fires. Sends either a discovery
+     * message or a hello message.
+    */
     void emitHeartbeat();
 
-    void emitDiscovery();
-
-    void emitHello();
-
+    /** Slot invoked when a UDP message is available on the internal QUdpSocket
+	instance, presumably from a Pyslimp3 server.
+    */
     void readMessage();
 
 private:
 
+    /** Broadcast a SLiMP3 discovery message.
+    */
+    void emitDiscovery();
+    
+    /** Send a SLiMP3 hello message to the current server
+    */
+    void emitHello();
+    
+    /** Override of QWidget method. Show the remote window.
+        \param event 
+    */
     void mousePressEvent( QMouseEvent* event );
-    void writeMessage( size_t count );
+    
+    /** Send out a broadcast or UDP message with the contents of the internal
+        buffer, 
+        \param buffer data to send
+        \return true if successful, false otherwise
+    */
+    bool writeMessage( const QByteArray& data );
     void updateDisplay();
     void sendKeyMessage( uint32_t when, uint32_t keyCode );
-    void writeInteger( uint32_t value, size_t offset );
+    void writeInteger( QByteArray&, int index, uint32_t value );
     void dumpBuffer();
     void clearDisplay();
     void setDisplay( const std::string& line1, const std::string& line2 );
-    size_t processEntry( size_t index );
-    size_t processCharacter( size_t index );
-    size_t processCommand( size_t index );
-    size_t processBrightness( size_t index );
-    size_t processCustomDefinition( size_t index );
+    void processEntry();
+    void processCharacter();
+    void processCommand();
+    void processBrightness();
+    void processCustomDefinition( uint8_t index );
     void keyPressEvent( QKeyEvent* event );
 
     QTime timeSource_;
@@ -77,10 +116,11 @@ private:
     int elementIndex_;
     QTimer* timer_;
     QUdpSocket* serverSocket_;
-    unsigned char buffer_[ 2048 ];
-    size_t bufferSize_;
+    QByteArray inputBuffer_;
+    int inputIndex_;
     QHostAddress serverAddress_;
     QDateTime lastTimeStamp_;
+    bool foundServer_;
 };
 
 #endif

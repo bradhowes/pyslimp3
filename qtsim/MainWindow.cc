@@ -31,6 +31,9 @@
 #include "VFDElement.h"
 #include "VFDElementData.h"
 
+/** Bit-definitions for the character elements. Each element has 8 rows of 5
+    dots, so each definition below has 8 values, with a maximum value of 31.
+*/
 static const VFDElementData::RawDef definitions[] = {
     { 0, 0, 0, 0, 0, 0, 0, 0 },	       // 0x00
     { 0, 0, 0, 0, 0, 0, 0, 0 },	       // 0x01
@@ -166,9 +169,9 @@ static const VFDElementData::RawDef definitions[] = {
 MainWindow::MainWindow()
     : QWidget(), timeSource_(), remote_( new Remote ), bits_(), elements_(),
       timer_( new QTimer( this ) ),
-      serverSocket_( new QUdpSocket( this ) ),
+      serverSocket_( new QUdpSocket( this ) ), inputBuffer_( 4096, 0 ),
       serverAddress_( QHostAddress::Broadcast ),
-      lastTimeStamp_( QDateTime::currentDateTime() )
+      lastTimeStamp_( QDateTime::currentDateTime() ), foundServer_( false )
 {
     timeSource_.start();
 
@@ -253,39 +256,39 @@ MainWindow::sendKey( uint32_t keyCode )
 void
 MainWindow::sendKeyMessage( uint32_t when, uint32_t keyCode )
 {
-    buffer_[ 0 ] = 'i';
-    buffer_[ 1 ] = 0;
-    writeInteger( htonl( when ), 2 );
-    buffer_[ 6 ] = 0;
-    buffer_[ 7 ] = 0;
-    writeInteger( htonl( keyCode ), 8 );
-    writeMessage( 18 );
+    QByteArray msg( 18, 0 );	// 18 characters of NULL bytes
+    msg[ 0 ] = 'i';		// Input message 
+    writeInteger( msg, 2, when );
+    writeInteger( msg, 8, keyCode );
+    if ( ! writeMessage( msg ) ) {
+	foundServer_ = false;
+	emitDiscovery();
+    }
 }
 
 void
-MainWindow::writeInteger( uint32_t value, size_t offset )
+MainWindow::writeInteger( QByteArray& msg, int offset, uint32_t value )
 {
-    value = htonl( value );
-    buffer_[ offset++ ] = ( value >> 24 ) & 0xFF;
-    buffer_[ offset++ ] = ( value >> 16 ) & 0xFF;
-    buffer_[ offset++ ] = ( value >>  8 ) & 0xFF;
-    buffer_[ offset++ ] = ( value >>  0 ) & 0xFF;
+    // value = htonl( value );
+    msg[ offset++ ] = ( value >> 24 ) & 0xFF;
+    msg[ offset++ ] = ( value >> 16 ) & 0xFF;
+    msg[ offset++ ] = ( value >>  8 ) & 0xFF;
+    msg[ offset++ ] = ( value >>  0 ) & 0xFF;
 }
 
 void
 MainWindow::emitHeartbeat()
 {
-    if ( serverAddress_ != QHostAddress::Broadcast ) {
+    if ( foundServer_ ) {
 	QDateTime now( QDateTime::currentDateTime() );
-	if ( lastTimeStamp_.secsTo( now ) > 30 ) {
-	    std::clog << "*** detected stale server\n";
-	    serverAddress_ = QHostAddress::Broadcast;
-	    lastTimeStamp_ = now;
-	}
-	else {
+	if ( lastTimeStamp_.secsTo( now ) < 30 ) {
 	    emitHello();
 	    return;
 	}
+
+	std::clog << "*** detected stale server\n";
+	serverAddress_ = QHostAddress::Broadcast;
+	foundServer_ = false;
     }
 
     emitDiscovery();
@@ -295,41 +298,70 @@ void
 MainWindow::emitDiscovery()
 {
     setDisplay( "Looking for server...", "" );
-    buffer_[ 0 ] = 'd';
-    for ( int index = 1; index < 18; ++index ) buffer_[ index ] = 0;
-    writeMessage( 18 );
+    QByteArray msg( 18, 0 );	// 18 characters of NULL bytes
+    msg[ 0 ] = 'd';		// Discovery message
+
+    serverAddress_ = QHostAddress::Broadcast;
+    if ( ! writeMessage( msg ) ) {
+
+	//
+	// Failed to write to broadcast address; attempt on localhost.
+	//
+	std::clog << "*** failed writeDatagram to broadcast address\n";
+	serverAddress_ = QHostAddress::LocalHost;
+	writeMessage( msg );	// Ignore return code here
+    }
 }
 
 void
 MainWindow::emitHello()
 {
-    buffer_[ 0 ] = 'h';
-    for ( int index = 1; index < 18; ++index ) buffer_[ index ] = 0;
-    writeMessage( 18 );
+    QByteArray msg( 18, 0 );	// 18 characters of NULL bytes
+    msg[ 0 ] = 'h';		// Hello message
+    if ( ! writeMessage( msg ) ) {
+	foundServer_ = false;
+	emitDiscovery();
+    }
 }
 
 void
 MainWindow::readMessage()
 {
     while ( serverSocket_->hasPendingDatagrams() ) {
-	qint64 size = serverSocket_->readDatagram( (char*)buffer_, 4096,
-						   &serverAddress_ );
-	bufferSize_ = size;
-	// std::clog << "bufferSize: " << bufferSize_ << std::endl;
+	qint64 size = serverSocket_->pendingDatagramSize();
+
+	if ( size > inputBuffer_.capacity() )
+	    inputBuffer_.reserve( size * 2 );
+
+	inputBuffer_.resize( size );
+	size = serverSocket_->readDatagram( inputBuffer_.data(), size,
+					    &serverAddress_ );
+
 	if ( size > 0 ) {
+
+	    //
+	    // Assume that this is a valid message from a good server.
+	    //
+	    foundServer_ = true;
 	    lastTimeStamp_ = QDateTime::currentDateTime();
-	    switch ( buffer_[ 0 ] ) {
-	    case 'D':
+	    switch ( inputBuffer_[ 0 ] ) {
+	    case 'D':		// Discovery response message
 		std::clog << "server host: "
 			  << serverAddress_.toString().toStdString()
 			  << std::endl;
 		emitHello();
 		break;
 
-	    case 'l':
+	    case 'l':		// Display update message
 		// dumpBuffer();
 		updateDisplay();
 		break;
+
+	    default:
+
+		std::clog << "unknown message type - " << std::hex
+			  << int( inputBuffer_[ 0 ] ) << std::dec
+			  << "'" << inputBuffer_[ 0 ] << "'" << std::endl;
 	    }
 	}
 	else {
@@ -342,10 +374,16 @@ MainWindow::readMessage()
 void
 MainWindow::dumpBuffer()
 {
-    size_t index = 0;
+    int index = 0;
+
+    //
+    // Print 16 bytes per row
+    //
     std::clog << std::hex;
-    while ( index < bufferSize_ ) {
-	std::clog << std::setw( 2 ) << int( buffer_[ index++ ] ) << ' ';
+    while ( index < inputBuffer_.size() ) {
+	std::clog << std::setw( 2 )
+		  << uint16_t( inputBuffer_[ index++ ] )
+		  << ' ';
 	if ( ( index % 16 ) == 0 ) std::clog << '\n';
     }
 
@@ -356,148 +394,193 @@ MainWindow::dumpBuffer()
 void
 MainWindow::updateDisplay()
 {
-    // std::clog << "updateDisplay\n";
-    size_t index = 18;
-    while ( index < bufferSize_ ) {
-	index = processEntry( index );
-    }
+    inputIndex_ = 18;		// SLiMP3 protocol states that data starts here
+
+    //
+    // Process the bytes of the message. Display messages contain two bytes per
+    // piece of data: the first indicates whether it is a command or data, and
+    // the second is the value of the command or data.
+    //
+    while ( inputIndex_ < inputBuffer_.size() )
+	processEntry();
 }
 
-size_t
-MainWindow::processEntry( size_t index )
+void
+MainWindow::processEntry()
 {
-    if ( index + 1 < bufferSize_ ) {
-	// std::clog << "processEntry: " << int( buffer_[ index ] ) << std::endl;
-	switch ( buffer_[ index ] ) {
-	case 0x02: return processCommand( index + 1 ); break;
-	case 0x03: return processCharacter( index + 1 ); break;
-	default: std::clog << "*** unknown prefix - " << int( buffer_[ index ] )
-			   << "\n"; break;
+    //
+    // Make sure we have enough bytes to work with (2)
+    //
+    if ( inputIndex_ + 1 < inputBuffer_.size() ) {
+
+	//
+	// Only two valid choices here: 0x02 for commands and 0x03 for data.
+	//
+	switch ( inputBuffer_[ inputIndex_++ ] ) {
+
+	case 0x02: return processCommand();   // !!! return from here
+	case 0x03: return processCharacter(); // !!! return from here
+
+	    //
+	    // Everything else will fall thru and move the index to the end of
+	    // the buffer.
+	    //
+	default: std::clog << "*** unknown prefix - "
+			   << std::hex << int( inputBuffer_[ inputIndex_ ] )
+			   << std::dec << "\n";
+	    break;
 	};
     }
-    return bufferSize_;
+
+    inputIndex_ = inputBuffer_.size();
 }
 
-size_t
-MainWindow::processCharacter( size_t index )
+void
+MainWindow::processCharacter()
 {
-    int c = buffer_[ index++ ];
+    //
+    // Grab the index of the character definition to use.
+    //
+    int c = inputBuffer_[ inputIndex_++ ];
     if ( c >= bits_.size() ) c = 32;
-    if ( elementIndex_ < elements_.size() ) {
-	// std::clog << "processCharacter: " << c << ' ' << elementIndex_
-	// << std::endl;
+
+    //
+    // Update the VFDElement object with the new character definition to use.
+    //
+    if ( elementIndex_ < elements_.size() )
 	elements_[ elementIndex_++ ]->setData( bits_[ c ] );
-    }
-    return index;
 }
 
-size_t
-MainWindow::processCommand( size_t index )
+void
+MainWindow::processCommand()
 {
-    // std::clog << "processCommand: " << int( buffer_[ index ] ) << std::endl;
-    switch ( buffer_[ index ] ) {
-    case 0x33: clearDisplay(); return index + 1;
-    case 0x30: return processBrightness( index + 1 );
-    case 0x06: return index + 1;
-    case 0x02: elementIndex_ = 0; return index + 1;
-    case 0xC0: elementIndex_ = 40; return index + 1;
-    case 0x0C: return index + 1;
-    default: break;
+    //
+    // Fetch the command to execute. We only handle what was in the original
+    // SLiMP3 code (but no cursor display)
+    //
+    uint8_t c = inputBuffer_[ inputIndex_++ ];
+    switch ( c ) {
+    case 0x33: clearDisplay(); break;
+    case 0x30: processBrightness(); break;
+    case 0x02: elementIndex_ = 0; break;
+    case 0xC0: elementIndex_ = 40; break;
+    case 0x06: break;
+    case 0x0C: break;
+    default:
+
+	//
+	// See if this is a custom character definition
+	//
+	if ( c & 0x40 )
+	    processCustomDefinition( c );
+	break;
     }
-
-    if ( buffer_[ index ] & 0x40 ) 
-	return processCustomDefinition( index );
-
-    return index + 1;
 }
 
-size_t
-MainWindow::processBrightness( size_t index )
+void
+MainWindow::processBrightness()
 {
-    if ( index + 1 < bufferSize_ && buffer_[ index ] == 0x03 ) {
-	int brightness = buffer_[ index + 1 ];
-	// std::clog << "processBrightness: " << brightness << std::endl;
+    //
+    // Make sure we have two bytes available for the brightness setting, and
+    // that the first byte indicates a data value
+    //
+    if ( inputIndex_ + 1 < inputBuffer_.size() &&
+	 uint8_t( inputBuffer_[ inputIndex_ ] ) == 0x03 ) {
+
+	//
+	// Update the elements with the new brightness setting. NOTE: use a
+	// signal here instead?
+	//
+	int brightness = inputBuffer_[ inputIndex_ + 1 ];
 	for ( int z = 0; z < elements_.size(); ++z )
 	    elements_[ z ]->setBrightness( brightness );
     }
-    return index + 2;
+
+    inputIndex_ += 2;
 }
 
-size_t
-MainWindow::processCustomDefinition( size_t index )
+void
+MainWindow::processCustomDefinition( uint8_t index )
 {
     //
     // Extract the custom character index (0-31)
     //
-    uint32_t bitsIndex = buffer_[ index++ ];
-
+    uint32_t bitsIndex = index;
     bitsIndex = ( bitsIndex - 0x40 ) / 8;
-    // std::clog << "processCustomDefinition: " << bitsIndex << std::endl;
-
-    std::vector<int> bits;
 
     //
     // Extract the bit settings
     //
-    while ( index + 1 < bufferSize_ && buffer_[ index ] == 0x03 ) {
-	bits.push_back( buffer_[ index + 1 ] );
-	index += 2;
+    std::vector<int> bits;
+    while ( inputIndex_ + 1 < inputBuffer_.size() &&
+	    uint8_t( inputBuffer_[ inputIndex_ ] ) == 0x03 ) {
+	bits.push_back( inputBuffer_[ inputIndex_ + 1 ] );
+	inputIndex_ += 2;
     }
 
+    //
+    // Pad until we have 8 rows.
+    //
     while ( bits.size() < 8 )
 	bits.push_back( 0 );
 
+    //
+    // Update the bit definition. 
+    //
     if ( bitsIndex < 32 )
 	bits_[ bitsIndex ]->setBits( bits );
-
-    return index;
 }
 
 void
 MainWindow::clearDisplay()
 {
-    for ( int index = 0; index < elements_.size(); ++index ) {
+    //
+    // Set all VFDElement objects to point to the space character
+    //
+    for ( int index = 0; index < elements_.size(); ++index )
 	elements_[ index ]->setData( bits_[ 32 ] );
-    }
 }
 
 void
 MainWindow::setDisplay( const std::string& line1, const std::string& line2 )
 {
+    //
+    // Write out the first line
+    //
+    int element = 0;
     for ( size_t index = 0; index < line1.size() && index < 40; ++index ) {
 	int c = line1[ index ];
-	if ( c < 32 or c >= bits_.size() ) c = 32;
-	elements_[ index ]->setData( bits_[ line1[ index ] ] );
+	if ( c < 32 or c >= bits_.size() ) c = 32; // Just to be safe
+	elements_[ element++ ]->setData( bits_[ c ] );
     }
 
+    //
+    // Write out the second line
+    //
+    element = 40;
     for ( size_t index = 0; index < line2.size() && index < 40; ++index ) {
-	int c = line1[ index ];
-	if ( c < 32 or c >= bits_.size() ) c = 32;
-	elements_[ index + 40 ]->setData( bits_[ line2[ index ] ] );
+	int c = line2[ index ];
+	if ( c < 32 or c >= bits_.size() ) c = 32; // Just to be safe
+	elements_[ element++ ]->setData( bits_[ c ] );
     }
 }
 
-void
-MainWindow::writeMessage( size_t count )
+bool
+MainWindow::writeMessage( const QByteArray& msg )
 {
-    while ( 1 ) {
+    static const int kServerPort = 3483; // Well-known port for SLiMP3 servers
 
-	qint64 size = serverSocket_->writeDatagram( (char*)buffer_, count,
-						    serverAddress_, 3483 );
-	if ( size == -1 ) {
-	    std::clog << "*** failed writeDatagram\n";
-	    if ( serverAddress_ == QHostAddress::Broadcast ) {
-		serverAddress_ = QHostAddress::LocalHost;
-		continue;
-	    }
-	    else if ( serverAddress_ != QHostAddress::LocalHost ) {
-		serverAddress_ = QHostAddress::Broadcast;
-		continue;
-	    }
-	}
+    //
+    // Attempt to send the message 
+    //
+    qint64 size = serverSocket_->writeDatagram( msg.constData(),
+						msg.size(),
+						serverAddress_,
+						kServerPort );
+    if ( size != msg.size() )
+	std::clog << "*** failed writeMessage\n";
 
-	break;
-    }
+    return size == msg.size();
 }
 
 void
@@ -505,6 +588,10 @@ MainWindow::keyPressEvent( QKeyEvent* event )
 {
     std::clog << "keyPressEvent: " << event->key() << ' '
 	      << event->modifiers() << std::endl;
+    //
+    // Ask the remote to translate the Qt key event code into a remote control
+    // code, and then invoke our sendKey() method to send the remote control
+    // code to the server.
+    //
     remote_->simulateButtonPressed( event->key() );
 }
-
