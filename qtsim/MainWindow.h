@@ -108,6 +108,7 @@ private:
     void processBrightness();
     void processCustomDefinition( uint8_t index );
     void keyPressEvent( QKeyEvent* event );
+    void writeLine( const std::string& data );
 
     QTime timeSource_;
     Remote* remote_;
