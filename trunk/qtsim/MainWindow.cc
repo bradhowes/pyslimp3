@@ -166,6 +166,12 @@ static const VFDElementData::RawDef definitions[] = {
     { 31, 31, 31, 31, 31, 31, 31, 0 }, // 0x80 <block>
 };
 
+static const size_t kSpace = 32;
+static const size_t kLineWidth = 40;
+static const size_t kMessageSize = 18; // 18 bytes in client messages
+static const int kPrefixCommand = 0x02;
+static const int kPrefixData = 0x03;
+
 MainWindow::MainWindow()
     : QWidget(), timeSource_(), remote_( new Remote ), bits_(), elements_(),
       timer_( new QTimer( this ) ),
@@ -196,9 +202,10 @@ MainWindow::MainWindow()
     row1->setContentsMargins( 0, 0, 0, 0 );
     row1->setSizeConstraint( QLayout::SetFixedSize );
     row1->setSpacing( 4 );
-    for ( int index = 0; index < 40; ++index ) {
+
+    for ( size_t index = 0; index < kLineWidth; ++index ) {
 	VFDElement* w = new VFDElement( this );
-	w->setData( bits_[ 32 ] );
+	w->setData( bits_[ kSpace ] );
 	row1->addWidget( w );
 	elements_.push_back( w );
     }
@@ -207,9 +214,10 @@ MainWindow::MainWindow()
     row2->setContentsMargins( 0, 0, 0, 0 );
     row2->setSizeConstraint( QLayout::SetFixedSize );
     row2->setSpacing( 4 );
-    for ( int index = 0; index < 40; ++index ) {
+
+    for ( size_t index = 0; index < kLineWidth; ++index ) {
 	VFDElement* w = new VFDElement( this );
-	w->setData( bits_[ 32 ] );
+	w->setData( bits_[ kSpace ] );
 	row2->addWidget( w );
 	elements_.push_back( w );
     }
@@ -230,13 +238,13 @@ MainWindow::MainWindow()
     
     connect( serverSocket_, SIGNAL( readyRead() ), SLOT( readMessage() ) );
 
-    timer_->start( 5000 );
+    timer_->start( 5000 );	// 5 second heartbeats
     connect( timer_, SIGNAL( timeout() ), SLOT( emitHeartbeat() ) );
-
-    emitDiscovery();
 
     setFocusPolicy( Qt::StrongFocus );
     setFocus( Qt::ActiveWindowFocusReason );
+
+    emitDiscovery();
 }
 
 void
@@ -256,10 +264,10 @@ MainWindow::sendKey( uint32_t keyCode )
 void
 MainWindow::sendKeyMessage( uint32_t when, uint32_t keyCode )
 {
-    QByteArray msg( 18, 0 );	// 18 characters of NULL bytes
+    QByteArray msg( kMessageSize, 0 );
     msg[ 0 ] = 'i';		// Input message 
-    writeInteger( msg, 2, when );
-    writeInteger( msg, 8, keyCode );
+    writeInteger( msg, 2, when ); // write timestamp value
+    writeInteger( msg, 8, keyCode ); // write keycode value
     if ( ! writeMessage( msg ) ) {
 	foundServer_ = false;
 	emitDiscovery();
@@ -270,6 +278,9 @@ void
 MainWindow::writeInteger( QByteArray& msg, int offset, uint32_t value )
 {
     // value = htonl( value );
+    //
+    // Write byte values to buffer
+    //
     msg[ offset++ ] = ( value >> 24 ) & 0xFF;
     msg[ offset++ ] = ( value >> 16 ) & 0xFF;
     msg[ offset++ ] = ( value >>  8 ) & 0xFF;
@@ -279,9 +290,15 @@ MainWindow::writeInteger( QByteArray& msg, int offset, uint32_t value )
 void
 MainWindow::emitHeartbeat()
 {
+    static const int kTimeout = 30; // seconds
     if ( foundServer_ ) {
+
+	//
+	// See if we have not seen a message from the server for kTimeout
+	// seconds.
+	//
 	QDateTime now( QDateTime::currentDateTime() );
-	if ( lastTimeStamp_.secsTo( now ) < 30 ) {
+	if ( lastTimeStamp_.secsTo( now ) < kTimeout ) {
 	    emitHello();
 	    return;
 	}
@@ -298,9 +315,8 @@ void
 MainWindow::emitDiscovery()
 {
     setDisplay( "Looking for server...", "" );
-    QByteArray msg( 18, 0 );	// 18 characters of NULL bytes
+    QByteArray msg( kMessageSize, 0 );
     msg[ 0 ] = 'd';		// Discovery message
-
     serverAddress_ = QHostAddress::Broadcast;
     if ( ! writeMessage( msg ) ) {
 
@@ -316,7 +332,7 @@ MainWindow::emitDiscovery()
 void
 MainWindow::emitHello()
 {
-    QByteArray msg( 18, 0 );	// 18 characters of NULL bytes
+    QByteArray msg( kMessageSize, 0 );
     msg[ 0 ] = 'h';		// Hello message
     if ( ! writeMessage( msg ) ) {
 	foundServer_ = false;
@@ -394,7 +410,10 @@ MainWindow::dumpBuffer()
 void
 MainWindow::updateDisplay()
 {
-    inputIndex_ = 18;		// SLiMP3 protocol states that data starts here
+    //
+    // SLiMP3 protocol states that display data starts here.
+    // 
+    inputIndex_ = kMessageSize;
 
     //
     // Process the bytes of the message. Display messages contain two bytes per
@@ -418,8 +437,8 @@ MainWindow::processEntry()
 	//
 	switch ( inputBuffer_[ inputIndex_++ ] ) {
 
-	case 0x02: return processCommand();   // !!! return from here
-	case 0x03: return processCharacter(); // !!! return from here
+	case kPrefixCommand: return processCommand(); // !!! return from here
+	case kPrefixData: return processCharacter();  // !!! return from here
 
 	    //
 	    // Everything else will fall thru and move the index to the end of
@@ -442,7 +461,7 @@ MainWindow::processCharacter()
     // Grab the index of the character definition to use.
     //
     int c = inputBuffer_[ inputIndex_++ ];
-    if ( c >= bits_.size() ) c = 32;
+    if ( c >= bits_.size() ) c = kSpace;
 
     //
     // Update the VFDElement object with the new character definition to use.
@@ -463,7 +482,7 @@ MainWindow::processCommand()
     case 0x33: clearDisplay(); break;
     case 0x30: processBrightness(); break;
     case 0x02: elementIndex_ = 0; break;
-    case 0xC0: elementIndex_ = 40; break;
+    case 0xC0: elementIndex_ = kLineWidth; break;
     case 0x06: break;
     case 0x0C: break;
     default:
@@ -485,7 +504,7 @@ MainWindow::processBrightness()
     // that the first byte indicates a data value
     //
     if ( inputIndex_ + 1 < inputBuffer_.size() &&
-	 uint8_t( inputBuffer_[ inputIndex_ ] ) == 0x03 ) {
+	 uint8_t( inputBuffer_[ inputIndex_ ] ) == kPrefixData ) {
 
 	//
 	// Update the elements with the new brightness setting. NOTE: use a
@@ -513,7 +532,7 @@ MainWindow::processCustomDefinition( uint8_t index )
     //
     std::vector<int> bits;
     while ( inputIndex_ + 1 < inputBuffer_.size() &&
-	    uint8_t( inputBuffer_[ inputIndex_ ] ) == 0x03 ) {
+	    uint8_t( inputBuffer_[ inputIndex_ ] ) == kPrefixData ) {
 	bits.push_back( inputBuffer_[ inputIndex_ + 1 ] );
 	inputIndex_ += 2;
     }
@@ -527,7 +546,7 @@ MainWindow::processCustomDefinition( uint8_t index )
     //
     // Update the bit definition. 
     //
-    if ( bitsIndex < 32 )
+    if ( bitsIndex < kSpace )
 	bits_[ bitsIndex ]->setBits( bits );
 }
 
@@ -538,30 +557,27 @@ MainWindow::clearDisplay()
     // Set all VFDElement objects to point to the space character
     //
     for ( int index = 0; index < elements_.size(); ++index )
-	elements_[ index ]->setData( bits_[ 32 ] );
+	elements_[ index ]->setData( bits_[ kSpace ] );
 }
 
 void
 MainWindow::setDisplay( const std::string& line1, const std::string& line2 )
 {
-    //
-    // Write out the first line
-    //
-    int element = 0;
-    for ( size_t index = 0; index < line1.size() && index < 40; ++index ) {
-	int c = line1[ index ];
-	if ( c < 32 or c >= bits_.size() ) c = 32; // Just to be safe
-	elements_[ element++ ]->setData( bits_[ c ] );
-    }
+    elementIndex_ = 0;
+    writeLine( line1 );
+    elementIndex_ = kLineWidth;
+    writeLine( line2 );
+}
 
-    //
-    // Write out the second line
-    //
-    element = 40;
-    for ( size_t index = 0; index < line2.size() && index < 40; ++index ) {
-	int c = line2[ index ];
-	if ( c < 32 or c >= bits_.size() ) c = 32; // Just to be safe
-	elements_[ element++ ]->setData( bits_[ c ] );
+void
+MainWindow::writeLine( const std::string& line )
+{
+    for ( size_t index = 0; index < line.size() && index < kLineWidth;
+	  ++index ) {
+	size_t c = line[ index ];
+	if ( c < kSpace or c >= size_t( bits_.size() ) )
+	    c = kSpace; // Just to be safe
+	elements_[ elementIndex_++ ]->setData( bits_[ c ] );
     }
 }
 
