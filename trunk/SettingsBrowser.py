@@ -43,7 +43,7 @@ class SettingsBrowser( Browser ):
         self.addKeyMapEntry( kOK, ( kModFirst, ), self.install )
 
     def generateWith( self, obj ):
-        return Content( [ self.kTitle, self.getDisplayName( obj ) ],
+        return Content( [ self.kTitle, self.getDisplayValue( obj ) ],
                         [ self.getIndexOverlay(), '' ] )
 
     def install( self ):
@@ -68,10 +68,11 @@ class AnimatorBrowser( SettingsBrowser ):
     def getDisplayValue( self, obj ): return obj.kName
     def updateSetting( self ): self.client.setAnimatorIndex( self.index )
 
-class ScreenSaverSetting( DynamicEntry, SettingsBrowser ):
+class ScreenSaverSetting( DynamicEntry ):
 
     def makeContent( self, browser ):
-        return [ 'Current Screen Saver:', kScreenSavers[ self.index ].kName ]
+        index = browser.client.getSettings().getScreenSaverIndex()
+        return [ 'Current Screen Saver:', kScreenSavers[ index ].kName ]
 
     def makeNextLevel( self, browser ):
         index = browser.client.getSettings().getScreenSaverIndex()
