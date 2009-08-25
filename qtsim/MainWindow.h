@@ -96,6 +96,8 @@ private:
         \return true if successful, false otherwise
     */
     bool writeMessage( const QByteArray& data );
+
+    bool serverIsAlive();
     void updateDisplay();
     void sendKeyMessage( uint32_t when, uint32_t keyCode );
     void writeInteger( QByteArray&, int index, uint32_t value );

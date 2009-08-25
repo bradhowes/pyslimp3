@@ -28,8 +28,6 @@ from Display import *
 # 
 class Animator( object ):
 
-    kHoldCount = 10             # Number of renders before animating
-
     def __init__( self, screenSaverClass, screenSaverTimeout ):
         self.content = None
         self.output = None
@@ -51,13 +49,12 @@ class Animator( object ):
     #
     def reset( self ):
         self.offsets = [ 0 ] * kDisplayHeight
-        self.atEnd = False
-        self.holdCounter = Animator.kHoldCount
         self.removeScreenSaver()
 
     #
     # Apply new display content for animating. Resets animation values if the
-    # screen content is different.
+    # screen content is different. Invoked by the Client owner to show new
+    # content on the remote device.
     #
     def setContent( self, content ):
 
@@ -65,19 +62,20 @@ class Animator( object ):
         # If the main content lines are different or the shifts needed to show
         # an entire line are different, reset the animation.
         #
-        shiftsNeeded = content.shiftsNeeded
+        shiftsNeeded = content.getShiftsNeeded()
         if self.content is None or \
                 content.hasDifferentLines( self.content ) or \
                 self.shiftsNeeded != shiftsNeeded:
             self.reset()
-            self.maxShift = max( shiftsNeeded )
-            self.shiftsNeeded = shiftsNeeded
+            self.setShiftsNeeded( shiftsNeeded )
+
         #
         # If lines are the same but the overlays differ, just remove any active
         # screen saver.
         #
         elif content.hasDifferentRightOverlays( self.content ):
             self.removeScreenSaver()
+
         #
         # Lines are the same, as are the overlays. Check to see if we should
         # invoke a screen saver.
@@ -87,7 +85,12 @@ class Animator( object ):
             delta -= self.activatingTimestamp
             if delta.seconds >= self.screenSaverTimeout:
                 self.activateScreenSaver()
+
         self.content = content
+
+    def setShiftsNeeded( self, shiftsNeeded ):
+        self.shiftsNeeded = shiftsNeeded
+        self.maxShift = max( shiftsNeeded )
 
     def activateScreenSaver( self ):
         self.screenSaver = self.screenSaverClass( self.output )
@@ -107,7 +110,6 @@ class Animator( object ):
     # long lines.
     #
     def render( self ):
-
         if self.screenSaver:
             return self.screenSaver.render()
 
@@ -115,16 +117,43 @@ class Animator( object ):
         # Obtain a rendering from the current display content, using any
         # animation offsets we have.
         #
-        self.output = output = self.content.render( self.offsets )
-        if self.maxShift == 0:
-            return output
+        self.output = self.content.render( self.offsets )
+        if self.maxShift > 0:
+            self.updateOffsets()
+        return self.output
+
+    def updateOffsets( self ):
+        raise NotImplementedError, 'generateOutput'
+
+#
+# Animator that scrolls text left by one character to slowly reveal the rest of
+# a line that is longer than ( kDisplayWidth - len( overlay text ).
+#
+class ScrollAnimator( Animator ):
+
+    kHoldCount = 10             # Number of renders before animating
+    kName = 'Scroll'            # Name to show in the conguration settings
+
+    #
+    # Override of Animator method. Reset scroll settings
+    #
+    def reset( self ):
+        Animator.reset( self )
+        self.atEnd = False
+        self.holdCounter = self.kHoldCount
+
+    #
+    # Implementation of Animator interface. Generate the output, shift the text
+    # to the left as necessary.
+    #
+    def updateOffsets( self ):
 
         #
         # Decrement our hold counter. Once at zero, we will start animating.
         #
         self.holdCounter -= 1
         if self.holdCounter > 0:
-            return output
+            return
 
         #
         # Scroll each line that needs it.
@@ -147,7 +176,7 @@ class Animator( object ):
                             #
                             self.atEnd = False
                             self.offsets = [ 0 ] * kDisplayHeight
-                            self.holdCounter = Animator.kHoldCount / 2
+                            self.holdCounter = self.kHoldCount / 2
 
                         else:
 
@@ -156,8 +185,8 @@ class Animator( object ):
                             # at the end.
                             #
                             self.atEnd = True
-                            self.holdCounter = Animator.kHoldCount / 2
-                            
+                            self.holdCounter = self.kHoldCount / 2
+
                         #
                         # It is sound to break here since we already know that
                         # we are working with one of the longest lines.
@@ -171,7 +200,77 @@ class Animator( object ):
                     # Clamp to the amount needed to shift the line to the right
                     # and store.
                     #
-                    offset += 2
+                    offset += 1
                     self.offsets[ index ] = min( offset, shiftNeeded )
 
-        return output
+#
+# Animator that shifts text left by ( kDisplayWidth - len( overlay text)
+# characters at a time to reveal the rest of a line.
+#
+class ShiftAnimator( Animator ):
+
+    kHoldCount = 6              # Number of renders before a shift
+    kName = 'Shift'             # Name to show in the configuration settings
+
+    #
+    # Override of Animator method. Reset scroll settings
+    #
+    def reset( self ):
+        Animator.reset( self )
+        self.holdCounter = self.kHoldCount
+
+    #
+    # Implementation of Animator interface. Generate the output, shift the text
+    # to the left as necessary.
+    #
+    def updateOffsets( self ):
+
+        #
+        # Decrement our hold counter. Once at zero, we will start animating.
+        #
+        self.holdCounter -= 1
+        if self.holdCounter > 0:
+            return
+
+        #
+        # Reset the hold counter.
+        #
+        self.holdCounter = self.kHoldCount
+
+        #
+        # Shift each line that needs it.
+        #
+        for index in range( kDisplayHeight ):
+            shiftNeeded = self.shiftsNeeded[ index ]
+            if shiftNeeded > 0:
+                
+                #
+                # Get current shift
+                #
+                offset = self.offsets[ index ]
+                if offset != shiftNeeded:
+                    
+                    #
+                    # Shift by the number of characters visible in the line.
+                    # Limit to the amount needed to shift to see the end of the
+                    # line.
+                    #
+                    offset += ( kDisplayWidth -
+                                len( self.content.getRightOverlay( index ) ) )
+                    if offset > shiftNeeded:
+                        offset = shiftNeeded
+                else:
+                    
+                    #
+                    # Start at the beginning of the line.
+                    #
+                    offset = 0
+
+                self.offsets[ index ] = offset
+
+#
+# List of available animator classes
+#
+kAnimators = ( ScrollAnimator,
+               ShiftAnimator,
+               )

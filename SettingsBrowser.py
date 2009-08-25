@@ -17,6 +17,7 @@
 # USA.
 #
 
+from Animator import kAnimators
 from Browser import Browser
 from Content import Content
 from Display import *
@@ -34,40 +35,61 @@ class NotificationDisplay( OverlayDisplay ):
     def generate( self ):
         return Content( [ self.line1, self.line2 ] )
 
-class ScreenSaverBrowser( Browser ):
+class SettingsBrowser( Browser ):
 
     def fillKeyMap( self ):
         Browser.fillKeyMap( self )
         self.addKeyMapEntry( kArrowRight, ( kModFirst, ), self.install )
         self.addKeyMapEntry( kOK, ( kModFirst, ), self.install )
 
-    def getCollection( self ):
-        return kScreenSavers
-
     def generateWith( self, obj ):
-        return Content( [ 'Screen Savers',
-                          obj.name ],
-                        [ self.getIndexOverlay(),
-                          '' ] )
+        return Content( [ self.kTitle, self.getDisplayName( obj ) ],
+                        [ self.getIndexOverlay(), '' ] )
 
     def install( self ):
-        self.client.setScreenSaverIndex( self.index )
+        self.updateSetting()
         return NotificationDisplay( self.client, self.prevLevel,
-                                    "Screen saver changed" )
+                                    self.kNotification )
 
-class ScreenSaverSetting( DynamicEntry ):
+    def updateSetting( self ):
+        raise NotImplementedError, 'setSetting'
+
+class ScreenSaverBrowser( SettingsBrowser ):
+    kTitle = 'Screen Savers'
+    kNotification = 'Screen saver changed'
+    def getCollection( self ): return kScreenSavers
+    def getDisplayValue( self, obj ): return obj.kName
+    def updateSetting( self ): self.client.setScreenSaverIndex( self.index )
+
+class AnimatorBrowser( SettingsBrowser ):
+    kTitle = 'Animators'
+    kNotification = 'Animator changed'
+    def getCollection( self ): return kAnimators
+    def getDisplayValue( self, obj ): return obj.kName
+    def updateSetting( self ): self.client.setAnimatorIndex( self.index )
+
+class ScreenSaverSetting( DynamicEntry, SettingsBrowser ):
 
     def makeContent( self, browser ):
-        index = browser.client.getSettings().getScreenSaverIndex()
-        return [ 'Current Screen Saver:', 
-                 kScreenSavers[ index ].name ]
+        return [ 'Current Screen Saver:', kScreenSavers[ self.index ].kName ]
 
     def makeNextLevel( self, browser ):
         index = browser.client.getSettings().getScreenSaverIndex()
         return ScreenSaverBrowser( browser.client, browser, index )
 
+class AnimatorSetting( DynamicEntry ):
+
+    def makeContent( self, browser ):
+        index = browser.client.getSettings().getAnimatorIndex()
+        return [ 'Current Animator:', kAnimators[ index ].kName ]
+
+    def makeNextLevel( self, browser ):
+        index = browser.client.getSettings().getAnimatorIndex()
+        return AnimatorBrowser( browser.client, browser, index )
+
 class SettingsBrowser( DynamicBrowser ):
 
     def __init__( self, client, prevLevel ):
         DynamicBrowser.__init__( self, client, prevLevel,
-                                 ( ScreenSaverSetting(), ) )
+                                 ( ScreenSaverSetting(),
+                                   AnimatorSetting(), ) )

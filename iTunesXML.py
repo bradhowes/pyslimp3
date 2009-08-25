@@ -29,18 +29,26 @@ from OrderedItem import OrderedItem
 # Class for an artist. Maintains a list of albums associated with the artist.
 #
 class Artist( OrderedItem ):
+
     def __init__( self, name ):
         OrderedItem.__init__( self, name )
         self.albums = []
+        self.needSort = False
+
+    def addAlbum( self, album ): 
         self.needSort = True
-    def addAlbum( self, album ): self.albums.append( album )
+        self.albums.append( album )
+
     def getAlbums( self ):
         if self.needSort:
             self.albums.sort()
             self.needSort = False
         return self.albums
+
     def getAlbumCount( self ): return len( self.albums )
+    
     def getAlbum( self, index ): return self.getAlbums()[ index ]
+
     def __repr__( self ): return 'Artist "%s"' % ( self.getName(), )
 
 #
@@ -48,79 +56,130 @@ class Artist( OrderedItem ):
 # make up the album.
 #
 class Album( OrderedItem ):
+
     def __init__( self, artist, name ):
         OrderedItem.__init__( self, name )
         self.artist = artist
         self.tracks = []
+
+        #
+        # Since tracks may arrive in any order in the XML file, we will sort
+        # them before returning any. The Track class defines the order as the
+        # track index from the album. An alternative way would be to
+        # preallocate an array and place tracks at their appropriate index.
+        # However, this could leave holes in the array due to missing tracks.
+        # This method, though slower for the first access, will not reveal gaps
+        # in the tracks.
+        #
+        self.needSort = True 
+
+    def addTrack( self, track ):
         self.needSort = True
-    def addTrack( self, track ): self.tracks.append( track )
+        self.tracks.append( track )
+
     def getArtistName( self ): return self.artist.getName()
+
     def getTracks( self ): 
         if self.needSort:
+            
+            #
+            # Since the Track object define ordering by their index within the
+            # original album, this will place them in their proper track order.
+            #
             self.tracks.sort()
             self.needSort = False
         return self.tracks
+
     def getTrackCount( self ): return len( self.tracks )
+
     def getTrack( self, index ): return self.getTracks()[ index ]
+
     def __repr__( self ): return 'Album "%s"' % ( self.getName(), )
 
 #
-# Class for a playlist in iTunes.
+# Class for a playlist in iTunes. A playlist just contains a list of tracks.
 #
 class Playlist( OrderedItem ):
+
     def __init__( self, name ):
         OrderedItem.__init__( self, name )
         self.tracks = []
+
     def getTracks( self ): return self.tracks
+
     def getTrackCount( self ): return len( self.tracks )
+
     def getTrack( self, index ): return self.tracks[ index ]
+
     def getTracks( self ): return self.tracks
+
     def __repr__( self ): return 'Playlist "%s"' % ( self.getName(), )
 
 #
-# Class for a track of an album of an artist. Contains the original iTunes
-# XML element object that describes the track.
+# Class for a track of an album of an artist. Contains the original iTunes XML
+# element object that describes the track. NOTE: defines ordering and hashing
+# methods to properly order a collection of Track objects by their track index.
 #
-class Track( object ):
+class Track( OrderedItem ):
+
     def __init__( self, track ):
+        OrderedItem.__init__( self, track.get( 'Name', '' ) )
         self.track = track
         self.id = str( track.get( 'Persistent ID' ) )
         self.index = int( track.get( 'Track Number', '-1' ) )
-        self.name = track.get( 'Name', '' )
         self.artistName = track.get( 'Artist', '' )
         self.albumName = track.get( 'Album', '' )
         self.duration = int( track.get( 'Total Time', 0 ) ) / 1000
+
     def getID( self ): return self.id
+
     def getIndex( self ): return self.index
+
     def getName( self ): return self.name
+
     def getArtistName( self ): return self.artistName
+
     def getAlbumName( self ): return self.albumName
+
     def getDuration( self ): return self.duration
+
     def __repr__( self ): return 'Track "%d - %s"' % ( self.index, self.name, )
+
     def hash( self ): return self.index
+
     def __cmp__( self, other ): return cmp( self.index, other.index )
 
 #
 # Wrapper class for a track object obtained from the appscript AppleScript
 # bridge. The naming of attributes is different from Track.
 #
-class ActiveTrack( object ):
+class ActiveTrack( OrderedItem ):
+
     def __init__( self, track ):
+        OrderedItem.__init__( self, track.name() )
         self.track = track
         self.id = track.persistent_ID()
         self.index = track.track_number()
-        self.name = track.name()
         self.artistName = track.artist()
         self.albumName = track.album()
         self.duration = track.duration()
+
     def getID( self ): return self.id
+
     def getIndex( self ): return self.index
+
     def getName( self ): return self.name
+
     def getArtistName( self ): return self.artistName
+
     def getAlbumName( self ): return self.albumName
+
     def getDuration( self ): return self.duration
+
     def __repr__( self ): return 'Track "%d - %s"' % ( self.index, self.name, )
+
     def hash( self ): return self.index
+
     def __cmp__( self, other ): return cmp( self.index, other.index )
 
 #
@@ -412,13 +471,14 @@ class iTunesXML( object ):
 
             #
             # Locate an existing album for the album name. Look first inside
-            # the artist.
+            # the artist. NOTE: do not use the getter methods to fetch albums,
+            # since we do not want to cause a sort on the held albums yet.
             #
             albumName = OrderedItem( albumName )
             album = None
             if len( artist.albums ):
                 for index in range( artist.getAlbumCount() - 1, -1, -1 ):
-                    album = artist.getAlbum( index )
+                    album = artist.albums[ index ]
                     if album == albumName:
                         break
                 if album != albumName:
@@ -456,8 +516,13 @@ class iTunesXML( object ):
                     artistMap[ aliasName ] = alias
                     artistList.append( alias )
                 found = None
+                
+                #
+                # NOTE: do not use the getter methods to fetch albums, since we
+                # do not want to cause a sort on the held albums yet.
+                #
                 for index in range( alias.getAlbumCount() ):
-                    tmp = alias.getAlbum( index )
+                    tmp = alias.albums[ index ]
                     if tmp == albumName:
                         found = tmp
                         break
@@ -574,8 +639,9 @@ class iTunesXML( object ):
         if type( key ) is type( 0 ):
             artist = self.artistList[ key ]
         else:
-            key = OrderedItem( key )
-            artist = self.artistMap.get( key.getKey() )
+            if not isinstance( key, OrderedItem ):
+                key = OrderedItem( key )
+            artist = self.artistMap.get( key )
         return artist
 
     def getAlbumList( self ): return self.albumList
@@ -589,12 +655,13 @@ class iTunesXML( object ):
         if type( key ) is type( 0 ):
             album = self.albumList[ key ]
         else:
-            
+
             #
             # We don't maintain a mapping of album names to album artists. Use
             # binary search on the sorted list of albums to find a match.
             #
-            key = OrderedItem( key )
+            if not isinstance( key, OrderedItem ):
+                key = OrderedItem( key )
             pos = bisect_left( self.albumList, key )
             album = self.albumList[ pos ]
             if album != key:
@@ -676,7 +743,8 @@ class iTunesXML( object ):
 
     #
     # Get the current playlist. If there is not one, then use our playlist
-    # (MBJB)
+    # (MBJB). This allows us to show what the user is playing via iTunes (or
+    # the Remote iPhone application).
     #
     def getActivePlaylistObject( self ):
         try:
@@ -772,7 +840,7 @@ class iTunesXML( object ):
 
     #
     # Get the AppleScript object representing the named playlist. If the
-    # playlist does not exist, create it if allowed
+    # playlist does not exist, create it if desired.
     #
     def getPlaylistObject( self, name, create = True ):
         playlist = None
@@ -780,12 +848,10 @@ class iTunesXML( object ):
             playlist = self.getApp().user_playlists[ name ].get()
         except appscript.reference.CommandError:
             pass
-
         if playlist is None and create:
             playlist = self.getApp().make( 
                 new = appscript.k.user_playlist,
                 with_properties = { appscript.k.name: name } )
-
         #
         # Make playlist current if it exists
         #

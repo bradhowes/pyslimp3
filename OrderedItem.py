@@ -17,6 +17,9 @@
 # USA.
 #
 
+import VFD
+import re
+
 #
 # Base class for names of albums and artists. Provides for a sane ordering that
 # disregards capitalization, leading articles, and non-alphanumeric characters.
@@ -24,24 +27,33 @@
 class OrderedItem( object ):
 
     __slots__ = ( 'name', 'key' )
-    
+
+    #
+    # Set of text substitutions to apply to the name of the item.
+    #
+    kSubstitutions = ( 
+        ( re.compile( ' & ' ), ' and ' ), # Spell out the '&' character
+        ( re.compile( ' *\\.\\.\\. *' ),  # Shorten '...' to one character
+          unichr( VFD.CustomCharacters.kEllipsis ) ),
+        )
+
     def __init__( self, name ):
 
+        #
+        # Detect if we've been given another OrdererdItem for the name. Just
+        # copy over its data
+        #
         if isinstance( name, OrderedItem ):
             self.name = name.name
             self.key = name.key
             return
 
         #
-        # Replace ' & ' with ' and ' in the name
+        # Apply the text substitutions.
         #
-        pos = 0
-        while 1:
-            pos = name.find( ' & ', pos )
-            if pos == -1:
-                break
-            name = name[ : pos ] + ' and ' + name[ pos + 3 : ]
-            pos += 5
+        for pair in self.kSubstitutions:
+            name = pair[ 0 ].sub( pair[ 1 ], name )
+
         self.name = name
 
         #
@@ -52,13 +64,21 @@ class OrderedItem( object ):
         bits = name.upper().split()
         if bits[ 0 ] in ( 'A', 'AN', 'THE', 'EL', 'LA', 'LOS', 'LAS' ):
             bits = bits[ 1: ]
+
         self.key = filter( lambda a: a.isalnum() or a.isspace(), 
                            ' '.join( bits ) )
 
     def getName( self ): return self.name
     def getKey( self ): return self.key
 
+    #
+    # Obtain the hash value for this object. Uses the hash of the key
+    #
     def __hash__( self ): return hash( self.key )
+
+    #
+    # Ordering definitions that rely on the key value
+    #
     def __eq__( self, other ): return self.key == other.key
     def __ne__( self, other ): return self.key != other.key
     def __lt__( self, other ): return self.key < other.key

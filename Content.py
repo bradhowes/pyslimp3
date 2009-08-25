@@ -17,7 +17,7 @@
 # USA.
 #
 
-from itertools import izip
+from VFD import *
 
 kDisplayHeight = 2              # Number of lines in display
 kDisplayWidth = 40              # Number of characters in line
@@ -30,6 +30,14 @@ kBlankOverlays = [ '' ] * kDisplayHeight
 # text output.
 #
 class Content:
+
+    #
+    # List of characters that do not require a space before them at the start
+    # of an overlay string
+    #
+    kNoSpacePrefix = ( u' ',
+                       unichr( CustomCharacters.kVolumeBarBegin ),
+                       )
 
     #
     # Constructor. The 'lines' value must be a list, as must be 'overlays' if
@@ -47,17 +55,24 @@ class Content:
         if rightOverlays is None:
             rightOverlays = kBlankOverlays
         elif id( rightOverlays ) is not id( kBlankOverlays ):
-            
-            #
-            # Normalize overlays so that we have kDisplayHeight of them, and
-            # any that are not blank begin with a space
-            #
+
             count = len( rightOverlays )
             for index in range( count ):
-                if len( rightOverlays[ index ] ):
-                    rightOverlays[ index ] = ' ' + rightOverlays[ index ]
+                rightOverlay = rightOverlays[ index ]
+                
+                #
+                # Add a space if the overlay has text, and the first character
+                # is not in the kNoSpacePrefix list.
+                #
+                if len( rightOverlay ) and \
+                        rightOverlay[ 0 ] not in self.kNoSpacePrefix:
+                    rightOverlays[ index ] = ' ' + rightOverlay
+            #
+            # Normalize overlays so that we have kDisplayHeight of them
+            #
             if count < kDisplayHeight:
                 rightOverlays.extend( [ '' ] * ( kDisplayHeight - count ) )
+
         self.rightOverlays = rightOverlays
 
         #
@@ -71,6 +86,12 @@ class Content:
             remaining -= len( rightOverlay )
             shiftNeeded = max( len( line ) - remaining, 0 )
             self.shiftsNeeded.append( shiftNeeded )
+
+    def getShiftsNeeded( self ): return self.shiftsNeeded
+
+    def getLine( self, index ): return self.lines[ index ]
+
+    def getRightOverlay( self, index ): return self.rightOverlays[ index ]
 
     #
     # Generate an text block from the content. Returns the rendered text block.

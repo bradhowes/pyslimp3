@@ -166,11 +166,13 @@ static const VFDElementData::RawDef definitions[] = {
     { 31, 31, 31, 31, 31, 31, 31, 0 }, // 0x80 <block>
 };
 
-static const size_t kSpace = 32;
+static const int kServerPort = 3483; // Well-known port for SLiMP3 servers
+static const size_t kSpaceCharacterIndex = 32;
 static const size_t kLineWidth = 40;
 static const size_t kMessageSize = 18; // 18 bytes in client messages
 static const int kPrefixCommand = 0x02;
 static const int kPrefixData = 0x03;
+static const int kHeartbeatInterval = 5000; // msecs (5 seconds)
 
 MainWindow::MainWindow()
     : QWidget(), timeSource_(), remote_( new Remote ), bits_(), elements_(),
@@ -205,7 +207,7 @@ MainWindow::MainWindow()
 
     for ( size_t index = 0; index < kLineWidth; ++index ) {
 	VFDElement* w = new VFDElement( this );
-	w->setData( bits_[ kSpace ] );
+	w->setData( bits_[ kSpaceCharacterIndex ] );
 	row1->addWidget( w );
 	elements_.push_back( w );
     }
@@ -217,7 +219,7 @@ MainWindow::MainWindow()
 
     for ( size_t index = 0; index < kLineWidth; ++index ) {
 	VFDElement* w = new VFDElement( this );
-	w->setData( bits_[ kSpace ] );
+	w->setData( bits_[ kSpaceCharacterIndex ] );
 	row2->addWidget( w );
 	elements_.push_back( w );
     }
@@ -238,7 +240,7 @@ MainWindow::MainWindow()
     
     connect( serverSocket_, SIGNAL( readyRead() ), SLOT( readMessage() ) );
 
-    timer_->start( 5000 );	// 5 second heartbeats
+    timer_->start( kHeartbeatInterval );
     connect( timer_, SIGNAL( timeout() ), SLOT( emitHeartbeat() ) );
 
     setFocusPolicy( Qt::StrongFocus );
@@ -257,16 +259,15 @@ MainWindow::mousePressEvent( QMouseEvent* )
 void
 MainWindow::sendKey( uint32_t keyCode )
 {
-    int msecs = timeSource_.elapsed();
-    sendKeyMessage( msecs, keyCode );
+    sendKeyMessage( timeSource_.elapsed(), keyCode );
 }
 
 void
 MainWindow::sendKeyMessage( uint32_t when, uint32_t keyCode )
 {
     QByteArray msg( kMessageSize, 0 );
-    msg[ 0 ] = 'i';		// Input message 
-    writeInteger( msg, 2, when ); // write timestamp value
+    msg[ 0 ] = 'i';		     // Input message 
+    writeInteger( msg, 2, when );    // write timestamp value
     writeInteger( msg, 8, keyCode ); // write keycode value
     if ( ! writeMessage( msg ) ) {
 	foundServer_ = false;
@@ -277,7 +278,6 @@ MainWindow::sendKeyMessage( uint32_t when, uint32_t keyCode )
 void
 MainWindow::writeInteger( QByteArray& msg, int offset, uint32_t value )
 {
-    // value = htonl( value );
     //
     // Write byte values to buffer
     //
@@ -287,28 +287,43 @@ MainWindow::writeInteger( QByteArray& msg, int offset, uint32_t value )
     msg[ offset++ ] = ( value >>  0 ) & 0xFF;
 }
 
+bool
+MainWindow::serverIsAlive()
+{
+    //
+    // Server cannot be alive if we've never found one.
+    //
+    if ( ! foundServer_ ) return false;
+
+    //
+    // Server is alive if we've received a message from it in the past
+    // kServerMissingDuration seconds
+    //
+    static const int kServerMissingDuration = 30; // seconds
+    QDateTime now( QDateTime::currentDateTime() );
+    if ( lastTimeStamp_.secsTo( now ) < kServerMissingDuration )
+	return true;
+
+    //
+    // Server seems to have disappeared. Reset so that we will emit
+    // broadcast server discovery messages.
+    //
+    std::clog << "*** detected stale server\n";
+    serverAddress_ = QHostAddress::Broadcast;
+    foundServer_ = false;
+
+    return false;
+}
+
 void
 MainWindow::emitHeartbeat()
 {
-    static const int kTimeout = 30; // seconds
-    if ( foundServer_ ) {
-
-	//
-	// See if we have not seen a message from the server for kTimeout
-	// seconds.
-	//
-	QDateTime now( QDateTime::currentDateTime() );
-	if ( lastTimeStamp_.secsTo( now ) < kTimeout ) {
-	    emitHello();
-	    return;
-	}
-
-	std::clog << "*** detected stale server\n";
-	serverAddress_ = QHostAddress::Broadcast;
-	foundServer_ = false;
+    if ( serverIsAlive() ) {
+	emitHello();
     }
-
-    emitDiscovery();
+    else {
+	emitDiscovery();
+    }
 }
 
 void
@@ -317,6 +332,10 @@ MainWindow::emitDiscovery()
     setDisplay( "Looking for server...", "" );
     QByteArray msg( kMessageSize, 0 );
     msg[ 0 ] = 'd';		// Discovery message
+
+    //
+    // Initially try to send as broadcast message.
+    //
     serverAddress_ = QHostAddress::Broadcast;
     if ( ! writeMessage( msg ) ) {
 
@@ -461,7 +480,7 @@ MainWindow::processCharacter()
     // Grab the index of the character definition to use.
     //
     int c = inputBuffer_[ inputIndex_++ ];
-    if ( c >= bits_.size() ) c = kSpace;
+    if ( c >= bits_.size() ) c = kSpaceCharacterIndex;
 
     //
     // Update the VFDElement object with the new character definition to use.
@@ -546,7 +565,7 @@ MainWindow::processCustomDefinition( uint8_t index )
     //
     // Update the bit definition. 
     //
-    if ( bitsIndex < kSpace )
+    if ( bitsIndex < kSpaceCharacterIndex )
 	bits_[ bitsIndex ]->setBits( bits );
 }
 
@@ -557,7 +576,7 @@ MainWindow::clearDisplay()
     // Set all VFDElement objects to point to the space character
     //
     for ( int index = 0; index < elements_.size(); ++index )
-	elements_[ index ]->setData( bits_[ kSpace ] );
+	elements_[ index ]->setData( bits_[ kSpaceCharacterIndex ] );
 }
 
 void
@@ -575,8 +594,8 @@ MainWindow::writeLine( const std::string& line )
     for ( size_t index = 0; index < line.size() && index < kLineWidth;
 	  ++index ) {
 	size_t c = line[ index ];
-	if ( c < kSpace or c >= size_t( bits_.size() ) )
-	    c = kSpace; // Just to be safe
+	if ( c < kSpaceCharacterIndex or c >= size_t( bits_.size() ) )
+	    c = kSpaceCharacterIndex; // Just to be safe
 	elements_[ elementIndex_++ ]->setData( bits_[ c ] );
     }
 }
@@ -584,8 +603,6 @@ MainWindow::writeLine( const std::string& line )
 bool
 MainWindow::writeMessage( const QByteArray& msg )
 {
-    static const int kServerPort = 3483; // Well-known port for SLiMP3 servers
-
     //
     // Attempt to send the message 
     //
