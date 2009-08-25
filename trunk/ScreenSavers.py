@@ -69,8 +69,7 @@ class ScreenSaverBase( object ):
 class Blanker( ScreenSaverBase ):
 
     kBlankLines = [ ' ' * kDisplayWidth ] * kDisplayHeight
-
-    name = 'Blank Display'
+    kName = 'Blank Display'
 
     def __init__( self, content ):
         ScreenSaverBase.__init__( self, self.kBlankLines )
@@ -84,7 +83,7 @@ class Blanker( ScreenSaverBase ):
 #
 class Zapper( ScreenSaverBase ):
 
-    name = 'Zap Characters'
+    kName = 'Zap Characters'
 
     def updateDisplay( self ):
         x, y = self.getRandomCharacterPosition()
@@ -98,7 +97,7 @@ class Zapper( ScreenSaverBase ):
 #
 class Swapper( ScreenSaverBase ):
 
-    name = 'Swap Characters'
+    kName = 'Swap Characters'
 
     def updateDisplay( self ):
         x1, y1 = self.getRandomCharacterPosition()
@@ -113,7 +112,7 @@ class Swapper( ScreenSaverBase ):
 #
 class LeftRotater( ScreenSaverBase ):
 
-    name = 'Rotate Left'
+    kName = 'Rotate Left'
 
     def updateDisplay( self ):
         for index in range( kDisplayHeight ):

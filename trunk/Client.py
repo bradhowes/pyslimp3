@@ -20,7 +20,7 @@
 import socket
 from datetime import datetime, timedelta
 
-from Animator import Animator
+from Animator import kAnimators
 from Browser import Browser
 from Display import *
 from KeyProcessor import *
@@ -111,9 +111,7 @@ class Client( object ):
         # Create a new display animator to use to render Content objects from
         # the active display generator.
         #
-        self.animator = Animator( 
-            kScreenSavers[ settings.getScreenSaverIndex() ],
-            settings.getScreenSaverTimeout() )
+        self.makeAnimator()
 
         #
         # Create a new VFD interface used to generate appropriate 'l' type
@@ -317,8 +315,7 @@ class Client( object ):
             delta = datetime.now() - self.lastKeyTimeStamp
             if delta.seconds > self.kPlaybackDisplayRestoreInterval:
                 self.setLinesGenerator( 
-                    PlaybackDisplay( self, self.linesGenerator,
-                                     self.playbackFormatterIndex ) )
+                    PlaybackDisplay( self, self.linesGenerator ) )
         self.emitDisplay()
 
         #
@@ -530,3 +527,12 @@ class Client( object ):
 
     def activateScreenSaver( self ):
         self.animator.activateScreenSaver()
+
+    def setAnimatorIndex( self, value ):
+        self.settings.setAnimatorIndex( value )
+        self.makeAnimator()
+
+    def makeAnimator( self ):
+        self.animator = kAnimators[ self.settings.getAnimatorIndex() ](
+            kScreenSavers[ self.settings.getScreenSaverIndex() ],
+            self.settings.getScreenSaverTimeout() )

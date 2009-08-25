@@ -37,6 +37,7 @@ class Settings( object ):
                   'isOn': False,
                   'playbackFormatterIndex': 0,
                   'playlistForManipulation': '',
+                  'animatorIndex': 0,
                   'screenSaverIndex': 1,
                   'screenSaverTimeout': 300,
                   }
