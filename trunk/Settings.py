@@ -36,7 +36,7 @@ class Settings( object ):
     kDefaults = { 'brightness': VFD.kMaxBrightness,
                   'isOn': False,
                   'playbackFormatterIndex': 0,
-                  'playlistForManipulation': '',
+                  'targetPlaylistName': '',
                   'animatorIndex': 0,
                   'screenSaverIndex': 1,
                   'screenSaverTimeout': 300,

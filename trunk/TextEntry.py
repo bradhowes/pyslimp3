@@ -67,9 +67,8 @@ class TextEntry( DisplayGenerator ):
 
     def __init__( self, client, prevLevel, title, minCount = 3,
                   acceptor = None ):
-        DisplayGenerator.__init__( self, client ) 
+        DisplayGenerator.__init__( self, client, prevLevel ) 
         self.title = title
-        self.prevLevel = prevLevel
         self.minCount = minCount
         self.acceptor = acceptor
         self.reset()
@@ -81,7 +80,6 @@ class TextEntry( DisplayGenerator ):
         DisplayGenerator.fillKeyMap( self )
         self.addKeyMapEntry( kArrowUp, ( kModFirst, kModRepeat ), self.up )
         self.addKeyMapEntry( kArrowDown, ( kModFirst, kModRepeat ), self.down )
-        self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kArrowRight, ( kModFirst, ), self.right )
         self.addKeyMapEntry( kOK, (kModFirst, ), self.validateAndAccept )
 
@@ -208,13 +206,13 @@ class TextEntry( DisplayGenerator ):
         raise NotImplementedError, 'accept'
 
     #
-    # Erase characters from the search display. If none left, show the previous
-    # level.
+    # Override of DisplayGenerator method. Erase characters from the search
+    # display. If none left, show the previous level.
     #
     def left( self ):
         if len( self.text ) == 1:
             self.text = self.kBlock
-            return self.prevLevel
+            return DisplayGenerator.left( self )
         self.text = self.text[ : -1 ]
         self.lastDigit, self.digitIndex, self.stack = self.stack
         return self

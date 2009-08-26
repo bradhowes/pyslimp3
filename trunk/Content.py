@@ -66,7 +66,8 @@ class Content:
                 #
                 if len( rightOverlay ) and \
                         rightOverlay[ 0 ] not in self.kNoSpacePrefix:
-                    rightOverlays[ index ] = ' ' + rightOverlay
+                    rightOverlays[ index ] = u' ' + rightOverlay
+
             #
             # Normalize overlays so that we have kDisplayHeight of them
             #

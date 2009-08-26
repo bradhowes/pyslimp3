@@ -46,6 +46,7 @@ class PlaybackDisplay( DisplayGenerator ):
         self.formatters = ( self.getPlayerTrackIndex,
                             self.getPlayerPositionElapsed,
                             self.getPlayerPositionRemaining,
+                            self.getPlayerTrackDuration,
                             self.getEmptyString )
 
         #
@@ -66,7 +67,6 @@ class PlaybackDisplay( DisplayGenerator ):
             value = 0
         elif value >= len( self.formatters ):
             value = len( self.formatters ) - 1
-            
 
         #
         # Install the new value and remember it in the client's settings
@@ -81,12 +81,12 @@ class PlaybackDisplay( DisplayGenerator ):
     def fillKeyMap( self ):
         DisplayGenerator.fillKeyMap( self )
 
-        #
-        # If we arrived here from the user pressing the 'Disp' button, allow
-        # them to return to the previous location.
-        #
-        self.addKeyMapEntry( kArrowLeft, None, self.left )
-        
+        self.addKeyMapEntry( kArrowUp, None, 
+                             self.nextPlayerPositionFormatter )
+
+        self.addKeyMapEntry( kArrowDown, None, 
+                             self.previousPlayerPositionFormatter )
+
         #
         # Show and edit the rating for the current track
         #
@@ -97,12 +97,12 @@ class PlaybackDisplay( DisplayGenerator ):
         # Stop playing, rewinding to the beginning of track
         #
         self.addKeyMapEntry( kStop, None, self.stop )
-        
+
         #
         # Start playing if not already
         #
         self.addKeyMapEntry( kPlay, None, self.play )
-        
+
         #
         # Stop playing, but do not rewind to beginning of track
         #
@@ -112,12 +112,12 @@ class PlaybackDisplay( DisplayGenerator ):
         # Move to previous track if not held down.
         #
         self.addKeyMapEntry( kRewind, kModRelease, self.previousTrack )
-        
+
         #
         # Rewind playback position while held down
         #
         self.addKeyMapEntry( kRewind, kModHeld, self.rewind )
-        
+
         #
         # Resume normal playback once released
         #
@@ -127,12 +127,12 @@ class PlaybackDisplay( DisplayGenerator ):
         # Move to next track if not held down
         #
         self.addKeyMapEntry( kFastForward, kModRelease, self.nextTrack )
-        
+
         #
         # Fast-forward playback positiono while held down
         #
         self.addKeyMapEntry( kFastForward, kModHeld, self.fastForward )
-        
+
         #
         # Resume normal playback once released
         #
@@ -148,8 +148,15 @@ class PlaybackDisplay( DisplayGenerator ):
     # Install the next available display formatter
     #
     def nextPlayerPositionFormatter( self ):
-        self.setFormatterIndex( ( self.formatterIndex + 1 ) %
-                                len( self.formatters ) )
+        index = ( self.formatterIndex + 1 ) % len( self.formatters )
+        self.setFormatterIndex( index )
+
+    #
+    # Install the previously available display formatter
+    #
+    def previousPlayerPositionFormatter( self ):
+        index = ( self.formatterIndex - 1 ) % len( self.formatters )
+        self.setFormatterIndex( index )
 
     #
     # Generate a screen showing what is playing, the current iTunes playback
@@ -178,8 +185,7 @@ class PlaybackDisplay( DisplayGenerator ):
         if state == '':
             state = self.getPlayerPositionIndicator( track )
         else:
-            state = unichr( CustomCharacters.kEllipsis ) + state + \
-                unichr( CustomCharacters.kEllipsis )
+            state = unichr( CustomCharacters.kEllipsis ) + state
         return state
 
     #
@@ -193,8 +199,8 @@ class PlaybackDisplay( DisplayGenerator ):
     # the custom position indicators.
     #
     def getPlayerTrackIndex( self, track ):
-        return '%d/%d' % ( track.track.index(), 
-                           self.source.getActivePlaylistSize() )
+        return '%d/%d' % ( track.getIndex(), 
+                           self.source.getActivePlaylist().getTrackCount() )
 
     #
     # Obtain a graphical progress indicator showing how much of the song has
@@ -203,13 +209,13 @@ class PlaybackDisplay( DisplayGenerator ):
     def getPlayerPositionIndicator( self, track ):
         position = float( self.source.getPlayerPosition() ) / \
             track.getDuration()
-        return generateProgressIndicator( 7, position )
+        return generateProgressIndicator( 5, position )
 
     #
     # Obtain a numerical elapsed indicator in MM:SS format.
     #
     def getPlayerPositionElapsed( self, track ):
-        return getHHMMSS( self.source.getPlayerPosition() )
+        return '+' + getHHMMSS( self.source.getPlayerPosition() )
 
     #
     # Obtain a numerical remaining indicator in MM:SS format.
@@ -217,6 +223,12 @@ class PlaybackDisplay( DisplayGenerator ):
     def getPlayerPositionRemaining( self, track ):
         return '-' + getHHMMSS( track.getDuration() - 
                                 self.source.getPlayerPosition() )
+
+    #
+    # Obtain the duration for the current track.
+    #
+    def getPlayerTrackDuration( self, track ):
+        return getHHMMSS( track.getDuration() )
 
     #
     # Show a track rating editor for the current track.
@@ -291,8 +303,8 @@ class PlaybackDisplay( DisplayGenerator ):
         if digit == 0:
             source.beginTrack()
         else:
-            count = source.getActivePlaylistSize()
+            playlist = getActivePlaylist()
+            count = playlist.getTrackCount()
             if digit <= count:
-                source.doPlayPlaylist( source.getActivePlaylistObject(),
-                                       digit - 1 )
+                playlist.play( digit - 1 )
         return self

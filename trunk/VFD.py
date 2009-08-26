@@ -191,6 +191,8 @@ class CustomCharacters( object ):
     kRatingHalf = indices()
     kDottedVerticalBar = indices()
 
+    kSolidVerticalBarRight = indices()
+
     kEllipsis = 0x85
 
     kCharacterMap = { 0x7E: Dots( '00000', # tilde
@@ -472,7 +474,13 @@ class CustomCharacters( object ):
                                                 '00000',
                                                 '00100',
                                                 '00000' ),
-
+                      kSolidVerticalBarRight: Dots( '00001',
+                                                    '00001',
+                                                    '00001',
+                                                    '00001',
+                                                    '00001',
+                                                    '00001',
+                                                    '00001', ),
                       }
 
     def __init__( self ):
