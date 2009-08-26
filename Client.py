@@ -25,6 +25,7 @@ from Browser import Browser
 from Display import *
 from KeyProcessor import *
 from PlaybackDisplay import PlaybackDisplay
+from PlaylistBrowser import PlaylistBrowser
 from ScreenSavers import kScreenSavers
 from TopBrowser import TopBrowser
 from VFD import VFD
@@ -189,6 +190,7 @@ class Client( object ):
             ( kDisplay, self.showPlaying ),
             ( kMenuHome, self.showTopBrowser ),
             ( kSleep, self.activateScreenSaver ),
+            ( kRecord, self.showTargetPlaylist ),
 
             #
             # Simple iTunes control
@@ -509,25 +511,43 @@ class Client( object ):
             self.clearOverlay()
             return
         if not isinstance( self.linesGenerator, PlaybackDisplay ):
-            track = self.iTunes.getCurrentTrack()
-            if track is not None:
+            playlist = self.iTunes.getActivePlaylist()
+            if playlist.getTrackCount() > 0:
                 self.setLinesGenerator(
                     PlaybackDisplay( self, self.linesGenerator ) )
 
     #
-    # Install a TopBrowser screen generator.
+    # Show a TopBrowser screen generator.
     #
     def showTopBrowser( self ):
         if not isinstance( self.linesGenerator, TopBrowser ):
             self.setLinesGenerator( TopBrowser( self ) )
 
+    #
+    # Show a PlaylistBrowser screen generator, showing the current target
+    # playlist for REC operations.
+    #
+    def showTargetPlaylist( self ):
+        if not isinstance( self.linesGenerator, PlaylistBrowser ):
+            self.setLinesGenerator( PlaylistBrowser( self ) )
+
+    #
+    # Set the index of the screen saver to use. Updates the current Animator
+    # object to use the new screen saver setting.
+    #
     def setScreenSaverIndex( self, value ):
         self.settings.setScreenSaverIndex( value )
         self.animator.setScreenSaverClass( kScreenSavers[ value ] )
 
+    #
+    # Invoke the current screen saver.
+    #
     def activateScreenSaver( self ):
         self.animator.activateScreenSaver()
 
+    #
+    # Set the idex of the Animator class to use, and use it.
+    #
     def setAnimatorIndex( self, value ):
         self.settings.setAnimatorIndex( value )
         self.makeAnimator()

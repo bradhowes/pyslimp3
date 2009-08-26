@@ -161,9 +161,6 @@ class DisplayGenerator( object ):
     def digit8( self ): return self.digit( 8 )
     def digit9( self ): return self.digit( 9 )
 
-class OverlayDisplay( DisplayGenerator ):
-    def isOverlay( self ): return True
-
 #
 # Generate a 'powered off' display like the original SliMP3.
 #
@@ -341,3 +338,27 @@ class RepeatStateGenerator( StateGenerator ):
     def generate( self ):
         return self.makeContent( 
             'Repeat', self.kTagMapping[ repr( self.source.getRepeat() ) ] )
+
+#
+# Base class for all overlay (temporary) displays
+#
+class OverlayDisplay( DisplayGenerator ):
+    
+    #
+    # Determine if this display generator is a temporary overlay.
+    #
+    def isOverlay( self ): return True
+
+#
+# General notification display that temporarily shows one or two lines of text,
+# centered on the display.
+#
+class NotificationDisplay( OverlayDisplay ):
+
+    def __init__( self, client, prevLevel, line1, line2 = '' ):
+        OverlayDisplay.__init__( self, client, prevLevel )
+        self.line1 = centerAlign( line1 )
+        self.line2 = centerAlign( line2 )
+
+    def generate( self ):
+        return Content( [ self.line1, self.line2 ] )

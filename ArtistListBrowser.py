@@ -18,7 +18,7 @@
 #
 
 from AlbumListBrowser import AlbumListBrowser
-from Browser import Browser
+from PlayableBrowser import *
 from Content import Content
 from Display import *
 from KeyProcessor import *
@@ -29,19 +29,12 @@ from PlaybackDisplay import PlaybackDisplay
 # keyCode event by asking iTunes to play all of the albums for the active
 # artist.
 #
-class ArtistListBrowser( Browser ):
+class ArtistListBrowser( PlayableBrowser ):
 
     #
     # Obtain the collection to browse. Implementation of Browser interface.
     #
     def getCollection( self ): return self.source.getArtistList()
-
-    #
-    # Enable 'play'
-    #
-    def fillKeyMap( self ):
-        Browser.fillKeyMap( self )
-        self.addKeyMapEntry( kPlay, None, self.play )
 
     #
     # Show the current artist name and album count
@@ -61,8 +54,9 @@ class ArtistListBrowser( Browser ):
         return AlbumListBrowser( self.client, self, obj.getAlbums() )
 
     #
-    # Begin playback at the start of the first albumn
+    # Implementation of PlayableBrowser interface. Begin playback at the start
+    # of the first albumn
     #
     def play( self ):
-        self.source.playArtist( self.getCurrentObject() )
+        self.source.playObject( self.getCurrentObject() )
         return PlaybackDisplay( self.client, self )

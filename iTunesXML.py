@@ -26,28 +26,65 @@ import xml.parsers.expat
 from OrderedItem import OrderedItem
 
 #
+# Obtain an AppleScript object that refers to the iTunes application
+#
+def GetApp(): 
+    return appscript.app( 'iTunes' )
+
+#
+# Obtain an AppleScript object that refers to the main iTunes library.
+# *** FIXME: make universal. I think this is only valid for US or
+# English-speaking countries.
+#
+def GetLibrary(): 
+    return GetApp().library_playlists[ 'Library' ]
+
+#
 # Class for an artist. Maintains a list of albums associated with the artist.
 #
 class Artist( OrderedItem ):
 
+    #
+    # Constructor. NAME is the name of the artist as found in the XML file.
+    #
     def __init__( self, name ):
         OrderedItem.__init__( self, name )
         self.albums = []
         self.needSort = False
 
+    #
+    # Add an Album object to the list of albums for this artist
+    #
     def addAlbum( self, album ): 
         self.needSort = True
         self.albums.append( album )
 
+    #
+    # Get the list of albums associated with this artist
+    #
     def getAlbums( self ):
         if self.needSort:
             self.albums.sort()
             self.needSort = False
         return self.albums
 
+    #
+    # Obtain the number of albums associated with this artist 
+    #
     def getAlbumCount( self ): return len( self.albums )
     
+    #
+    # Get the Album object at INDEX.
+    #
     def getAlbum( self, index ): return self.getAlbums()[ index ]
+
+    #
+    # Add all of the albums associate with this artist to the PLAYLIST
+    # playlist.
+    #
+    def addToPlaylist( self, playlist ):
+        for album in self.getAlbums():
+            album.addToPlaylist( playlist )
 
     def __repr__( self ): return 'Artist "%s"' % ( self.getName(), )
 
@@ -57,6 +94,10 @@ class Artist( OrderedItem ):
 #
 class Album( OrderedItem ):
 
+    #
+    # Constructor. ARTIST is an Artist object associated with the album, NAME
+    # is the name of the album from the XML file.
+    #
     def __init__( self, artist, name ):
         OrderedItem.__init__( self, name )
         self.artist = artist
@@ -73,12 +114,21 @@ class Album( OrderedItem ):
         #
         self.needSort = True 
 
+    #
+    # Add a Track object to the list of tracks for this album
+    #
     def addTrack( self, track ):
         self.needSort = True
         self.tracks.append( track )
 
+    #
+    # Obtain the name of the artist associated with this album
+    #
     def getArtistName( self ): return self.artist.getName()
 
+    #
+    # Obtain the list of Track objects associated with this album
+    #
     def getTracks( self ): 
         if self.needSort:
             
@@ -90,28 +140,136 @@ class Album( OrderedItem ):
             self.needSort = False
         return self.tracks
 
+    #
+    # Obtain the number of tracks associated with this album
+    #
     def getTrackCount( self ): return len( self.tracks )
 
+    #
+    # Get the Track object at INDEX
+    #
     def getTrack( self, index ): return self.getTracks()[ index ]
+
+    #
+    # Add the tracks associated with this album to the playlist PLAYLIST
+    #
+    def addToPlaylist( self, playlist ):
+        for track in self.getTracks():
+            track.addToPlaylist( playlist )
 
     def __repr__( self ): return 'Album "%s"' % ( self.getName(), )
 
 #
-# Class for a playlist in iTunes. A playlist just contains a list of tracks.
+# Class for a playlist in iTunes. A playlist contains a list of tracks as well
+# as an AppleScript refernce to the internal iTunes playlist object it
+# represents.
 #
 class Playlist( OrderedItem ):
 
-    def __init__( self, name ):
+    #
+    # Constructor. PLAYLISTOBJECT is the iTunes playlist AppleScript object to
+    # mirror, NAME is the playlist name, and CANMANIPULATE is a boolean flag
+    # indicating whether the user may manipulate the contents of the playlist
+    # (including deleting it)
+    #
+    def __init__( self, playlistObject, name, canManipulate ):
         OrderedItem.__init__( self, name )
+        self.playlistObject = playlistObject
+        self.canManipulate = canManipulate
         self.tracks = []
 
+    #
+    # Obtain the list of Track objects associated with this playlist
+    #
     def getTracks( self ): return self.tracks
 
+    #
+    # Obtain the number of tracks associated with this playlist
+    #
     def getTrackCount( self ): return len( self.tracks )
 
+    #
+    # Obtain the Track object at INDEX
+    #
     def getTrack( self, index ): return self.tracks[ index ]
 
-    def getTracks( self ): return self.tracks
+    #
+    # Determine if the user can manipulate this playlist
+    #
+    def getCanManipulate( self ): return self.canManipulate
+
+    #
+    # Clear the tracks from this playlist
+    #
+    def clear( self ):
+        if not self.getCanManipulate():
+            return
+
+        #
+        # Attempt to keep our track list and iTunes in sync.
+        #
+        try:
+            self.playlistObject.tracks.delete()
+            self.tracks = []
+        except appscript.reference.CommandError:
+            print( '*** failed to clear playlist', self.getName() )
+            pass
+
+    #
+    # Add a Track object to this playlist.
+    #
+    def addTrack( self, track ):
+        
+        #
+        # Attempt to keep our track list and iTunes in sync.
+        #
+        try:
+            GetLibrary().tracks[ 
+                appscript.its.persistent_ID == track.getID() ].duplicate(
+                to = self.playlistObject )
+            self.tracks.append( track )
+        except appscript.reference.CommandError:
+            print( '*** failed to add track', track.getName(), 'to playlist',
+                   self.getName() )
+            pass
+
+    #
+    # Ask iTunes to begin playing this playlist
+    #
+    def play( self, trackIndex = 0 ):
+        if trackIndex >= self.getTrackCount():
+            print( '*** invalid trackIndex:', trackIndex )
+        else:
+            try:
+                self.playlistObject.tracks[ trackIndex + 1 ].play()
+            except appscript.reference.CommandError:
+                print( '*** failed to start playing playlist', self.getName(),
+                       'at track', trackIndex )
+            pass
+
+    #
+    # Get the current shuffle setting for this playlist
+    #
+    def getShuffle( self ): 
+        return self.playlistObject.shuffle.get()
+
+    #
+    # Change the shuffle setting for this playlist
+    #
+    def setShuffle( self, value ): 
+        self.playlistObject.shuffle.set( value )
+
+    #
+    # Get the current repeat mode for this playlist
+    #
+    def getRepeat( self ): 
+        return self.playlistObject.song_repeat.get()
+
+    #
+    # Change the repeat mode for this playlist
+    #
+    def setRepeat( self, value ): 
+        self.playlistObject.song_repeat.set( value )
 
     def __repr__( self ): return 'Playlist "%s"' % ( self.getName(), )
 
@@ -122,65 +280,79 @@ class Playlist( OrderedItem ):
 #
 class Track( OrderedItem ):
 
+    #
+    # Constructor. TRACK is either a Python dictionary containing the
+    # attributes found in the XML file for this track, or it is an AppleScript
+    # iTunes track object.
+    #
     def __init__( self, track ):
-        OrderedItem.__init__( self, track.get( 'Name', '' ) )
-        self.track = track
-        self.id = str( track.get( 'Persistent ID' ) )
-        self.index = int( track.get( 'Track Number', '-1' ) )
-        self.artistName = track.get( 'Artist', '' )
-        self.albumName = track.get( 'Album', '' )
-        self.duration = int( track.get( 'Total Time', 0 ) ) / 1000
+        if isinstance( track, dict ):
+            OrderedItem.__init__( self, track.get( 'Name', '' ) )
+            self.id = str( track.get( 'Persistent ID' ) )
+            self.trackId = track.get( 'Track ID' )
+            self.index = int( track.get( 'Track Number', '-1' ) )
+            self.artistName = track.get( 'Artist', '' )
+            self.albumName = track.get( 'Album', '' )
+            self.duration = int( track.get( 'Total Time', 0 ) ) / 1000
+        else:
+            OrderedItem.__init__( self, track.name() )
+            self.id = track.persistent_ID()
+            self.trackId = None # !!!
+            self.index = track.track_number()
+            self.artistName = track.artist()
+            self.albumName = track.album()
+            self.duration = track.duration()
 
+    #
+    # Obtain the persistent ID for this track.
+    #
     def getID( self ): return self.id
 
+    #
+    # Obtain the track ID for this track. NOTE: this is only valid (apparently)
+    # for playlist relationships.
+    #
+    def getTrackId( self ): return self.trackId
+
+    #
+    # Obtain the index of this track. This determines the ordering of the track
+    # in the parent Album object in which it resides.
+    #
     def getIndex( self ): return self.index
 
+    #
+    # Obtain the name of this track
+    #
     def getName( self ): return self.name
 
+    #
+    # Obtain the artist name for this track
+    #
     def getArtistName( self ): return self.artistName
 
+    #
+    # Obtain the album name for this track
+    #
     def getAlbumName( self ): return self.albumName
 
+    #
+    # Obtain the duration in seconds for this track
+    #
     def getDuration( self ): return self.duration
 
-    def __repr__( self ): return 'Track "%d - %s"' % ( self.index, self.name, )
+    #
+    # Add the track to the PLAYLIST playlist
+    #
+    def addToPlaylist( self, playlist ):
+        playlist.addTrack( self )
 
-    def hash( self ): return self.index
-
+    #
+    # Define a comparison method for Track objects such that they will be
+    # ordered by their track index values.
+    #
     def __cmp__( self, other ): return cmp( self.index, other.index )
 
-#
-# Wrapper class for a track object obtained from the appscript AppleScript
-# bridge. The naming of attributes is different from Track.
-#
-class ActiveTrack( OrderedItem ):
-
-    def __init__( self, track ):
-        OrderedItem.__init__( self, track.name() )
-        self.track = track
-        self.id = track.persistent_ID()
-        self.index = track.track_number()
-        self.artistName = track.artist()
-        self.albumName = track.album()
-        self.duration = track.duration()
-
-    def getID( self ): return self.id
-
-    def getIndex( self ): return self.index
-
-    def getName( self ): return self.name
-
-    def getArtistName( self ): return self.artistName
-
-    def getAlbumName( self ): return self.albumName
-
-    def getDuration( self ): return self.duration
-
     def __repr__( self ): return 'Track "%d - %s"' % ( self.index, self.name, )
-
-    def hash( self ): return self.index
-
-    def __cmp__( self, other ): return cmp( self.index, other.index )
 
 #
 # Parser for the iTunes Music Library.xml file.
@@ -321,6 +493,9 @@ class iTunesXML( object ):
                            appscript.k.all: appscript.k.one,
                            appscript.k.one: appscript.k.off }
 
+    #
+    # Constructor.
+    #
     def __init__( self ):
 
         #
@@ -356,6 +531,10 @@ class iTunesXML( object ):
         self.genreNames = []    # Found genre names
         self.playlistNames = [] # Names of the playlists found in iTunes
 
+    #
+    # See if we should reload the iTunes XML file. If so, we do it in a
+    # separate thread.
+    #
     def reloadCheck( self ):
 
         #
@@ -393,25 +572,18 @@ class iTunesXML( object ):
         self.backgroundLoader.start()
 
     #
-    # Obtain an AppleScript object that refers to the iTunes application
-    #
-    def getApp( self ): return appscript.app( 'iTunes' )
-
-    #
-    # Obtain an AppleScript object that refers to the main iTunes library.
-    # *** FIXME: make universal. I think this is only valid for US or
-    # English-speaking countries.
-    #
-    def getLibrary( self ): return self.getApp().library_playlists[ 'Library' ]
-
-    #
-    # Load the iTunes XML file at a given path.
+    # Load the iTunes XML file. NOTE: this may execute in a separate thread, so
+    # we keep all collections local until the very end, where we install them
+    # as the new values.
     #
     def load( self ):
 
         print( '... loading XML file', self.xmlFilePath )
         startTime = datetime.now()
 
+        #
+        # Create an XML parser and parse the file.
+        #
         parser = XMLParser( self.xmlFilePath )
         rawTracks = parser.getTracks()
 
@@ -536,7 +708,7 @@ class iTunesXML( object ):
             #
             track = Track( track )
             tracks[ track.getID() ] = track
-            tracks[ track.track.get( 'Track ID' ) ] = track
+            tracks[ track.getTrackId() ] = track
             album.addTrack( track )
 
         #
@@ -550,7 +722,7 @@ class iTunesXML( object ):
         # Validate the load.
         #
         if 0:
-            library = self.getLibrary()
+            library = GetLibrary()
             print( '...validating loaded track IDs' )
             for artist in artistList:
                 for album in artist.getAlbums():
@@ -582,77 +754,199 @@ class iTunesXML( object ):
         #
         playlistList = []
         for each in parser.getPlaylists():
+            
+            #
+            # Playlists to ignore
+            #
             if each.get( 'Master', False ): continue
             if each.get( 'Folder', False ): continue
+
+            #
+            # Obtain the iTunes playlist object with the same name
+            #
+            name = each.get( 'Name' )
+            playlistObject = GetApp().user_playlists[ name ].get()
+
+            #
+            # Determine if this playlist is one that the user may manipulate.
+            #
+            canManipulate = True
+            if each.get( 'Smart Info', False ): canManipulate = False
+            if each.get( 'Distinguished Kind', False ): canManipulate = False
+
+            #
+            # Create a new Playlist object and add Track objects to it.
+            #
+            playlist = Playlist( playlistObject, name, canManipulate )
+            playlistList.append( playlist )
+
             items = each.get( 'Playlist Items', [] )
-            if len( items ) == 0: continue
-            playlist = Playlist( each.get( 'Name' ) )
             for item in items:
+                
+                #
+                # NOTE: playlists references tracks by its 'Track ID' element,
+                # not by their 'Persistent ID' element.
+                #
                 trackId = item[ 'Track ID' ]
                 track = tracks.get( trackId )
+                
+                #
+                # This should always be true...
+                #
                 if track:
                     playlist.tracks.append( track )
-            if playlist.getTrackCount() > 0:
-                playlistList.append( playlist )
 
+        #
+        # Order the available playlists and install
+        #
         playlistList.sort()
         self.playlistList = playlistList
 
+        #
+        # Update the loaded timestamp so we can detect when the XML file
+        # changes in the future.
+        #
         self.loadedTimeStamp = datetime.now()
         duration = self.loadedTimeStamp - startTime
 
         print( '... finished in', duration.seconds, 'seconds' )
 
+    #
+    # Obtain the names of the genres in the iTunes library, as found during the
+    # last XML load.
+    #
     def getGenreNames( self ): return self.genreNames
+    
+    #
+    # Obtain the number of genres in the iTunes library
+    #
     def getGenreCount( self ): return len( self.genreNames )
 
     #
-    # Obtain the list of albums associated with a genre. Accept either index or
-    # genre name.
+    # Obtain the list of albums associated with a genre, where KEY may be an
+    # ingteger index or a string name.
     #
     def getGenre( self, key ):
         if type( key ) is type( 0 ):
             key = self.genreNames[ key ]
         return self.genreMap[ key ]
 
+    #
+    # Get the list of playlists in the iTunes library, as found during the last
+    # XML load.
+    #
     def getPlaylistList( self ): return self.playlistList
+    
+    #
+    # Obtain the number of playlists in the iTunes library
+    #
     def getPlaylistCount( self ): return len( self.playlistList )
-    def getPlaylist( self, key ):
-        if type( key ) is type( 0 ):
+    
+    #
+    # Obtain the Playlist object for a given key, where KEY may be an integer
+    # index or a string name. NOTE: may return None
+    #
+    def getPlaylist( self, key, createIfMissing = False ):
+        if isinstance( key, int ):
             playlist = self.playlistList[ key ]
         else:
-            key = OrderedItem( key )
-            pos = bisect_left( self.playlistList, key )
+            
+            #
+            # If the name is empty, use our default playlist name ('MBJB')
+            #
+            if key == '':
+                key = self.kOurPlaylistName
+
+            #
+            # Search the sorted list for the given key name.
+            #
+            key2 = OrderedItem( key )
+            pos = bisect_left( self.playlistList, key2 )
             playlist = self.playlistList[ pos ]
-            if playlist != key:
+            if playlist != key2:
                 playlist = None
+
+        #
+        # If not found, but creation is allowed, create it.
+        #
+        if playlist is None and createIfMissing:
+            playlist = self.createPlaylist( key )
+
         return playlist
 
+    #
+    # Create a new playlist in iTunes under the given name NAME. Add to our
+    # internal list of playlists and reorder it.
+    #
+    def createPlaylist( self, name ):
+        try:
+            playlist = GetApp().make( 
+                new = appscript.k.user_playlist,
+                with_properties = { appscript.k.name: name } )
+            playlist = Playlist( playlist, name, True )
+            self.playlistList.append( playlist )
+            self.playlistList.sort()
+        except appscript.reference.CommandError:
+            playlist = None
+
+        return playlist
+
+    #
+    # Delete a playlist from iTunes, where PLAYLIST is an Playlist object.
+    #
+    def deletePlaylist( self, playlist ):
+        try:
+            GetApp().playlists[ playlist.getName() ].delete()
+            self.playlistList.remove( playlist)
+        except appscript.reference.CommandError:
+            pass
+
+    #
+    # Get the list of artists in the iTunes library, as found during the last
+    # XML load.
+    #
     def getArtistList( self ): return self.artistList
+    
+    #
+    # Obtain the number of artists in the iTunes library
+    #
     def getArtistCount( self ): return len( self.artistList )
 
     #
-    # Obtain the artist for a given key value. Accept either index or artist
-    # name.
+    # Obtain the Artist object for a given key, where KEY may be an integer
+    # index, an OrderedItem instance, or a string value. NOTE; may return None
     #
     def getArtist( self, key ):
-        if type( key ) is type( 0 ):
+        if isinstance( key, int ):
             artist = self.artistList[ key ]
         else:
+            
+            #
+            # If not an OrderedItem instance, make it one.
+            #
             if not isinstance( key, OrderedItem ):
                 key = OrderedItem( key )
+
             artist = self.artistMap.get( key )
         return artist
 
-    def getAlbumList( self ): return self.albumList
-    def getAlbumCount( self ): return len( self.albumList )
-    
     #
-    # Obtain the album for a given key value. Accept either index or album
-    # name.
+    # Get the list of albums in the iTunes library, as found during the last
+    # XML load.
+    #
+    def getAlbumList( self ): return self.albumList
+
+    #
+    # Obtain the number of albums in the iTunes library
+    #
+    def getAlbumCount( self ): return len( self.albumList )
+
+    #
+    # Obtain the Album object for a given key. where KEY may be an integer
+    # index, an OrderedItem instance, or a string value. NOTE: may return None
     #
     def getAlbum( self, key ):
-        if type( key ) is type( 0 ):
+        if isinstance( key, int ):
             album = self.albumList[ key ]
         else:
 
@@ -669,21 +963,22 @@ class iTunesXML( object ):
         return album
 
     #
-    # Scan the list of albums for those matching a given search term.
+    # Obtain a list of Album objects matching a given search term.
     #
     def searchForAlbum( self, term ):
-        return self.searchFor( term, self.albumList )
+        return self.searchFor( self.albumList, term )
 
     #
-    # Scan the list of artists for those matching a given search term.
+    # Obtain a list of Artist objects for those matching a given search term.
     #
     def searchForArtist( self, term ):
-        return self.searchFor( term, self.artistList )
+        return self.searchFor( self.artistList, term )
 
     #
-    # Scan a container for elements containing a given search term.
+    # Scan a container for elements containing a given search term, returning a
+    # list of matches.
     #
-    def searchFor( self, term, container ):
+    def searchFor( self, container, term ):
         term = term.upper()
         found = []
         for each in container:
@@ -692,69 +987,100 @@ class iTunesXML( object ):
         return found
 
     #
-    # Application volume controls. NOTE: for some reason unable to change
-    # iTunes volume by delta of 1.
+    # Obtain the current iTunes volume setting.
     #
     def getVolume( self ): 
-        value = int( self.getApp().sound_volume.get() )
-        return value
+        return int( GetApp().sound_volume.get() )
 
+    #
+    # Change the iTunes volume settiing, where VALUE is an integer from 0 to
+    # 100.
+    #
     def setVolume( self, value ):
-        self.getApp().sound_volume.set( value )
+        GetApp().sound_volume.set( value )
 
+    #
+    # Adjust the volume by a given DELTA value.
+    #
     def adjustVolume( self, delta ): 
         adjustment = delta
         old = self.getVolume()
         if ( old == 0 and delta < 0 ) or ( old == 100 and delta > 0 ):
             return
+
+        #
+        # NOTE: some changes in volume apparently do not work. So, we add
+        # multiples of DELTA until the volume from iTunes indicates a change.
+        #
         while old == self.getVolume():
             self.setVolume( old + delta )
             delta += adjustment
 
     #
-    # Application mute controls.
+    # Obtain the current iTunes mute setting.
     #
-    def getMute( self ): return self.getApp().mute.get()
-    def setMute( self, value ): self.getApp().mute.set( value )
+    def getMute( self ): return GetApp().mute.get()
+
+    #
+    # Change the iTunes mute setting, where VALUE is 1 or 0
+    #
+    def setMute( self, value ): GetApp().mute.set( value )
+
+    #
+    # Toggle the iTunes mute setting.
+    #
     def toggleMute( self ): self.setMute( not self.getMute() )
-
-    #
-    # Playlist shuffle controls.
-    #
-    def getShuffle( self ): 
-        return self.getActivePlaylistObject().shuffle.get()
-    def setShuffle( self, value ): 
-        self.getActivePlaylistObject().shuffle.set( value )
-    def toggleShuffle( self ): 
-        self.setShuffle( not self.getShuffle() )
-
-    #
-    # Playlist repeat controls. The valid values for 'value' are: 
-    #  - appscript.k.off
-    #  - appscript.k.all
-    #  - appscript.k.one
-    #
-    def getRepeat( self ): 
-        return self.getActivePlaylistObject().song_repeat.get()
-    def setRepeat( self, value ): 
-        return self.getActivePlaylistObject().song_repeat.set( value )
-    def toggleRepeat( self ):
-        self.setRepeat( self.kRepeatTransitions[ self.getRepeat() ] )
 
     #
     # Get the current playlist. If there is not one, then use our playlist
     # (MBJB). This allows us to show what the user is playing via iTunes (or
-    # the Remote iPhone application).
+    # the Remote iPhone application). Returns a Playlist object
     #
-    def getActivePlaylistObject( self ):
+    def getActivePlaylist( self ):
         try:
-            return self.getApp().current_playlist.get()
+            name = GetApp().current_playlist.name.get()
         except appscript.reference.CommandError:
-            pass
-        return self.getPlaylistObject( self.kOurPlaylistName, True )
+            name = self.kOurPlaylistName
+        return self.getPlaylist( name, True )
 
-    def getActivePlaylistSize( self ):
-        return len( self.getActivePlaylistObject().tracks() )
+    #
+    # Get the shuffle setting for the active playlist.
+    #
+    def getShuffle( self ): 
+        return self.getActivePlaylist().geShuffle()
+    
+    #
+    # Set the shuffle setting for the active playlist
+    #
+    def setShuffle( self, value ): 
+        self.getActivePlaylist().setShuffle( value )
+
+    #
+    # Toggle the shuffle setting for the active playlist
+    #
+    def toggleShuffle( self ): 
+        self.setShuffle( not self.getShuffle() )
+
+    #
+    # Get the current repeat mode for the active playlist
+    #
+    def getRepeat( self ): 
+        return self.getActivePlaylist().getRepeat()
+    #
+    # Set the repeat mode for the active playlist, where VALUE is one of
+    #  - appscript.k.off
+    #  - appscript.k.all
+    #  - appscript.k.one
+    #
+    def setRepeat( self, value ): 
+        self.getActivePlaylist().setRepeat( value )
+
+    #
+    # Change the repeat mode of the active playlist to the next value in the
+    # cycle ( appscript.k.off, appscript.k.all, appscript.k.one )
+    #
+    def toggleRepeat( self ):
+        self.setRepeat( self.kRepeatTransitions[ self.getRepeat() ] )
 
     #
     # Obtain current track. If there is not one, then return the last track
@@ -762,11 +1088,16 @@ class iTunesXML( object ):
     #
     def getCurrentTrack( self ):
         try:
-            track = ActiveTrack( self.getApp().current_track.get() )
+            track = Track( GetApp().current_track.get() )
             self.lastTrack = track
         except appscript.reference.CommandError:
             track = self.lastTrack
         return track
+
+    #
+    # Get the current state of the iTunes player (playing, paused, stopped )
+    #
+    def getPlayerState( self ): return str( GetApp().player_state.get() )
 
     #
     # Determine if iTunes is currently playing
@@ -779,153 +1110,104 @@ class iTunesXML( object ):
     def isPaused( self ): return self.getPlayerState() == 'k.paused'
 
     #
-    # Get the current state of the iTunes player (playing, paused, stopped )
-    #
-    def getPlayerState( self ): return str( self.getApp().player_state.get() )
-    
-    #
     # Get the current position (seconds) of the iTunes player
     #
     def getPlayerPosition( self ): 
         try:
-            return int( self.getApp().player_position.get() )
+            return int( GetApp().player_position.get() )
         except TypeError:
             return 0
 
     #
     # Stop the iTunes player
     #
-    def stop( self ): self.getApp().stop()
+    def stop( self ): GetApp().stop()
     
     #
     # Start the iTunes player at the beginning of the current track
     #
-    def play( self ): self.getApp().play()
+    def play( self ): GetApp().play()
     
+    #
+    # Clear the 'MBJB' playlist, add the Track object(s) of the given OBJECT
+    # object to the PLAYLIST playlist and commence playback at the indicated
+    # track
+    #
+    def playObject( self, object, trackIndex = 0 ):
+        playlist = self.getPlaylist( self.kOurPlaylistName, True )
+        playlist.clear()
+
+        #
+        # Ask the object to add its Track objects to the MBJB playlist
+        #
+        object.addToPlaylist( playlist )
+        playlist.play( trackIndex )
+
     #
     # Pause the iTunes player
     #
-    def pause( self ): self.getApp().pause()
+    def pause( self ): GetApp().pause()
 
     #
     # Move the player to the beginning of the current track.
     #
-    def beginTrack( self ): self.getApp().back_track()
+    def beginTrack( self ): GetApp().back_track()
 
     #
     # Move the player to the previous track in the playlist
     #
-    def previousTrack( self ): self.getApp().previous_track()
+    def previousTrack( self ): GetApp().previous_track()
     
     #
     # Move the player to the next track in the playlist
     #
-    def nextTrack( self ): self.getApp().next_track()
+    def nextTrack( self ): GetApp().next_track()
     
     #
     # Move the player backwards over the current track
     #
-    def rewind( self ): self.getApp().rewind()
+    def rewind( self ): GetApp().rewind()
 
     #
     # Move the player fast-forward over the current track
     #
-    def fastForward( self ): self.getApp().fast_forward()
+    def fastForward( self ): GetApp().fast_forward()
     
     #
     # Resume normal playback of the current track (after rewind() or
     # fastForward())
     #
-    def resume( self ): self.getApp().resume()
+    def resume( self ): GetApp().resume()
 
     #
-    # Get the AppleScript object representing the named playlist. If the
-    # playlist does not exist, create it if desired.
-    #
-    def getPlaylistObject( self, name, create = True ):
-        playlist = None
-        try:
-            playlist = self.getApp().user_playlists[ name ].get()
-        except appscript.reference.CommandError:
-            pass
-        if playlist is None and create:
-            playlist = self.getApp().make( 
-                new = appscript.k.user_playlist,
-                with_properties = { appscript.k.name: name } )
-        #
-        # Make playlist current if it exists
-        #
-        if playlist:
-            self.getApp().browser_windows.get()[ 0 ].view.set( playlist )
-        return playlist
-
-    #
-    # Remove tracks for a given playlist
-    #
-    def playlistClear( self, playlist ):
-        self.getApp().stop()
-        playlist.tracks.delete()
-
-    #
-    # Add a track to a playlist
-    #
-    def playlistAddTrack( self, playlist, track ):
-        self.getLibrary().tracks[ 
-            appscript.its.persistent_ID == track.getID() ].duplicate(
-            to = playlist )
-
-    #
-    # Add a the tracks of an album to a playlist
-    #
-    def playlistAddAlbum( self, playlist, album ):
-        for track in album.getTracks():
-            self.playlistAddTrack( playlist, track )
-
-    def doPlayPlaylist( self, playlist, trackIndex ):
-        if playlist is None:
-            print( '*** NULL playlist' )
-        elif trackIndex >= len( playlist.tracks.get() ):
-            print( '*** invalid trackIndex:', trackIndex,
-                   len( playlist.tracks.get() ) )
-        else:
-            playlist.tracks[ trackIndex + 1 ].play()
-
-    def playPlaylist( self, playlist, trackIndex = 0 ):
-        playlist = self.getPlaylistObject( playlist.getName(), False )
-        self.doPlayPlaylist( playlist, trackIndex )
-
-    #
-    # Clear the 'MBJB' playlist, add the tracks of the albums of the given
-    # artist to the playlist and commence playback.
-    #
-    def playArtist( self, artist ):
-        playlist = self.getPlaylistObject( self.kOurPlaylistName, True )
-        self.playlistClear( playlist )
-        for each in artist.getAlbums():
-            self.playlistAddAlbum( playlist, each )
-        self.doPlayPlaylist( playlist, 1 )
-
-    #
-    # Clear the 'MBJB' playlist, add the tracks of the given album to the
-    # playlist and commence playback.
-    #
-    def playAlbum( self, album, trackIndex = 0 ):
-        playlist = self.getPlaylistObject( self.kOurPlaylistName, True )
-        self.playlistClear( playlist )
-        self.playlistAddAlbum( playlist, album )
-        self.doPlayPlaylist( playlist, trackIndex )
-
-    #
-    # Obtain the current rating for the given album.
+    # Obtain the current rating for the given ALBUM Album object.
     #
     def getAlbumRating( self, album ):
+
+        #
+        # Cannot do anything unless the album has at least one track.
+        #
+        if album.getTrackCount() == 0:
+            return 0
+
+        #
+        # Get the first track for this album
+        #
         track = album.getTrack( 0 )
+
+        #
+        # Get the iTunes track object for the first Track object.
+        #
         id = track.getID()
-        track = self.getLibrary().tracks[ 
+        track = GetLibrary().tracks[ 
             appscript.its.persistent_ID == id ].get()[ 0 ]
+        
+        #
+        # Get the rating and its type for the first track
+        #
         rating = track.album_rating.get()
         ratingKind = track.album_rating_kind.get()
-        
+
         #
         # If the user's album rating is 0, iTunes may return to us a computed
         # value based on ratings of the album's tracks. We want to ignore such
@@ -933,14 +1215,23 @@ class iTunesXML( object ):
         #
         if repr( ratingKind ) == 'k.computed':
             rating = 0
+
         return rating
 
     #
-    # Set a new rating for the given album.
+    # Set a new rating for the given ALBUM Album object, where RATING is an
+    # integer from 0 to 100.
     #
     def setAlbumRating( self, album, rating ):
+
+        #
+        # Cannot do anything unless the album has at least one track.
+        #
+        if album.getTrackCount() == 0:
+            return
+
         id = album.getTrack( 0 ).getID()
-        self.getLibrary().tracks[ 
+        GetLibrary().tracks[ 
             appscript.its.persistent_ID == id ].album_rating.set( rating )
 
     #
@@ -948,9 +1239,17 @@ class iTunesXML( object ):
     # the track's album
     #
     def getTrackRating( self, track ):
+        
+        #
+        # Get the iTunes track object for the given Track object
+        #
         id = track.getID()
-        track = self.getLibrary().tracks[ 
+        track = GetLibrary().tracks[ 
             appscript.its.persistent_ID == id ].get()[ 0 ]
+
+        #
+        # Get the rating and its type for the track
+        #
         rating = track.rating.get()
         ratingKind = track.rating_kind.get()
 
@@ -961,13 +1260,13 @@ class iTunesXML( object ):
         #
         if repr( ratingKind ) == 'k.computed':
             rating = 0
-        albumRating = track.album_rating.get()
-        return rating, albumRating
+
+        return rating
 
     #
     # Set a new rating for the given track
     #
     def setTrackRating( self, track, rating ):
         id = track.getID()
-        self.getLibrary().tracks[ 
+        GetLibrary().tracks[ 
             appscript.its.persistent_ID == id ].rating.set( rating )

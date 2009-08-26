@@ -31,30 +31,18 @@ from VFD import CustomCharacters
 class RatingDisplay( OverlayDisplay ):
 
     def __init__( self, client, prevLevel, obj, tag ):
-        DisplayGenerator.__init__( self, client, prevLevel )
+        OverlayDisplay.__init__( self, client, prevLevel )
         self.obj = obj          # The object whose ratings we will muck with
         self.tag = tag          # Either 'Track' or 'Album'
-
-    #
-    # Signal that this display generator is a temporary overlay
-    #
-    def isOverlay( self ): return True
 
     #
     # Allow up/down arrow keys to increment/decrement rating values.
     #
     def fillKeyMap( self ):
         DisplayGenerator.fillKeyMap( self )
-        self.addKeyMapEntry( kArrowLeft, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kPIP, ( kModFirst, ), self.left )
         self.addKeyMapEntry( kArrowUp, ( kModFirst, kModRepeat ), self.up )
         self.addKeyMapEntry( kArrowDown, ( kModFirst, kModRepeat ), self.down )
-
-    #
-    # Return to the previous display level
-    #
-    def left( self ):
-        return self.prevLevel
 
     #
     # Change the rating to a new value. Derived classes must define
@@ -183,7 +171,7 @@ class TrackRatingDisplay( RatingDisplay ):
     # interface.
     #
     def getRating( self ): 
-        return self.source.getTrackRating( self.obj )[ 0 ]
+        return self.source.getTrackRating( self.obj )
 
     #
     # Change the rating for this track. Implementation of RatingDisplay

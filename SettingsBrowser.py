@@ -25,17 +25,12 @@ from DynamicBrowser import DynamicBrowser, DynamicEntry
 from KeyProcessor import *
 from ScreenSavers import kScreenSavers
 
-class NotificationDisplay( OverlayDisplay ):
-    
-    def __init__( self, client, prevLevel, line1, line2 = '' ):
-        OverlayDisplay.__init__( self, client, prevLevel )
-        self.line1 = centerAlign( line1 )
-        self.line2 = centerAlign( line2 )
-
-    def generate( self ):
-        return Content( [ self.line1, self.line2 ] )
-
-class SettingsBrowser( Browser ):
+#
+# Base class for setting browsers that operate on a list of values. Derived
+# classes must implement the install() method that shou.d apply the new
+# configuration setting value.
+#
+class ChoiceSetting( Browser ):
 
     def fillKeyMap( self ):
         Browser.fillKeyMap( self )
@@ -54,20 +49,20 @@ class SettingsBrowser( Browser ):
     def updateSetting( self ):
         raise NotImplementedError, 'setSetting'
 
-class ScreenSaverBrowser( SettingsBrowser ):
+#
+# ChoiceSetting derivative that browses a list of screen saver names.
+#
+class ScreenSaverBrowser( ChoiceSetting ):
     kTitle = 'Screen Savers'
     kNotification = 'Screen saver changed'
     def getCollection( self ): return kScreenSavers
     def getDisplayValue( self, obj ): return obj.kName
     def updateSetting( self ): self.client.setScreenSaverIndex( self.index )
 
-class AnimatorBrowser( SettingsBrowser ):
-    kTitle = 'Animators'
-    kNotification = 'Animator changed'
-    def getCollection( self ): return kAnimators
-    def getDisplayValue( self, obj ): return obj.kName
-    def updateSetting( self ): self.client.setAnimatorIndex( self.index )
-
+#
+# DynamicEntry derivative that shows the current screen saver setting, and can
+# create a new ScreenSaverBrowser object to choose a new setting.
+#
 class ScreenSaverSetting( DynamicEntry ):
 
     def makeContent( self, browser ):
@@ -78,6 +73,20 @@ class ScreenSaverSetting( DynamicEntry ):
         index = browser.client.getSettings().getScreenSaverIndex()
         return ScreenSaverBrowser( browser.client, browser, index )
 
+#
+# ChoiceSetting derivative that browses a list of display animator names.
+#
+class AnimatorBrowser( ChoiceSetting ):
+    kTitle = 'Animators'
+    kNotification = 'Animator changed'
+    def getCollection( self ): return kAnimators
+    def getDisplayValue( self, obj ): return obj.kName
+    def updateSetting( self ): self.client.setAnimatorIndex( self.index )
+
+#
+# DynamicEntry derivative that shows the current display animation and can
+# create a new AnimatorBrowser to choose a new setting.
+#
 class AnimatorSetting( DynamicEntry ):
 
     def makeContent( self, browser ):
@@ -88,6 +97,9 @@ class AnimatorSetting( DynamicEntry ):
         index = browser.client.getSettings().getAnimatorIndex()
         return AnimatorBrowser( browser.client, browser, index )
 
+#
+# Browser for user configuration settings.
+#
 class SettingsBrowser( DynamicBrowser ):
 
     def __init__( self, client, prevLevel ):

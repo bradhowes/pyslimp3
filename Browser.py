@@ -43,7 +43,7 @@ class Browser( DisplayGenerator ):
                 'TUV',
                 'WXYZ' ]
 
-    def __init__( self, client, prevLevel, index = 0 ):
+    def __init__( self, client, prevLevel = None, index = 0 ):
         DisplayGenerator.__init__( self, client, prevLevel )
         self.index = index      # Index of the current item to show
         self.reset()            # Initialize to known state

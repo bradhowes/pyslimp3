@@ -153,27 +153,12 @@ class ArtistSearchResults( ArtistListBrowser ):
 
 #
 # Simple display generate that indicates that there are no matches for a given
-# search term. The only key supported is 'left'
+# search term.
 #
-class NoneFound( OverlayDisplay ):
+class NoneFound( NotificationDisplay ):
 
     def __init__( self, client, prevLevel, context, term ): 
-        DisplayGenerator.__init__( self, client )
-        self.context = context
-        self.term = term
-        self.prevLevel = prevLevel
-
-    def isOverlay( self ): return True
-
-    #
-    # Override of DisplayGenerator.fillKeyMap. Enable kArrowLeft.
-    #
-    def fillKeyMap( self ):
-        DisplayGenerator.fillKeyMap( self )
-        self.addKeyMapEntry( kArrowLeft, kModFirst, self.left )
-
-    def generate( self ): return Content(
-        [ centerAlign( 'No %ss matched' % ( self.context.lower(), ) ),
-          centerAlign( self.term ) ] )
-
-    def left( self ): return self.prevLevel
+        NotificationDisplay.__init__( 
+            self, client, prevLevel,
+            'No %ss matched' % ( context.lower(), ),
+            term )

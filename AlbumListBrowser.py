@@ -17,7 +17,7 @@
 # USA.
 #
 
-from Browser import Browser
+from PlayableBrowser import *
 from Content import Content
 from Display import *
 from KeyProcessor import *
@@ -31,10 +31,10 @@ from TrackListBrowser import *
 # albums found in iTunes (default) or a subset of those albums associated with
 # a particular artist.
 #
-class AlbumListBrowser( Browser ):
+class AlbumListBrowser( PlayableBrowser ):
 
     def __init__( self, client, prevLevel, albumList = None ):
-        Browser.__init__( self, client, prevLevel )
+        PlayableBrowser.__init__( self, client, prevLevel )
         self.albumList = albumList
 
     #
@@ -46,11 +46,10 @@ class AlbumListBrowser( Browser ):
         return self.albumList
 
     #
-    # Enable 'play'
+    # Enable 'PIP' for ratings
     #
     def fillKeyMap( self ):
-        Browser.fillKeyMap( self )
-        self.addKeyMapEntry( kPlay, None, self.play )
+        PlayableBrowser.fillKeyMap( self )
         self.addKeyMapEntry( kPIP, None, self.ratings )
 
     #
@@ -70,11 +69,11 @@ class AlbumListBrowser( Browser ):
         return TrackListBrowser( self.client, self, obj.getTracks() )
 
     #
-    # Begin playback at the start of the album (or at the track at the given
-    # index)
+    # Implementation of the PlayableBrowser interface. Begin playback at the
+    # start of the album (or at the track at the given index)
     #
     def play( self, trackIndex = 0 ): 
-        self.source.playAlbum( self.getCurrentObject(), trackIndex )
+        self.source.playObject( self.getCurrentObject(), trackIndex )
         return PlaybackDisplay( self.client, self )
 
     #

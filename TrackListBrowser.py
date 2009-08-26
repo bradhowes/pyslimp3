@@ -17,10 +17,10 @@
 # USA.
 #
 
-from Browser import Browser
 from Content import Content
 from Display import getHHMMSS
 from KeyProcessor import *
+from PlayableBrowser import *
 from RatingDisplay import *
 
 #
@@ -28,10 +28,10 @@ from RatingDisplay import *
 # album or playlist. Pressing the 'play' key will start playing at the
 # indicated track
 #
-class TrackListBrowser( Browser ):
+class TrackListBrowser( PlayableBrowser ):
 
     def __init__( self, client, prevLevel, trackList ):
-        Browser.__init__( self, client, prevLevel )
+        PlayableBrowser.__init__( self, client, prevLevel )
         self.trackList = trackList
 
     def getCollection( self ): return self.trackList
@@ -40,8 +40,7 @@ class TrackListBrowser( Browser ):
     # Enable 'play'
     #
     def fillKeyMap( self ):
-        Browser.fillKeyMap( self )
-        self.addKeyMapEntry( kPlay, None, self.play )
+        PlayableBrowser.fillKeyMap( self )
         self.addKeyMapEntry( kPIP, None, self.ratings )
         self.addKeyMapEntry( kArrowRight, None, self.ratings )
 
@@ -57,7 +56,8 @@ class TrackListBrowser( Browser ):
                           self.getIndexOverlay() ] )
 
     #
-    # Begin playback at the current track.
+    # Implementation of the PlayableBrowser interace. Begin playback at the
+    # current track.
     #
     def play( self ): 
         if self.prevLevel:

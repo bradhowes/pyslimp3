@@ -591,9 +591,8 @@ MainWindow::setDisplay( const std::string& line1, const std::string& line2 )
 void
 MainWindow::writeLine( const std::string& line )
 {
-    for ( size_t index = 0; index < line.size() && index < kLineWidth;
-	  ++index ) {
-	size_t c = line[ index ];
+    for ( size_t index = 0; index < kLineWidth; ++index ) {
+	size_t c = index < line.size() ? line[ index ] : ' ';
 	if ( c < kSpaceCharacterIndex or c >= size_t( bits_.size() ) )
 	    c = kSpaceCharacterIndex; // Just to be safe
 	elements_[ elementIndex_++ ]->setData( bits_[ c ] );
