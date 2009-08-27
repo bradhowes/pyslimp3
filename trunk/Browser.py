@@ -169,7 +169,7 @@ class Browser( DisplayGenerator ):
     #
     # Override of DisplayGenerator method. If there are 10 or less items, jump
     # to the exact index based on the 'digit' pressed. Otherwise, treat the
-    # given digit as a telephone keypad (similar to Search.py -- see the
+    # given digit as a telephone keypad (similar to TextEdit.py -- see the
     # commentary there)
     #
     def digit( self, digit ):
@@ -189,7 +189,7 @@ class Browser( DisplayGenerator ):
             #
             values = Browser.kDigits[ digit ]
             if digit == self.lastDigit:
-                
+
                 #
                 # Repeated key - cycle to the next character
                 #

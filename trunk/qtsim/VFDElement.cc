@@ -26,7 +26,7 @@
 
 VFDElement::VFDElement( QWidget* parent )
     : Super( parent ), onColor_( Qt::green ), offColor_( Qt::black ),
-      backgroundColor_( Qt::black ), pixelSize_( 4 ), spacing_( 1 ),
+      backgroundColor_( Qt::black ), pixelSize_( 3 ), spacing_( 1 ),
       data_( 0 )
 {
     adjustedOnColor_ = onColor_;
