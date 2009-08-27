@@ -1,0 +1,7 @@
+#summary Details of the Browser class that shows a list of artists
+
+= Introduction =
+
+The ArtistListBrowser class allows the user to browse a set of Artist objects.
+
+= Keys Supported =
