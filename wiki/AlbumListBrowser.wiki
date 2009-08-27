@@ -4,7 +4,7 @@
 
 = Introduction =
 
-The AlbumListBrowser class allows the user to browse a set of Album objects.
+The AlbumListBrowser class allows the user to browse a set of Album objects. The display shows the artist name (*Aimee Mann*) of the current album on the first line, and the album name (*@#%&`*`! Smilers*), album index (*2*) and album count (*374*) on the second.
 
 = Keys Supported =
 
