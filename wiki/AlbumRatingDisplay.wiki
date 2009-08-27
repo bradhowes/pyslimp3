@@ -12,5 +12,5 @@ The AlbumRatingDisplay class allows the user to view and edit the iTunes rating 
 
 || UP || Increase the rating ||
 || DOWN || Decrease the rating ||
-|| LEFT || Return to the parent level and display ||
 || 0-5 || Set the rating that corresponds to the digit ||
+|| LEFT || Return to the parent level and display ||
