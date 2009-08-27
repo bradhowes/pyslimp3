@@ -11,5 +11,6 @@ The TrackListBrowser class allows the user to browse a set of Track objects. The
 || UP || Show the next track in the collection ||
 || DOWN || Show the previous track in the collection ||
 || RIGHT, PIP || Show a TrackRatingDisplay screen to view and edit the rating for the current track ||
+|| LEFT || Return to the parent level and display ||
 || REC || Append the current track to the target playlist ||
 || PLAY || Play the container hold this track (album or playlist) but starting with the current track ||
