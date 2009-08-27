@@ -98,19 +98,9 @@ class PlaybackDisplay( DisplayGenerator ):
         self.addKeyMapEntry( kPIP, None, self.ratings )
 
         #
-        # Stop playing, rewinding to the beginning of track
-        #
-        self.addKeyMapEntry( kStop, None, self.stop )
-
-        #
         # Start playing if not already
         #
         self.addKeyMapEntry( kPlay, None, self.play )
-
-        #
-        # Stop playing, but do not rewind to beginning of track
-        #
-        self.addKeyMapEntry( kPause, None, self.pause )
 
         #
         # Move to previous track if not held down.
@@ -330,7 +320,7 @@ class PlaybackDisplay( DisplayGenerator ):
         if digit == 0:
             source.beginTrack()
         else:
-            playlist = getActivePlaylist()
+            playlist = source.getActivePlaylist()
             count = playlist.getTrackCount()
             if digit <= count:
                 playlist.play( digit - 1 )

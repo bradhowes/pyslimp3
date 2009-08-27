@@ -69,13 +69,14 @@ static const KeyCodeMapEntry inits[] = {
     KeyCodeMapEntry( "rec", 0xf743, Qt::Key_R ),
     KeyCodeMapEntry( "recall", 0xf7ab, Qt::Key_A ),
     KeyCodeMapEntry( "sleep", 0xf7b3, Qt::Key_E ),
-    KeyCodeMapEntry( "ok", 0xf72b, Qt::Key_O ),
+    KeyCodeMapEntry( "ok", 0xf72b, Qt::Key_K ),
     KeyCodeMapEntry( "mute", 0xc538, Qt::Key_U ),
+    KeyCodeMapEntry( "src", 0xc538, Qt::Key_T ),
     KeyCodeMapEntry( "", 0x00, 0 ), // sentinal
 };
 
 Remote::Remote()
-    : QWidget(), gui_( new Ui::Remote )
+    : QSvgWidget(), gui_( new Ui::Remote )
 {
     setWindowFlags( windowFlags() | Qt::Tool );
 
@@ -134,6 +135,8 @@ Remote::Remote()
     connect( gui_->sleep, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
     connect( gui_->ok, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
     connect( gui_->mute, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+
+    load( QString( ":/RMV201.png" ) );
 }
 
 void

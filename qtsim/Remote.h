@@ -22,13 +22,13 @@
 
 #include <map>
 
-#include <QtGui/QWidget>
+#include <QtSvg/QSvgWidget>
 
 #include "ui_Remote.h"
 
 class MainWindow;
 
-class Remote : public QWidget
+class Remote : public QSvgWidget
 {
     Q_OBJECT
 public:

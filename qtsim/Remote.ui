@@ -6,675 +6,934 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>311</width>
-    <height>598</height>
+    <width>151</width>
+    <height>536</height>
    </rect>
   </property>
-  <property name="focusPolicy">
-   <enum>Qt::NoFocus</enum>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>151</width>
+    <height>536</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>151</width>
+    <height>536</height>
+   </size>
   </property>
   <property name="windowTitle">
-   <string>Remote Control</string>
+   <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="power">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Q</string>
-       </property>
-       <property name="text">
-        <string>Power</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="one">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>1</string>
-       </property>
-       <property name="text">
-        <string>1</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="two">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>2</string>
-       </property>
-       <property name="text">
-        <string>2</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="three">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>3</string>
-       </property>
-       <property name="text">
-        <string>3</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="four">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>4</string>
-       </property>
-       <property name="text">
-        <string>4</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="five">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>5</string>
-       </property>
-       <property name="text">
-        <string>5</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="six">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>6</string>
-       </property>
-       <property name="text">
-        <string>6</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QPushButton" name="seven">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>7</string>
-       </property>
-       <property name="text">
-        <string>7</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QPushButton" name="eight">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>8</string>
-       </property>
-       <property name="text">
-        <string>8</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QPushButton" name="nine">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>9</string>
-       </property>
-       <property name="text">
-        <string>9</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QPushButton" name="zero">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>0</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="pip">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="text">
-        <string>PIP</string>
-       </property>
-       <property name="toolTip">
-        <string>I</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="enter">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="text">
-        <string>ENT</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <property name="spacing">
-      <number>-1</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="rewind">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>&lt; (previous track)</string>
-       </property>
-       <property name="text">
-        <string>&lt;&lt;</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="play">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>P</string>
-       </property>
-       <property name="text">
-        <string>Play</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="fastForward">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>&gt;(next track)</string>
-       </property>
-       <property name="text">
-        <string>&gt;&gt;</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>-1</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="rec">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>R</string>
-       </property>
-       <property name="text">
-        <string>Rec</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="stop">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>S</string>
-       </property>
-       <property name="text">
-        <string>Stop</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pause">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>Space</string>
-       </property>
-       <property name="text">
-        <string>Pause</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_6">
-     <property name="spacing">
-      <number>-1</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="src">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="text">
-        <string>Src</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="disp">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>D</string>
-       </property>
-       <property name="text">
-        <string>Dsp</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="sleep">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="text">
-        <string>Sleep</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="guide">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>G</string>
-       </property>
-       <property name="text">
-        <string>Guide</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="1">
-      <widget class="QPushButton" name="up">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>Up Arrow</string>
-       </property>
-       <property name="text">
-        <string>^</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="left">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>Left Arrow</string>
-       </property>
-       <property name="text">
-        <string>&lt;</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="right">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>Right Arrow</string>
-       </property>
-       <property name="text">
-        <string>&gt;</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QPushButton" name="down">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>Down Arrow</string>
-       </property>
-       <property name="text">
-        <string>v</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_7">
-     <item>
-      <widget class="QPushButton" name="menu">
-       <property name="toolTip">
-        <string>M</string>
-       </property>
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="text">
-        <string>Menu</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_8">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="ok">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>O</string>
-       </property>
-       <property name="text">
-        <string>OK</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QPushButton" name="volumeUp">
-	  <property name="focusPolicy">
-	    <enum>Qt::NoFocus</enum>
-	  </property>
-         <property name="toolTip">
-          <string>]</string>
-         </property>
-         <property name="text">
-          <string>V+</string>
-         </property>
-         <property name="autoRepeat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="volumeDown">
-	  <property name="focusPolicy">
-	    <enum>Qt::NoFocus</enum>
-	  </property>
-         <property name="toolTip">
-          <string>[</string>
-         </property>
-         <property name="text">
-          <string>V-</string>
-         </property>
-         <property name="autoRepeat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QPushButton" name="brightnessUp">
-	  <property name="focusPolicy">
-	    <enum>Qt::NoFocus</enum>
-	  </property>
-         <property name="toolTip">
-          <string>}</string>
-         </property>
-         <property name="text">
-          <string>Ch+</string>
-         </property>
-         <property name="autoRepeat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="brightnessDown">
-	  <property name="focusPolicy">
-	    <enum>Qt::NoFocus</enum>
-	  </property>
-         <property name="toolTip">
-          <string>{</string>
-         </property>
-         <property name="text">
-          <string>CH-</string>
-         </property>
-         <property name="autoRepeat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_8">
-     <item>
-      <widget class="QPushButton" name="mute">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="text">
-        <string>Muting</string>
-       </property>
-       <property name="toolTip">
-        <string>U</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_9">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="recall">
-	<property name="focusPolicy">
-	  <enum>Qt::NoFocus</enum>
-	</property>
-       <property name="toolTip">
-        <string>A</string>
-       </property>
-       <property name="text">
-        <string>Recall</string>
-       </property>
-       <property name="autoRepeat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-  </layout>
+  <property name="styleSheet">
+   <string>QPushButton:pressed { background-color: rgba(255,255,255,0); border: 0px; }</string>
+  </property>
+  <widget class="QLabel" name="image">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>151</width>
+     <height>536</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="qtsim.qrc">:/RMV201.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="power">
+   <property name="geometry">
+    <rect>
+     <x>109</x>
+     <y>22</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Power Button&lt;/b&gt; - "Q" key&lt;br&gt;Toggle iTunes control</string>
+   </property>
+   <property name="styleSheet">
+    <string/>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="one">
+   <property name="geometry">
+    <rect>
+     <x>27</x>
+     <y>78</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 1&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="two">
+   <property name="geometry">
+    <rect>
+     <x>64</x>
+     <y>78</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 2&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="three">
+   <property name="geometry">
+    <rect>
+     <x>102</x>
+     <y>78</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 3&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="four">
+   <property name="geometry">
+    <rect>
+     <x>27</x>
+     <y>107</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 4&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="five">
+   <property name="geometry">
+    <rect>
+     <x>64</x>
+     <y>107</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 5&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="six">
+   <property name="geometry">
+    <rect>
+     <x>102</x>
+     <y>107</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 6&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="seven">
+   <property name="geometry">
+    <rect>
+     <x>27</x>
+     <y>136</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 7&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="eight">
+   <property name="geometry">
+    <rect>
+     <x>64</x>
+     <y>136</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 8&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="nine">
+   <property name="geometry">
+    <rect>
+     <x>102</x>
+     <y>136</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 9&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pip">
+   <property name="geometry">
+    <rect>
+     <x>27</x>
+     <y>164</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;PIP&lt;/b&gt; - "I" key&lt;br&gt;show a ratings editor when appropriate</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="zero">
+   <property name="geometry">
+    <rect>
+     <x>64</x>
+     <y>164</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;Digit 0&lt;/b&gt;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="enter">
+   <property name="geometry">
+    <rect>
+     <x>103</x>
+     <y>164</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;ENTER&lt;/b&gt;&lt;br&gt;Not used</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rewind">
+   <property name="geometry">
+    <rect>
+     <x>28</x>
+     <y>196</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;RWD&lt;/b&gt; - "&amp;lt;" key&lt;br&gt;Press for previous track or hold to rewind
+    current one</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="play">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>192</y>
+     <width>31</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;PLAY&lt;/b&gt; - "P" key&lt;br&gt;Press to begin or resume playing</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="fastForward">
+   <property name="geometry">
+    <rect>
+     <x>103</x>
+     <y>196</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;FFWD&lt;/b&gt; - "&gt;" key&lt;br&gt;Press for next track or hold to fast-forward
+    current one</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rec">
+   <property name="geometry">
+    <rect>
+     <x>28</x>
+     <y>220</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;REC&lt;/b&gt;  -"R" key&lt;br&gt;Press to jump to "target" playlist or add to it</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="stop">
+   <property name="geometry">
+    <rect>
+     <x>65</x>
+     <y>220</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;STOP&lt;/b&gt; - "S" key&lt;br&gt;Stop iTunes playback, and rewind to beginning of
+    current track</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pause">
+   <property name="geometry">
+    <rect>
+     <x>102</x>
+     <y>220</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;PAUSE&lt;/b&gt; - SPACE key&lt;br&gt;Stop iTunes playback but do not rewind</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="src">
+   <property name="geometry">
+    <rect>
+     <x>23</x>
+     <y>245</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;TV/VIDEO&lt;/b&gt; - "T" key&lt;br&gt;Not used</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="disp">
+   <property name="geometry">
+    <rect>
+     <x>52</x>
+     <y>245</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;DISP&lt;/b&gt; - "D" key&lt;br&gt;Jump to the current playback display</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="sleep">
+   <property name="geometry">
+    <rect>
+     <x>82</x>
+     <y>245</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;SLEEP&lt;/b&gt; - "E" key&lt;br&gt;Invoke the screen saver now</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="guide">
+   <property name="geometry">
+    <rect>
+     <x>111</x>
+     <y>245</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;GUIDE&lt;/b&gt; - "G" key&lt;br&gt;Not used</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="left">
+   <property name="geometry">
+    <rect>
+     <x>32</x>
+     <y>274</y>
+     <width>21</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;LEFT&lt;/b&gt; - Left-Arrow key&lt;br&gt;Show a previous screen</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="right">
+   <property name="geometry">
+    <rect>
+     <x>98</x>
+     <y>274</y>
+     <width>21</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;RIGHT&lt;/b&gt; - Right-Arrow key&lt;br&gt;Show more-specific information</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="up">
+   <property name="geometry">
+    <rect>
+     <x>56</x>
+     <y>265</y>
+     <width>41</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;UP&lt;/b&gt; - Up-Arrow key&lt;br&gt;Show the next item in the current browser</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="down">
+   <property name="geometry">
+    <rect>
+     <x>56</x>
+     <y>294</y>
+     <width>41</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;DOWN&lt;/b&gt; - Down-Arrow key&lt;br&gt;Show the previous item in the current browser</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="menu">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>309</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;MENU&lt;/b&gt; - "M" key&lt;br&gt;Jump to the top-level browser</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ok">
+   <property name="geometry">
+    <rect>
+     <x>105</x>
+     <y>309</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;OK&lt;/b&gt; - "K" key&lt;br&gt;Toggle shuffling mode for active playlist</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="volumeUp">
+   <property name="geometry">
+    <rect>
+     <x>39</x>
+     <y>337</y>
+     <width>21</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;VOL+&lt;/b&gt; - "]" key&lt;br&gt;Increase iTunes volume</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="volumeDown">
+   <property name="geometry">
+    <rect>
+     <x>39</x>
+     <y>370</y>
+     <width>21</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;VOL-&lt;/b&gt; - "[" key&lt;br&gt;Decrease iTunes volume</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="brightnessDown">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>370</y>
+     <width>21</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;CH-&lt;/b&gt; - "{" key&lt;br&gt;Decrease SLiMP3 brightness level</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="brightnessUp">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>337</y>
+     <width>21</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;CH+&lt;/b&gt; - "}" key&lt;br&gt;Increase SLiMP3 brightness level</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="recall">
+   <property name="geometry">
+    <rect>
+     <x>93</x>
+     <y>409</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;RECALL&lt;/b&gt; - "A" key&lt;br&gt;Cycle through the repeat modes for the active playlist</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="mute">
+   <property name="geometry">
+    <rect>
+     <x>41</x>
+     <y>409</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>&lt;b&gt;MUTING&lt;/b&gt; - "U" key&lt;br&gt;Toggle the mute setting of iTunes</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="qtsim.qrc"/>
+ </resources>
  <connections/>
 </ui>

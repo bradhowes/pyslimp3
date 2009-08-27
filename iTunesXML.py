@@ -1083,7 +1083,7 @@ class iTunesXML( object ):
     # Get the shuffle setting for the active playlist.
     #
     def getShuffle( self ): 
-        return self.getActivePlaylist().geShuffle()
+        return self.getActivePlaylist().getShuffle()
     
     #
     # Set the shuffle setting for the active playlist

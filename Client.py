@@ -362,6 +362,13 @@ class Client( object ):
         self.lastKeyTimeStamp = datetime.now()
         
         #
+        # If powered off, don't process any key but the kPower button
+        #
+        if not self.settings.getIsOn() and key != kPower:
+            print( 'ignoring', key )
+            return
+
+        #
         # If a screen saver is active, just eat the key event and get rid of
         # the screen saver.
         #
@@ -428,7 +435,8 @@ class Client( object ):
     def volumeDown( self ): self.changeVolume( -1 )
     def changeVolume( self, delta ):
         self.iTunes.adjustVolume( delta )
-        self.setOverlayGenerator( VolumeGenerator( self ) )
+        self.setOverlayGenerator( 
+            VolumeGenerator( self, self.linesGenerator ) )
 
     #
     # Increase brightness
@@ -449,14 +457,16 @@ class Client( object ):
     #
     def toggleMute( self ):
         self.iTunes.toggleMute()
-        self.setOverlayGenerator( MuteStateGenerator( self ) )
+        self.setOverlayGenerator( 
+            MuteStateGenerator( self, self.linesGenerator ) )
 
     #
     # Toggle iTunes shuffle state for a playlist
     #
     def toggleShuffle( self ):
         self.iTunes.toggleShuffle()
-        self.setOverlayGenerator( ShuffleStateGenerator( self ) )
+        self.setOverlayGenerator( 
+            ShuffleStateGenerator( self, self.linesGenerator ) )
 
     #
     # Cycle throught the iTunes repeat state for a playlist: off, all songs,
@@ -464,7 +474,8 @@ class Client( object ):
     #
     def toggleRepeat( self ):
         self.iTunes.toggleRepeat()
-        self.setOverlayGenerator( RepeatStateGenerator( self ) )
+        self.setOverlayGenerator( 
+            RepeatStateGenerator( self, self.linesGenerator ) )
 
     #
     # Toggle the 'power' button, showing a clock display ala SLIMP3 when the

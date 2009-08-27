@@ -17,11 +17,13 @@
 # USA.
 #
 
-QT += network 
+QT += network svg
 
 CONFIG += uitools
 
 FORMS += Remote.ui \
+
+RESOURCES += qtsim.qrc \
 
 HEADERS += App.h \
            MainWindow.h \
