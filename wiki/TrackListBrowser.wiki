@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The TracksListBrowser class allows the user to browse a set of Track objects.
+The TrackListBrowser class allows the user to browse a set of Track objects.
 
 = Keys Supported =
 
