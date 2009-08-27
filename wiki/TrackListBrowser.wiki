@@ -4,7 +4,7 @@
 
 = Introduction =
 
-The TrackListBrowser class allows the user to browse a set of Track objects. The display shows the album name (*@#%&`*`! Smilers*) and artist name (*Aimee Mann*) on the first line, and the track name (*Freeway*), track index (*1*) and track count (*13*) on the second.
+The TrackListBrowser class allows the user to browse a set of Track objects. The set of tracks may be from a specific album or a playlist. The display shows the album name (*@#%&`*`! Smilers*) and artist name (*Aimee Mann*) on the first line, and the track name (*Freeway*), track index (*1*) and track count (*13*) on the second.
 
 = Keys Supported =
 
