@@ -30,9 +30,11 @@ from RatingDisplay import *
 #
 class TrackListBrowser( PlayableBrowser ):
 
-    def __init__( self, client, prevLevel, trackList ):
-        PlayableBrowser.__init__( self, client, prevLevel )
+    def __init__( self, client, prevLevel, trackList, index = 0, 
+                  unrecord  = False ):
+        PlayableBrowser.__init__( self, client, prevLevel, index )
         self.trackList = trackList
+        self.unrecord = unrecord
 
     def getCollection( self ): return self.trackList
 
@@ -63,6 +65,27 @@ class TrackListBrowser( PlayableBrowser ):
         if self.prevLevel:
             return self.prevLevel.play( self.index )
         return None
+
+    #
+    # Override of PlayableBrowser method.
+    #
+    def record( self ):
+        if not self.unrecord:
+            return PlayableBrowser.record( self )
+
+        if self.prevLevel:
+
+            #
+            # Remove the current track from the playlist. NOTE: the unrecord()
+            # method must make sure that we have a valid index.
+            #
+            prevLevel = self.prevLevel.unrecord( self.index )
+            if self.index >= len( self.trackList ):
+                self.index -= 1
+            if self.index < 0:
+                return prevLevel
+
+        return self
 
     #
     # Show the user ratings for the current track

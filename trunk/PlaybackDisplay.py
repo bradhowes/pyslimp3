@@ -21,6 +21,7 @@ from Content import Content
 from Display import *
 from KeyProcessor import *
 from RatingDisplay import *
+from TrackListBrowser import TrackListBrowser
 
 #
 # Display generator showing current playing status of iTunes. Responds to
@@ -42,6 +43,9 @@ class PlaybackDisplay( DisplayGenerator ):
     # Constructor. 
     #
     def __init__( self, client, prevLevel ):
+        if prevLevel is None:
+            raise RuntimeError, 'prevLevel is None'
+
         DisplayGenerator.__init__( self, client, prevLevel )
         self.formatters = ( self.getPlayerTrackIndex,
                             self.getPlayerPositionElapsed,
@@ -82,10 +86,10 @@ class PlaybackDisplay( DisplayGenerator ):
         DisplayGenerator.fillKeyMap( self )
 
         self.addKeyMapEntry( kArrowUp, None, 
-                             self.nextPlayerPositionFormatter )
+                             self.nextTrackBrowser )
 
         self.addKeyMapEntry( kArrowDown, None, 
-                             self.previousPlayerPositionFormatter )
+                             self.previousTrackBrowser )
 
         #
         # Show and edit the rating for the current track
@@ -151,12 +155,31 @@ class PlaybackDisplay( DisplayGenerator ):
         index = ( self.formatterIndex + 1 ) % len( self.formatters )
         self.setFormatterIndex( index )
 
-    #
-    # Install the previously available display formatter
-    #
-    def previousPlayerPositionFormatter( self ):
-        index = ( self.formatterIndex - 1 ) % len( self.formatters )
-        self.setFormatterIndex( index )
+    def nextTrackBrowser( self ):
+        playlist = self.source.getActivePlaylist()
+        index = playlist.getTrackIndex( self.source.getCurrentTrack() ) + 1
+        if index >= playlist.getTrackCount():
+            index = 0
+        return TrackListBrowser( self.client, self, playlist.getTracks(), 
+                                 index, True )
+
+    def previousTrackBrowser( self ):
+        playlist = self.source.getActivePlaylist()
+        index = playlist.getTrackIndex( self.source.getCurrentTrack() ) - 1
+        if index < 0:
+            index = playlist.getTrackCount() - 1
+        return TrackListBrowser( self.client, self, playlist.getTracks(), 
+                                 index, True )
+
+    def unrecord( self, trackIndex ):
+        print( 'unrecord', trackIndex )
+        playlist = self.source.getActivePlaylist()
+        if not playlist.getCanManipulate():
+            return self
+        playlist.removeTrack( trackIndex )
+        if playlist.getTrackCount() == 0:
+            return self.prevLevel
+        return self
 
     #
     # Generate a screen showing what is playing, the current iTunes playback
@@ -199,8 +222,9 @@ class PlaybackDisplay( DisplayGenerator ):
     # the custom position indicators.
     #
     def getPlayerTrackIndex( self, track ):
-        return '%d/%d' % ( track.getIndex(), 
-                           self.source.getActivePlaylist().getTrackCount() )
+        playlist = self.source.getActivePlaylist()
+        return '%d/%d' % ( playlist.getTrackIndex( track ) + 1,
+                           playlist.getTrackCount() )
 
     #
     # Obtain a graphical progress indicator showing how much of the song has
@@ -261,8 +285,11 @@ class PlaybackDisplay( DisplayGenerator ):
     #
     # Begin iTunes playback.
     #
-    def play( self ):
-        self.source.play()
+    def play( self, trackIndex = -1 ):
+        if trackIndex == -1:
+            self.source.play()
+        else:
+            self.source.getActivePlaylist().play( trackIndex )
         return self
 
     #

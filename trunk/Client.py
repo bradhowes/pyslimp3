@@ -529,7 +529,8 @@ class Client( object ):
     #
     def showTargetPlaylist( self ):
         if not isinstance( self.linesGenerator, PlaylistBrowser ):
-            self.setLinesGenerator( PlaylistBrowser( self ) )
+            self.setLinesGenerator( 
+                PlaylistBrowser( self, self.linesGenerator ) )
 
     #
     # Set the index of the screen saver to use. Updates the current Animator

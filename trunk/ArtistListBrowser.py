@@ -18,21 +18,19 @@
 #
 
 from AlbumListBrowser import AlbumListBrowser
-from PlayableBrowser import *
 from Content import Content
 from Display import *
-from KeyProcessor import *
+from PlayableBrowser import PlayableBrowser
 from PlaybackDisplay import PlaybackDisplay
 
 #
-# Specialization of Browser that shows a list of artists. Handles the kPlay
-# keyCode event by asking iTunes to play all of the albums for the active
-# artist.
+# Specialization of PlayableBrowser that shows a list of artists. Moving right
+# shows an AlbumListBrowser for the current artist.
 #
 class ArtistListBrowser( PlayableBrowser ):
 
     #
-    # Obtain the collection to browse. Implementation of Browser interface.
+    # Implementation of Browser interface. Returns a list for Artist objects 
     #
     def getCollection( self ): return self.source.getArtistList()
 
@@ -54,8 +52,8 @@ class ArtistListBrowser( PlayableBrowser ):
         return AlbumListBrowser( self.client, self, obj.getAlbums() )
 
     #
-    # Implementation of PlayableBrowser interface. Begin playback at the start
-    # of the first albumn
+    # Implementation of the PlayableBrowser interface. Begin playback at the
+    # start of the first albumn
     #
     def play( self ):
         self.source.playObject( self.getCurrentObject() )

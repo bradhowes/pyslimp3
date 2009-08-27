@@ -72,7 +72,7 @@ class Artist( OrderedItem ):
     # Obtain the number of albums associated with this artist 
     #
     def getAlbumCount( self ): return len( self.albums )
-    
+
     #
     # Get the Album object at INDEX.
     #
@@ -87,6 +87,13 @@ class Artist( OrderedItem ):
             album.addToPlaylist( playlist )
 
     def __repr__( self ): return 'Artist "%s"' % ( self.getName(), )
+
+#
+# Derivation of Artist that we use to represent a genre.
+#
+class Genre( Artist ):
+
+    def __repr__( self ): return 'Genre "%s"' % ( self.getName(), )
 
 #
 # Class for an 'album' created by an artist. Maintains a list of tracks that
@@ -112,7 +119,7 @@ class Album( OrderedItem ):
         # This method, though slower for the first access, will not reveal gaps
         # in the tracks.
         #
-        self.needSort = True 
+        self.needSort = False 
 
     #
     # Add a Track object to the list of tracks for this album
@@ -131,7 +138,7 @@ class Album( OrderedItem ):
     #
     def getTracks( self ): 
         if self.needSort:
-            
+
             #
             # Since the Track object define ordering by their index within the
             # original album, this will place them in their proper track order.
@@ -193,6 +200,13 @@ class Playlist( OrderedItem ):
     #
     def getTrack( self, index ): return self.tracks[ index ]
 
+    def getTrackIndex( self, track ):
+        for index in range( len( self.tracks ) ):
+            if self.tracks[ index ].getID() == track.getID():
+                return index
+        print( 'track not found in playlist:', track.getName(), track.getID() )
+        return -1
+
     #
     # Determine if the user can manipulate this playlist
     #
@@ -219,7 +233,7 @@ class Playlist( OrderedItem ):
     # Add a Track object to this playlist.
     #
     def addTrack( self, track ):
-        
+
         #
         # Attempt to keep our track list and iTunes in sync.
         #
@@ -231,6 +245,14 @@ class Playlist( OrderedItem ):
         except appscript.reference.CommandError:
             print( '*** failed to add track', track.getName(), 'to playlist',
                    self.getName() )
+            pass
+
+    def removeTrack( self, trackIndex ):
+        try:
+            self.playlistObject.tracks[ trackIndex + 1 ].delete()
+            del self.tracks[ trackIndex ]
+        except appscript.reference.CommandError:
+            print( '*** failed to delete track', trackIndex )
             pass
 
     #
@@ -278,7 +300,7 @@ class Playlist( OrderedItem ):
 # element object that describes the track. NOTE: defines ordering and hashing
 # methods to properly order a collection of Track objects by their track index.
 #
-class Track( OrderedItem ):
+class Track( object ):
 
     #
     # Constructor. TRACK is either a Python dictionary containing the
@@ -287,7 +309,7 @@ class Track( OrderedItem ):
     #
     def __init__( self, track ):
         if isinstance( track, dict ):
-            OrderedItem.__init__( self, track.get( 'Name', '' ) )
+            self.name = OrderedItem( track.get( 'Name', '' ) )
             self.id = str( track.get( 'Persistent ID' ) )
             self.trackId = track.get( 'Track ID' )
             self.index = int( track.get( 'Track Number', '-1' ) )
@@ -295,13 +317,15 @@ class Track( OrderedItem ):
             self.albumName = track.get( 'Album', '' )
             self.duration = int( track.get( 'Total Time', 0 ) ) / 1000
         else:
-            OrderedItem.__init__( self, track.name() )
+            self.name = OrderedItem( track.name() )
             self.id = track.persistent_ID()
             self.trackId = None # !!!
             self.index = track.track_number()
             self.artistName = track.artist()
             self.albumName = track.album()
             self.duration = track.duration()
+
+    def getName( self ): return self.name.getName()
 
     #
     # Obtain the persistent ID for this track.
@@ -318,12 +342,7 @@ class Track( OrderedItem ):
     # Obtain the index of this track. This determines the ordering of the track
     # in the parent Album object in which it resides.
     #
-    def getIndex( self ): return self.index
-
-    #
-    # Obtain the name of this track
-    #
-    def getName( self ): return self.name
+    # def getIndex( self ): return self.index
 
     #
     # Obtain the artist name for this track
@@ -350,9 +369,16 @@ class Track( OrderedItem ):
     # Define a comparison method for Track objects such that they will be
     # ordered by their track index values.
     #
-    def __cmp__( self, other ): return cmp( self.index, other.index )
+    def __eq__( self, other ): return self.index == other.index
+    def __ne__( self, other ): return self.index != other.index
+    def __lt__( self, other ): return self.index < other.index
+    def __le__( self, other ): return self.index <= other.index
+    def __gt__( self, other ): return self.index > other.index
+    def __ge__( self, other ): return self.index >= other.index
+    def __hash__( self ): return hash( self.index )
 
-    def __repr__( self ): return 'Track "%d - %s"' % ( self.index, self.name, )
+    def __repr__( self ): return 'Track "%d - %s"' % ( self.index, 
+                                                       self.getName(), )
 
 #
 # Parser for the iTunes Music Library.xml file.
@@ -387,7 +413,7 @@ class XMLParser( object ):
     #
     def startElement( self, name, atts ):
         self.value = ''
-        
+
         #
         # Create a new container if appropriate
         #
@@ -517,18 +543,13 @@ class iTunesXML( object ):
         self.loadedTimeStamp = None
 
         #
-        # Establish an AppleScript connection to the iTunes application
-        #
-        self.lastTrack = None
-
-        #
         # Initialize iTunes containers
         #
         self.artistMap = {}     # Mapping of names to Artist objects
         self.artistList = []    # List of all Artist objects
         self.albumList = []     # List of all Album objects
-        self.genreMap = {}      # Mapping of genre names to a list of Albums
-        self.genreNames = []    # Found genre names
+        self.genreMap = {}      # Mapping of genre names to Genre objects
+        self.genreList = []     # List of all Genre objects
         self.playlistNames = [] # Names of the playlists found in iTunes
 
     #
@@ -592,6 +613,7 @@ class iTunesXML( object ):
         artistList = []
         albumList = []
         genreMap = {}
+        genreList = []
 
         #
         # Visit all of the tracks found in the 'Tracks' <dict>
@@ -670,10 +692,12 @@ class iTunesXML( object ):
                 genreName = track.get( 'Genre' )
                 if genreName is not None and len( genreName ) > 0:
                     genreName = OrderedItem( genreName )
-                    genreList = genreMap.get( genreName )
-                    if genreList is None:
-                        genreMap[ genreName ] = genreList = []
-                    genreList.append( album )
+                    genre = genreMap.get( genreName )
+                    if genre is None:
+                        genre = Genre( genreName )
+                        genreMap[ genreName ] = genre
+                        genreList.append( genre )
+                    genre.addAlbum( album )
 
             #
             # If the 'Artist' field is different than 'Album Artist', link the
@@ -717,6 +741,7 @@ class iTunesXML( object ):
         #
         artistList.sort()
         albumList.sort()
+        genreList.sort()
 
         #
         # Validate the load.
@@ -743,11 +768,8 @@ class iTunesXML( object ):
         #
         # Obtain a sorted list of genre names.
         #
-        genreNames = genreMap.keys()
-        genreNames.sort()
-
         self.genreMap = genreMap
-        self.genreNames = genreNames
+        self.genreList = genreList
 
         #
         # Create Playlist objects to represent meaningful playlists.
@@ -815,21 +837,30 @@ class iTunesXML( object ):
     # Obtain the names of the genres in the iTunes library, as found during the
     # last XML load.
     #
-    def getGenreNames( self ): return self.genreNames
-    
+    def getGenreList( self ): return self.genreList
+
     #
     # Obtain the number of genres in the iTunes library
     #
-    def getGenreCount( self ): return len( self.genreNames )
+    def getGenreCount( self ): return len( self.genreList )
 
     #
-    # Obtain the list of albums associated with a genre, where KEY may be an
-    # ingteger index or a string name.
+    # Obtain the Genre object for a given key, where KEY may be an integer
+    # index, and OrderedItem instance, or a string name.
     #
     def getGenre( self, key ):
-        if type( key ) is type( 0 ):
-            key = self.genreNames[ key ]
-        return self.genreMap[ key ]
+        if isinstance( key, int ):
+            genre = self.genreLists[ key ]
+        else:
+            
+            #
+            # If not an OrderedItem instance, make it one,
+            #
+            if not isinstance( key, OrderedItem ):
+                key = OrderedItem( key )
+
+            genre = self.genreMap.get( key )
+        return genre
 
     #
     # Get the list of playlists in the iTunes library, as found during the last
@@ -1066,6 +1097,7 @@ class iTunesXML( object ):
     #
     def getRepeat( self ): 
         return self.getActivePlaylist().getRepeat()
+
     #
     # Set the repeat mode for the active playlist, where VALUE is one of
     #  - appscript.k.off
@@ -1089,9 +1121,12 @@ class iTunesXML( object ):
     def getCurrentTrack( self ):
         try:
             track = Track( GetApp().current_track.get() )
-            self.lastTrack = track
         except appscript.reference.CommandError:
-            track = self.lastTrack
+            playlist = self.getActivePlaylist()
+            if playlist.getTrackCount():
+                track = playlist.getTrack( 0 )
+            else:
+                track = None
         return track
 
     #

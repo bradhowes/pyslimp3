@@ -74,7 +74,10 @@ class Browser( DisplayGenerator ):
     #
     # Get the object/value that corresponds to the current index
     #
-    def getCurrentObject( self ): return self.getCollection()[ self.index ]
+    def getCurrentObject( self ): 
+        if self.index < 0 or self.index >= self.getMaxIndex():
+            raise IndexError, self.index, self.getMaxIndex()
+        return self.getCollection()[ self.index ]
 
     #
     # Generate an overlay that shows X/Y where X is the current index + 1, and
@@ -140,8 +143,9 @@ class Browser( DisplayGenerator ):
         return DisplayGenerator.left( self )
 
     #
-    # If there was a previous child browser, show it. Otherwise, invoke
-    # makeNextLevel() and return that.
+    # Generate a child Browser object to show for the current object. Cache the
+    # value in case the user made a mistake coming back from the child to the
+    # parent. 
     #
     def right( self ): 
         if not self.nextLevel:

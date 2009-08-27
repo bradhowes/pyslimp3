@@ -126,7 +126,7 @@ class PlaylistBrowser( Browser ):
         obj = self.getCurrentObject()
         if obj.getTrackCount() == 0:
             return None
-        return TrackListBrowser( self.client, self, obj.getTracks() )
+        return TrackListBrowser( self.client, self, obj.getTracks(), 0, True )
 
     #
     # Begin playback at the start of the playlist (or at the track at the given
@@ -137,6 +137,14 @@ class PlaylistBrowser( Browser ):
         if obj.getTrackCount() > 0:
             self.getCurrentObject().play( trackIndex )
             return PlaybackDisplay( self.client, self )
+        return self
+
+    def unrecord( self, trackIndex ):
+        print( 'unrecord', trackIndex )
+        playlist = self.getCurrentObject()
+        if not playlist.getCanManipulate():
+            return self
+        playlist.removeTrack( trackIndex )
         return self
 
     #
