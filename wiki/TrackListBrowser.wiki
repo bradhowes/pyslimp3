@@ -1,0 +1,9 @@
+#summary Details of the Browser class that shows a list of tracks
+
+= Introduction =
+
+The TracksListBrowser class allows the user to browse a set of Track objects.
+
+= Keys Supported =
+
+|| RIGHT, PIP || Show an TrackRatingDisplay screen to view and edit the rating for the current track ||
