@@ -6,4 +6,4 @@ The TrackListBrowser class allows the user to browse a set of Track objects.
 
 = Keys Supported =
 
-|| RIGHT, PIP || Show an TrackRatingDisplay screen to view and edit the rating for the current track ||
+|| RIGHT, PIP || Show a TrackRatingDisplay screen to view and edit the rating for the current track ||
