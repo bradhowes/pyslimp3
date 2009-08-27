@@ -1,0 +1,16 @@
+#summary Details of the Browser class that shows a list of genres
+
+[http://pyslimp3.googlecode.com/svn/wiki/GenreListBrowser.jpg]
+
+= Introduction =
+
+The GenreListBrowser class allows the user to browse a set of Genre objects. The display shows the genre name (*Alternative*) on the first line, and the album count (*32*) for in the genre, album index (*1*) and total album count (*25*) on the second.
+
+== Keys Supported ==
+
+|| UP || Show the next genre in the collection ||
+|| DOWN || Show the previous genre in the collection ||
+|| RIGHT || Show an AlbumListBrowser for the albums associated with the current genre ||
+|| LEFT || Return to the parent level and display ||
+|| REC || Append all of the tracks of all of the albums for the current genre to the target playlist ||
+|| PLAY || Play all of the tracks of the albums of the current genre, starting with the first track ||

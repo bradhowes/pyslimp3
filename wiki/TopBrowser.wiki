@@ -1,0 +1,76 @@
+#summary Details of the Browser class that is the root of all iTunes browsing
+
+= Introduction =
+
+The TopBrowser class is the top-level browser of Pyslimp3. It contains menu items that let you browse the iTunes library by various categories as well as search for items of interest. 
+
+ <b>NOTE</b>: you can always reach the TopBrowser display by pressing the MENU button.
+
+== Common Keys Supported ==
+
+|| UP || Show the next menu option ||
+|| DOWN || Show the previous menu option ||
+
+= Browse Albums =
+
+[http://pyslimp3.googlecode.com/svn/wiki/BrowseAlbums.jpg]
+
+Shows the total number of albums found in the iTunes library.
+
+== Keys Supported ==
+
+|| RIGHT || Show an AlbumListBrowser to browse all albums in the iTunes library ||
+
+= Browse Artists =
+
+[http://pyslimp3.googlecode.com/svn/wiki/BrowseArtists.jpg]
+
+Shows the total number of artists found in the iTunes library.
+
+== Keys Supported ==
+
+|| RIGHT || Show an ArtistListBrowser to browse all artists in the iTunes library ||
+
+= Browse Genres =
+
+[http://pyslimp3.googlecode.com/svn/wiki/BrowseGenres.jpg]
+
+Shows the total number of genres found in the iTunes library.
+
+== Keys Supported ==
+
+|| RIGHT || Show an GenreListBrowser to browse all genres in the iTunes library ||
+
+= Browse Playlists =
+
+[http://pyslimp3.googlecode.com/svn/wiki/BrowsePlaylists.jpg]
+
+Shows the total number of meaningful playlists found in the iTunes library.
+
+== Keys Supported ==
+
+|| RIGHT || Show an PlaylistBrowser to browse the playlists in the iTunes library ||
+
+= Search Albums =
+
+[http://pyslimp3.googlecode.com/svn/wiki/SearchAlbums.jpg]
+
+== Keys Supported ==
+
+|| RIGHT || Show an AlbumSearcher to allow searching the iTunes library for albums containg a search term. ||
+
+= Search Artists =
+
+[http://pyslimp3.googlecode.com/svn/wiki/SearchArtists.jpg]
+
+== Keys Supported ==
+
+|| RIGHT || Show an ArtistSearcher to allow searching the iTunes library for artists containg a search term. ||
+
+= Configuration Settings =
+
+[http://pyslimp3.googlecode.com/svn/wiki/ConfigurationSettings.jpg]
+
+== Keys Supported ==
+
+|| RIGHT || Show a SettingsBrowser to allow viewing and changing various Pyslimp3 settings. ||

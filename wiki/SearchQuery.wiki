@@ -1,0 +1,17 @@
+#summary Details of the searching functionality available in Pyslimp3
+
+= Introduction =
+
+The AlbumSearcher and ArtistSearcher classes enable searching for items in the iTunes library that match a search term that you enter. Since these two classes derive from the same class hierarchy (Searcher/TextEntry), they operate in the same manner; they only differ in their presentation.
+
+== Text Entry ==
+
+A search query is made up of three or more characters. Initially, the query is empty, except for a '_' character: this is the cursor, and it indicates where a new character will appear.
+
+Since most remote control devices do not have an alphanumeric keypad, one must design a means by which the user can enter alphanumeric text using the existing keys. An common approach, and one that was taken by the SLiMP3 developers, is to borrow the text entry behavior of some cell phones whereby pressing a number key emits the first letter assigned to the key as shown below. Pressing the same key will show the next assigned letter, with repeated pressings cycling through the list. Finally, after all of the letters, the number of the key itself appears.
+
+[http://pyslimp3.googlecode.com/svn/wiki/BrowseAlbums.jpg]
+
+In the display above, the search term contains three characters - *CAR* - with the cursor at the end indicating that any future number press will add a new character or number to the search term.
+
+To erase the last character of the query, simply press the LEFT button. To erase -all- characters, press the 0 (zero) key. If there are no characters in the search query, pressing LEFT will show the TopBrowser menu.

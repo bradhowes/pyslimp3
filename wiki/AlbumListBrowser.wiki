@@ -6,11 +6,11 @@
 
 The AlbumListBrowser class allows the user to browse a set of Album objects. The display shows the artist name (*Aimee Mann*) of the current album on the first line, and the album name (*@#%&`*`! Smilers*), album index (*2*) and album count (*374*) on the second.
 
-= Keys Supported =
+== Keys Supported ==
 
 || UP || Show the next album in the collection ||
 || DOWN || Show the previous album in the collection ||
 || RIGHT || Show a TrackListBrowser for the tracks associated with the current album ||
-|| LEFT || Return to the parent level and display ||
 || REC || Append all of the tracks of the current album to the target playlist ||
 || PLAY || Play the tracks of the current album, starting with the first track ||
+|| LEFT || Return to the parent level (eg. ArtistListBrowser or GenreListBrowser) ||
