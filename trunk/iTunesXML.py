@@ -787,7 +787,12 @@ class iTunesXML( object ):
             # Obtain the iTunes playlist object with the same name
             #
             name = each.get( 'Name' )
-            playlistObject = GetApp().user_playlists[ name ].get()
+            
+            try:
+                playlistObject = GetApp().user_playlists[ name ].get()
+            except appscript.reference.CommandError:
+                print( 'failed to get playlist', name )
+                continue
 
             #
             # Determine if this playlist is one that the user may manipulate.

@@ -481,6 +481,7 @@ class CustomCharacters( object ):
                                                     '00001',
                                                     '00001',
                                                     '00001', ),
+                      8217: ord( "'" ),
                       }
 
     def __init__( self ):
@@ -491,7 +492,7 @@ class CustomCharacters( object ):
         alt = self.kCharacterMap.get( value )
         if alt is None:
             return value
-        if type( alt ) is type( 0 ):
+        if isinstance( alt, int ):
             # print '* ', hex( value ), alt
             return alt
         index = self.lookup.get( value )
@@ -579,6 +580,7 @@ class VFD( object ):
         if value > 1000 and value < 1255:
             value -= 1000
         if value > 255:
+            print( '*** untranslated value:', value )
             value = 255
         return value
 
