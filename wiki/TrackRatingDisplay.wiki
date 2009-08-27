@@ -12,5 +12,6 @@ The TrackRatingDisplay class allows the user to view and edit the iTunes rating 
 
 || UP || Increase the rating ||
 || DOWN || Decrease the rating ||
+|| 0-5 || Set the rating that corresponds to the digit ||
 || RIGHT, PIP || Show an AlbumRatingDisplay screen to view and edit the rating for the album containing the track ||
 || LEFT || Return to the parent level and display ||
