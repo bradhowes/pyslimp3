@@ -6,7 +6,7 @@ The AlbumSearcher and ArtistSearcher classes enable searching for items in the i
 
 == Text Entry ==
 
-A search query is made up of three or more characters. Initially, the query is empty, except for a '_' character: this is the cursor, and it indicates where a new character will appear.
+A search query is made up of three or more characters. Initially, the query is empty, except for a '`_`' character: this is the cursor, and it indicates where a new character will appear.
 
 Since most remote control devices do not have an alphanumeric keypad, one must design a means by which the user can enter alphanumeric text using the existing keys. An common approach, and one that was taken by the SLiMP3 developers, is to borrow the text entry behavior of some cell phones whereby pressing a number key emits the first letter assigned to the key as shown below. Pressing the same key will show the next assigned letter, with repeated pressings cycling through the list. Finally, after all of the letters, the number of the key itself appears.
 
