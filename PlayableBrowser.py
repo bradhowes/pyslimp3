@@ -39,7 +39,7 @@ class PlayableBrowser( Browser ):
     # Add the current object to the target playlist.
     #
     def record( self ):
-        
+
         #
         # Ask the object to add itself to the target playlist.
         #

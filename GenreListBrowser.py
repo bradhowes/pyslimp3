@@ -18,37 +18,43 @@
 #
 
 from AlbumListBrowser import AlbumListBrowser
-from Browser import Browser
 from Content import Content
 from Display import *
+from PlayableBrowser import PlayableBrowser
+from PlaybackDisplay import PlaybackDisplay
 
 #
-# Specialization of Browser that shows a list of genre names. Moving right
+# Specialization of PlayableBrowser that shows a list of genres. Moving right
 # shows an AlbumListBrowser for the current genre.
 #
-class GenreListBrowser( Browser ):
+class GenreListBrowser( PlayableBrowser ):
 
     #
-    # Implementation of Browser interface. Returns list of genre names
+    # Implementation of Browser interface. Returns list of Genre objects
     #
-    def getCollection( self ): return self.source.getGenreNames()
+    def getCollection( self ): return self.source.getGenreList()
 
     #
-    # Obtain the display for the current genre index
+    # Show the current genre name and album count
     #
     def generateWith( self, obj ): 
-        genre = self.source.getGenre( obj )
         return Content( [ obj.getName(),
-                          formatQuantity( len( genre ), 'album', None,
+                          formatQuantity( obj.getAlbumCount(), 'album', None,
                                           '(%d %s)' ) ],
                         [ 'Genre',
                           self.getIndexOverlay() ] )
 
     #
-    # Show an AlbumListBrowser with the list of albums associated with the
-    # current genre.
+    # Create an AlbumListBrowser for the genre's albums
     #
     def makeNextLevel( self ): 
         obj = self.getCurrentObject()
-        genre = self.source.getGenre( obj )
-        return AlbumListBrowser( self.client, self, genre )
+        return AlbumListBrowser( self.client, self, obj.getAlbums() )
+
+    #
+    # Implementation of the PlayableBrowser interface. Begin playback at the
+    # start of the first album
+    #
+    def play( self ): 
+        self.source.playObject( self.getCurrentObject() )
+        return PlaybackDisplay( self.client, self )
