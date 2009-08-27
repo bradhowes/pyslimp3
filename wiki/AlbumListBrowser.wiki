@@ -1,0 +1,10 @@
+#summary Details of the Browser class that shows a list of albums
+
+= Introduction =
+
+The AlbumListBrowser class allows the user to browse a set of Album objects.
+
+= Keys Supported =
+
+|| RIGHT || Show a TrackListBrowser for the list of tracks associated with the current album ||
+|| PLAY || Play all tracks associated with the current album ||
