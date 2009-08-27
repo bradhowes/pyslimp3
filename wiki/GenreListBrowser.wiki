@@ -1,4 +1,4 @@
-#summary Details of the Browser class that shows a list of genres
+#summary Details of the class that shows a list of Genre objects
 
 [http://pyslimp3.googlecode.com/svn/wiki/GenreListBrowser.jpg]
 
