@@ -1,5 +1,7 @@
 #summary The key maps in use by the various display classes
 
+[http://pyslimp3.googlecode.com/svn/wiki/RMV201.png]
+
 = Always Available Keys =
 
 || *Key* || *Description* ||
