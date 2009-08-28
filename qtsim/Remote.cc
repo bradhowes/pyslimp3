@@ -18,6 +18,7 @@
 //
 
 #include <iostream>
+#include <QtGui/QMouseEvent>
 
 #include "MainWindow.h"
 #include "Remote.h"
@@ -76,9 +77,10 @@ static const KeyCodeMapEntry inits[] = {
 };
 
 Remote::Remote()
-    : QSvgWidget(), gui_( new Ui::Remote )
+    : QWidget( 0, Qt::FramelessWindowHint ), gui_( new Ui::Remote )
 {
-    setWindowFlags( windowFlags() | Qt::Tool );
+    setAttribute( Qt::WA_TranslucentBackground, true );
+    setAutoFillBackground( false );
 
     //
     // Initialize the maps used to translate object names and Qt key code
@@ -135,8 +137,6 @@ Remote::Remote()
     connect( gui_->sleep, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
     connect( gui_->ok, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
     connect( gui_->mute, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-
-    load( QString( ":/RMV201.png" ) );
 }
 
 void
@@ -167,4 +167,22 @@ Remote::simulateButtonPressed( uint32_t key )
     }
 
     emit keyPressed( pos->second );
+}
+
+void
+Remote::mousePressEvent( QMouseEvent* event )
+{
+    if ( event->button() == Qt::LeftButton ) {
+        dragPosition_ = event->globalPos() - frameGeometry().topLeft();
+        event->accept();
+    }
+}
+
+void
+Remote::mouseMoveEvent( QMouseEvent* event )
+{
+    if ( event->buttons() & Qt::LeftButton ) {
+        move( event->globalPos() - dragPosition_ );
+        event->accept();
+    }
 }
