@@ -96,7 +96,9 @@ class ClientPersistence( object ):
             #
             # Create new Client object for the address.
             #
+            print( 'getClient:', addr )
             client = Client.Client( server, addr, settings )
             self.clients[ key ] = client
-
+        else:
+            client.setHardwareAddress( addr )
         return client

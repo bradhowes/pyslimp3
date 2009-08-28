@@ -97,6 +97,7 @@ class Server( asyncore.dispatcher ):
             print( '*** unknown message type:', kind )
  
     def processDiscovery( self, addr ):
+        print( '...discovery response' )
         self.sendDiscoveryResponse( addr )
 
     def processHello( self, client ):

@@ -22,13 +22,13 @@
 
 #include <map>
 
-#include <QtSvg/QSvgWidget>
+#include <QtGui/QWidget>
 
 #include "ui_Remote.h"
 
 class MainWindow;
 
-class Remote : public QSvgWidget
+class Remote : public QWidget
 {
     Q_OBJECT
 public:
@@ -49,9 +49,13 @@ public slots:
     void buttonPressed();
 
 private:
+    void mouseMoveEvent( QMouseEvent* event );
+    void mousePressEvent( QMouseEvent* event );
+
     Ui::Remote* gui_;
     NameKeyCodeMap nameKeyCodes_;
     KeyKeyCodeMap keyKeyCodes_;
+    QPoint dragPosition_;
 };
 
 #endif

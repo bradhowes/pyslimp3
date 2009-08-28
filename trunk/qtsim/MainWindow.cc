@@ -351,6 +351,7 @@ MainWindow::emitDiscovery()
 void
 MainWindow::emitHello()
 {
+    std::clog << "emitHello\n";
     QByteArray msg( kMessageSize, 0 );
     msg[ 0 ] = 'h';		// Hello message
     if ( ! writeMessage( msg ) ) {
@@ -371,6 +372,7 @@ MainWindow::readMessage()
 	inputBuffer_.resize( size );
 	size = serverSocket_->readDatagram( inputBuffer_.data(), size,
 					    &serverAddress_ );
+	std::clog << "readMessage: " << size << ' ' << foundServer_ << '\n';
 
 	if ( size > 0 ) {
 

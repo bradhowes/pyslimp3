@@ -385,7 +385,7 @@ class Track( object ):
 #
 class XMLParser( object ):
 
-    def __init__( self, path ):
+    def __init__( self ):
 
         #
         # Install XML parser hooks
@@ -403,10 +403,23 @@ class XMLParser( object ):
         self.key = None
         self.value = ''
 
-        #
-        # Parse the given file.
-        #
-        self.parser.ParseFile( open( path ) )
+    #
+    # Parse the given file.
+    #
+    def parseFile( self, path ):
+        ok = False
+        try:
+
+            #
+            # Attempt to parse the iTunes Music Library XML file. If we have a
+            # non-empty stack afterwards, assume the file was incomplete.
+            #
+            self.parser.ParseFile( open( path ) )
+            if self.stack is None:
+                ok = True
+        except:
+            pass
+        return ok
 
     #
     # XML parsing hook invoked at the start of an element.
@@ -603,9 +616,14 @@ class iTunesXML( object ):
         startTime = datetime.now()
 
         #
-        # Create an XML parser and parse the file.
+        # Create an XML parser and parse the file. Don't continue if the
+        # parsing failed.
         #
-        parser = XMLParser( self.xmlFilePath )
+        parser = XMLParser()
+        if not parser.parseFile(  self.xmlFilePath ):
+            print( '*** failed to parse XML file ***' )
+            return
+
         rawTracks = parser.getTracks()
 
         tracks = {}
@@ -757,6 +775,14 @@ class iTunesXML( object ):
                                            track.getName():
                             print( '*** track ID mismatch', track.getID(),
                                    track.getName() )
+
+        if len( artistList ) < len( self.artistList ) / 2:
+            print( '*** ignoring sudden drop in artist count ***' )
+            return
+
+        if len( albumList ) < len( self.albumList ) / 2:
+            print( '*** ignoring sudden drop in album count ***' )
+            return
 
         #
         # Now install the new data structures.

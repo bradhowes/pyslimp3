@@ -1,7 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <qresource prefix="/">
-    <file>RMV201.svg</file>
     <file>RMV201.png</file>
 </qresource>
 </RCC>
