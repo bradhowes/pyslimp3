@@ -351,7 +351,6 @@ class Client( object ):
 
         try:
             rc = self.socket.sendto( data, self.hardwareAddress )
-            print( 'sendto', self.hardwareAddress, rc )
             if rc != len( data ):
                 print( '*** failed to send', len( data ), 'bytes -', rc )
         except socket.error:
