@@ -29,11 +29,11 @@ The following maps refer to the keys found on the original SLiMP3 remote control
 </tr>
 </table>
 
-== DisplayGenerator Keys == 
+== DisplayGenerator == 
 || *Key* || *Description* ||
 || LEFT || Exit the current browser and show a prior higher-level browser display ||
 
-== PlaybackDisplay Keys ==
+== PlaybackDisplay ==
 
 Derived from #DisplayGenerator.
 
@@ -49,7 +49,7 @@ Derived from #DisplayGenerator.
 
 == TextEntry ==
 
-Inherits from DisplayGenerator
+Inherits from #DisplayGenerator.
 
 || *Key* || *Description* ||
 || UP || cycle the current character to the next value ||
@@ -68,7 +68,7 @@ Inherits from DisplayGenerator
 
 == RatingDisplay ==
 
-Inherits from DisplayGenerator
+Inherits from #DisplayGenerator
 
 || *Key* || *Description* ||
 || PIP || show the display that was active prior to this one (same as LEFT) ||
@@ -78,7 +78,7 @@ Inherits from DisplayGenerator
 
 == TrackRatingDisplay ==
 
-Inherits from RatingDisplay.
+Inherits from #RatingDisplay.
 
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the album of the current track ||
@@ -86,7 +86,7 @@ Inherits from RatingDisplay.
 
 == [Browser] ==
 
-Inherits from DisplayGenerator.
+Inherits from #DisplayGenerator.
 
 || *Key* || *Description* ||
 || UP || Show the next element in the browser collection ||
@@ -96,7 +96,7 @@ Inherits from DisplayGenerator.
 
 == ChoiceSetting ==
 
-Inherits from [Browser].
+Inherits from [#Browser].
 
 || *Key* || *Description* ||
 || RIGHT || Use the current value as the value of a particular setting ||
@@ -104,7 +104,7 @@ Inherits from [Browser].
 
 == PlaylistBrowser ==
 
-Inherits from [Browser].
+Inherits from [#Browser].
 
 || *Key* || *Description* ||
 || PLAY || start playing the first track in the current playlist ||
@@ -114,7 +114,7 @@ Inherits from [Browser].
 
 == PlayableBrowser ==
 
-Inherits from [Browser].
+Inherits from [#Browser].
 
 || *Key* || *Description* ||
 || REC || add the browsed collection to the target playlist ||
@@ -122,14 +122,14 @@ Inherits from [Browser].
 
 == AlbumListBrowser == 
 
-Inherits from PlayableBrowser.
+Inherits from #PlayableBrowser.
 
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the current album. ||
 
 = TrackListBrowser =
 
-Inherits from PlayableBrowser.
+Inherits from #PlayableBrowser.
 
 || *Key* || *Description* ||
 || PIP || show a ratings editor for the current track ||
