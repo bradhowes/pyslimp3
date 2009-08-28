@@ -1,8 +1,13 @@
 #summary The key maps in use by the various display classes
 
-[http://pyslimp3.googlecode.com/svn/wiki/RMV201.png]
+<table cellspacing="15">
+<tr>
+<td>[http://pyslimp3.googlecode.com/svn/wiki/RMV201.png]</td>
+<td>
+= Introduction =
+The following maps refer to the keys found on the original SLiMP3 remote control from Sony (model RMV201). I don't know if the SlimDevices remote operates with the same key codes or functionality. So, your results may vary.
 
-= Always Available Keys =
+== Always Available Keys ==
 
 || *Key* || *Description* ||
 || MENU || Shows the top-level browser menu ||
@@ -20,11 +25,17 @@
 || STOP || Stop iTunes playback and rewind to the start of the current track. ||
 || PAUSE|| Stop iTunes playback and leave the playback position alone. ||
 
-= DisplayGenerator = 
+</td>
+</tr>
+</table>
+
+== DisplayGenerator Keys == 
 || *Key* || *Description* ||
 || LEFT || Exit the current browser and show a prior higher-level browser display ||
 
-= PlaybackDisplay (DisplayGenerator) =
+== PlaybackDisplay Keys ==
+
+Derived from #DisplayGenerator.
 
 || *Key* || *Description* ||
 || UP || Show the next track in the active playlist ||
@@ -36,7 +47,10 @@
 || FFWD || Fast-forward the playback position when held down, otherwise move to the next track. ||
 || DISP || Cycle through the various track info displays: track index (eg. 3/10); elapsed time (eg. +0:23); remaining time (eg -3:33); track duration (eg: 4:56); and blank ||
 
-= TextEntry (DisplayGenerator) =
+== TextEntry ==
+
+Inherits from DisplayGenerator
+
 || *Key* || *Description* ||
 || UP || cycle the current character to the next value ||
 || DOWN || cycle the current character to the previous value ||
@@ -52,47 +66,71 @@
 || 8 || cycle through the characters T,U,V,8 ||
 || 9 || cycle through the characters W,X,Y,Z,9 ||
 
-= RatingDisplay (DisplayGenerator) =
+== RatingDisplay ==
+
+Inherits from DisplayGenerator
+
 || *Key* || *Description* ||
 || PIP || show the display that was active prior to this one (same as LEFT) ||
 || UP || increase the rating of the current item ||
 || DOWN || decrease the rating of the current item ||
 || 0-5 || set the rating to 20x the digit pressed (0-100). If the same digit is pressed twice in a row, add 10 to the current rating (half-star) ||
 
-= TrackRatingDisplay (RatingDisplay) =
+== TrackRatingDisplay ==
+
+Inherits from RatingDisplay.
+
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the album of the current track ||
 || RIGHT || Show a ratings editor for the album of the current track ||
 
-= Browser (DisplayGenerator) =
+== [Browser] ==
+
+Inherits from DisplayGenerator.
+
 || *Key* || *Description* ||
 || UP || Show the next element in the browser collection ||
 || DOWN || show the previous element in the browser collection ||
 || RIGHT || show a more-detailed (child) display ||
 || 0-9 || if there are 10 items or less, treat the digit as an index (0 being 10) and show that item in the browser. Otherwise, treat the digit in a manner similar to that of TextEntry, where a digit maps to the letters of a telephone keypad. This letter is then used in a binary search of the items being browsed, and the first entry found that starts with that character is then shown. ||
 
-= ChoiceSetting (Browser) = 
+== ChoiceSetting ==
+
+Inherits from [Browser].
+
 || *Key* || *Description* ||
 || RIGHT || Use the current value as the value of a particular setting ||
 || OK || Use the current value as the value of a particular setting ||
 
-= PlaylistBrowser (Browser) =
+== PlaylistBrowser ==
+
+Inherits from [Browser].
+
 || *Key* || *Description* ||
 || PLAY || start playing the first track in the current playlist ||
 || REC || create a new playlist ||
 || 0 (zero) || clear the current playlist if it contains tracks, or delete it if it is empty ||
 || OK || Make the current playlist the "target" playlist for REC operations. If it is already the "target" playlist, make MBJB the target playlist ||
 
-= PlayableBrowser (Browser) =
+== PlayableBrowser ==
+
+Inherits from [Browser].
+
 || *Key* || *Description* ||
 || REC || add the browsed collection to the target playlist ||
 || PLAY || copy the browsed collection to the MBJB playlist and begin playback ||
 
-= AlbumListBrowser (PlayableBrowser) = 
+== AlbumListBrowser == 
+
+Inherits from PlayableBrowser.
+
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the current album. ||
 
-= TrackListBrowser (PlayableBrowser) =
+= TrackListBrowser =
+
+Inherits from PlayableBrowser.
+
 || *Key* || *Description* ||
 || PIP || show a ratings editor for the current track ||
 || RIGHT || show a ratings editor for the current track ||
