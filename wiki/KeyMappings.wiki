@@ -123,14 +123,14 @@ Inherits from [#Browser].
 
 == AlbumListBrowser == 
 
-Inherits from #PlayableBrowser.
+Inherits from [#PlayableBrowser].
 
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the current album. ||
 
-= TrackListBrowser =
+== TrackListBrowser ==
 
-Inherits from #PlayableBrowser.
+Inherits from [#PlayableBrowser].
 
 || *Key* || *Description* ||
 || PIP || show a ratings editor for the current track ||
