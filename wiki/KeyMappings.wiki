@@ -30,12 +30,13 @@ The following maps refer to the keys found on the original SLiMP3 remote control
 </table>
 
 == DisplayGenerator ==
+
 || *Key* || *Description* ||
 || LEFT || Exit the current browser and show a prior higher-level browser display ||
 
-= PlaybackDisplay =
+== PlaybackDisplay ==
 
-Derived from [#DisplayGenerator DisplayGenerator].
+Inherits from [#DisplayGenerator].
 
 || *Key* || *Description* ||
 || UP || Show the next track in the active playlist ||
@@ -68,7 +69,7 @@ Inherits from [#DisplayGenerator]
 
 == RatingDisplay ==
 
-Inherits from KeyMappings#DisplayGenerator
+Inherits from [#DisplayGenerator].
 
 || *Key* || *Description* ||
 || PIP || show the display that was active prior to this one (same as LEFT) ||
@@ -78,7 +79,7 @@ Inherits from KeyMappings#DisplayGenerator
 
 == TrackRatingDisplay ==
 
-Inherits from KeyMappings#RatingDisplay.
+Inherits from [#RatingDisplay].
 
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the album of the current track ||
@@ -86,7 +87,7 @@ Inherits from KeyMappings#RatingDisplay.
 
 == [Browser] ==
 
-Inherits from #DisplayGenerator.
+Inherits from [#DisplayGenerator].
 
 || *Key* || *Description* ||
 || UP || Show the next element in the browser collection ||
