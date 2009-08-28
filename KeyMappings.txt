@@ -1,0 +1,122 @@
+The key maps in use by the various display classes
+
+Always Available Keys
+---------------------
+  MENU - Shows the top-level browser menu
+  DISP - Shows the playback display if possible. If already showing the
+       	 playback display, this button will cycle through the various track info
+	 displays:
+           - track index (eg. 3/10)
+	   - elapsed time (eg. +0:23)
+	   - remaining time (eg -3:33)
+	   - track duration (eg: 4:56)
+	   - blank
+  VOL+ - Increases iTunes volume
+  VOL- - Decreases iTunes volume
+   CH+ - Increases the SLiMP3 brightness
+   CH- - Decreases the SLiMP3 brightness
+MUTING - Toggle iTunes mute setting
+    OK - Toggle shuffling mode for current playlist
+RECALL - Cycle repeat mode for current playlist (off, all, song)
+ POWER - Toggle SLiMP3 "power", where ON allows iTunes control and OFF shows
+       	 the current date/time.
+ SLEEP - Enable the screen saver. If enabled, and button press will disable
+       	 it.
+
+   REC - Show the current "target" playlist if not showing an artist, album, or
+       	 track browswer. Otherwise, add the artist, album or track to the
+       	 "target" playlist.
+  STOP - Stop iTunes playback and rewind to the start of the current track.
+ PAUSE - Stop iTunes playback and leave the playback position alone.
+
+AlbumListBrowser
+----------------
+   PIP - Show a ratings editor for the current album.
+
+Browser
+-------
+    UP - Show the next element in the browser collection
+  DOWN - show the previous element in the browser collection
+ RIGHT - show a more-detailed (child) display
+   0-9 - if there are 10 items or less, treat the digit as an index (0 being
+         10) and show that item in the browser. Otherwise, treat the digit in a
+         manner similar to that of TextEntry, where a digit maps to the letters
+         of a telephone keypad. This letter is then used in a binary search of
+         the items being browsed, and the first entry found that starts with
+         that character is then shown.
+
+DisplayGenerator
+----------------
+  LEFT - Exit the current browser and show a prior higher-level browser display
+
+PlayableBrowser
+---------------
+   REC - Add the browsed collection to the target playlist
+  PLAY - Copy the browsed collection to the MBJB playlist and begin playback
+
+PlaybackDisplay
+---------------
+    UP - Show the next track in the active playlist
+  DOWN - Show the previous track in the active playlist
+ RIGHT - Show a ratings editor for the current track
+   PIP - Show a ratings editor for the current track
+  PLAY - Begin/resume playing the current track
+   RWD - Rewind the playback position when held down, otherwise move to the
+         previous track.
+  FFWD - Fast-forward the playback position when held down, otherwise move to
+         the next track.
+  DISP - Cycle through the various track info displays:
+       	   - track index (eg. 3/10)
+	   - elapsed time (eg. +0:23)
+	   - remaining time (eg -3:33)
+	   - track duration (eg: 4:56)
+	   - blank
+
+PlaylistBrowser
+---------------
+  PLAY - Start playing the first track in the current playlist
+   REC - Create a new playlist
+     0 - (zero) clear the current playlist if it contains tracks, or delete it
+         if it is empty
+    OK - Make the current playlist the "target" playlist for REC operations. If
+       	 it is already the "target" playlist, make MBJB the target playlist
+
+RatingDisplay
+-------------
+   PIP - Show the display that was active prior to this one (same as LEFT)
+    UP - Increase the rating of the current item
+  DOWN - Decrease the rating of the current item
+   0-5 - Set the rating to 20x the digit pressed (0-100). If the same digit is
+         pressed twice in a row, add 10 to the current rating (half-star)
+
+TrackRatingDisplay
+------------------
+   PIP - Show a ratings editor for the album of the current track
+ RIGHT - Show a ratings editor for the album of the current track
+
+ChoiceSetting
+-------------
+ RIGHT - Use the current value as the value of a particular setting
+    OK - Use the current value as the value of a particular setting
+
+TextEntry
+---------
+    UP - Cycle the current character to the next value
+  DOWN - Cycle the current character to the previous value
+ RIGHT - Move to the next character position. Twice in a row will validate and
+       	 accept the text entry
+    OK - Validate and accept the text entry
+     1 - Cycle through the characters 1,2,3,4,5,6,7,8,9,0
+     2 - Cycle through the characters A,B,C,2
+     3 - Cycle through the characters D,E,F,3
+     4 - Cycle through the characters G,H,I,4
+     5 - Cycle through the characters J,K,L,5
+     6 - Cycle through the characters M,N,O,6
+     7 - Cycle through the characters P,Q,R,S,7
+     8 - Cycle through the characters T,U,V,8
+     9 - Cycle through the characters W,X,Y,Z,9
+
+TrackListBrowser
+----------------
+   PIP - Show a ratings editor for the current track
+ RIGHT - Show a ratings editor for the current track
