@@ -35,7 +35,7 @@ The following maps refer to the keys found on the original SLiMP3 remote control
 
 == PlaybackDisplay ==
 
-Derived from WikiSyntax#DisplayGenerator.
+Derived from [WikiSyntax#DisplayGenerator DisplayGenerator].
 
 || *Key* || *Description* ||
 || UP || Show the next track in the active playlist ||
