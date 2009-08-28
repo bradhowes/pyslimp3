@@ -29,13 +29,13 @@ The following maps refer to the keys found on the original SLiMP3 remote control
 </tr>
 </table>
 
-= DisplayGenerator =
+== DisplayGenerator ==
 || *Key* || *Description* ||
 || LEFT || Exit the current browser and show a prior higher-level browser display ||
 
 = PlaybackDisplay =
 
-Derived from [KeyMappings#DisplayGenerator DisplayGenerator].
+Derived from [#DisplayGenerator DisplayGenerator].
 
 || *Key* || *Description* ||
 || UP || Show the next track in the active playlist ||
