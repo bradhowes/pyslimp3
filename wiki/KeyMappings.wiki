@@ -49,7 +49,7 @@ Derived from [#DisplayGenerator DisplayGenerator].
 
 == TextEntry ==
 
-Inherits from KeyMappings#DisplayGenerator.
+Inherits from [#DisplayGenerator]
 
 || *Key* || *Description* ||
 || UP || cycle the current character to the next value ||
