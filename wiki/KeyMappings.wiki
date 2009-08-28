@@ -35,7 +35,7 @@ The following maps refer to the keys found on the original SLiMP3 remote control
 
 == PlaybackDisplay ==
 
-Derived from #DisplayGenerator.
+Derived from KeyMappings#DisplayGenerator.
 
 || *Key* || *Description* ||
 || UP || Show the next track in the active playlist ||
@@ -49,7 +49,7 @@ Derived from #DisplayGenerator.
 
 == TextEntry ==
 
-Inherits from #DisplayGenerator.
+Inherits from KeyMappings#DisplayGenerator.
 
 || *Key* || *Description* ||
 || UP || cycle the current character to the next value ||
@@ -68,7 +68,7 @@ Inherits from #DisplayGenerator.
 
 == RatingDisplay ==
 
-Inherits from #DisplayGenerator
+Inherits from KeyMappings#DisplayGenerator
 
 || *Key* || *Description* ||
 || PIP || show the display that was active prior to this one (same as LEFT) ||
@@ -78,7 +78,7 @@ Inherits from #DisplayGenerator
 
 == TrackRatingDisplay ==
 
-Inherits from #RatingDisplay.
+Inherits from KeyMappings#RatingDisplay.
 
 || *Key* || *Description* ||
 || PIP || Show a ratings editor for the album of the current track ||
