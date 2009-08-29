@@ -175,8 +175,8 @@ static const int kPrefixData = 0x03;
 static const int kHeartbeatInterval = 5000; // msecs (5 seconds)
 
 MainWindow::MainWindow()
-    : QWidget(), timeSource_(), remote_( new Remote ), bits_(), elements_(),
-      timer_( new QTimer( this ) ),
+    : QWidget(), timeSource_(), remote_( new Remote( this ) ), bits_(),
+      elements_(), timer_( new QTimer( this ) ),
       serverSocket_( new QUdpSocket( this ) ), inputBuffer_( 4096, 0 ),
       serverAddress_( QHostAddress::Broadcast ),
       lastTimeStamp_( QDateTime::currentDateTime() ), foundServer_( false )
@@ -231,9 +231,6 @@ MainWindow::MainWindow()
 
     connect( remote_, SIGNAL( keyPressed( uint32_t ) ),
 	     SLOT( sendKey( uint32_t ) ) );
-    remote_->show();
-    remote_->raise();
-    remote_->activateWindow();
 
     if ( ! serverSocket_->bind() )
 	std::clog << "*** failed to bind\n";
@@ -247,13 +244,10 @@ MainWindow::MainWindow()
     setFocus( Qt::ActiveWindowFocusReason );
 
     emitDiscovery();
-}
 
-void
-MainWindow::mousePressEvent( QMouseEvent* )
-{
     remote_->show();
     remote_->raise();
+    remote_->activateWindow();
 }
 
 void
@@ -351,7 +345,6 @@ MainWindow::emitDiscovery()
 void
 MainWindow::emitHello()
 {
-    std::clog << "emitHello\n";
     QByteArray msg( kMessageSize, 0 );
     msg[ 0 ] = 'h';		// Hello message
     if ( ! writeMessage( msg ) ) {
@@ -372,7 +365,6 @@ MainWindow::readMessage()
 	inputBuffer_.resize( size );
 	size = serverSocket_->readDatagram( inputBuffer_.data(), size,
 					    &serverAddress_ );
-	std::clog << "readMessage: " << size << ' ' << foundServer_ << '\n';
 
 	if ( size > 0 ) {
 
@@ -383,9 +375,6 @@ MainWindow::readMessage()
 	    lastTimeStamp_ = QDateTime::currentDateTime();
 	    switch ( inputBuffer_[ 0 ] ) {
 	    case 'D':		// Discovery response message
-		std::clog << "server host: "
-			  << serverAddress_.toString().toStdString()
-			  << std::endl;
 		emitHello();
 		break;
 
@@ -628,4 +617,20 @@ MainWindow::keyPressEvent( QKeyEvent* event )
     // code to the server.
     //
     remote_->simulateButtonPressed( event->key() );
+}
+
+void
+MainWindow::hideEvent( QHideEvent* event )
+{
+    QWidget::hideEvent( event );
+    remote_->hide();
+}
+
+void
+MainWindow::showEvent( QShowEvent* event )
+{
+    QWidget::showEvent( event );
+    remote_->show();
+    remote_->raise();
+    remote_->activateWindow();
 }

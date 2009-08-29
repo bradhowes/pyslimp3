@@ -36,7 +36,7 @@ public:
     typedef std::map<QString,uint32_t> NameKeyCodeMap;
     typedef std::map<int,uint32_t> KeyKeyCodeMap;
 
-    Remote();
+    Remote( QWidget* parent );
 
     void simulateButtonPressed( uint32_t key );
 
