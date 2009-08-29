@@ -85,11 +85,6 @@ private:
     */
     void emitHello();
     
-    /** Override of QWidget method. Show the remote window.
-        \param event 
-    */
-    void mousePressEvent( QMouseEvent* event );
-    
     /** Send out a broadcast or UDP message with the contents of the internal
         buffer, 
         \param buffer data to send
@@ -111,6 +106,9 @@ private:
     void processCustomDefinition( uint8_t index );
     void keyPressEvent( QKeyEvent* event );
     void writeLine( const std::string& data );
+
+    void hideEvent( QHideEvent* event );
+    void showEvent( QShowEvent* event );
 
     QTime timeSource_;
     Remote* remote_;

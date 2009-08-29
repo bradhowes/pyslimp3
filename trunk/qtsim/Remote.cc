@@ -76,10 +76,12 @@ static const KeyCodeMapEntry inits[] = {
     KeyCodeMapEntry( "", 0x00, 0 ), // sentinal
 };
 
-Remote::Remote()
+Remote::Remote( QWidget* parent )
     : QWidget( 0, Qt::FramelessWindowHint ), gui_( new Ui::Remote )
 {
     setAttribute( Qt::WA_TranslucentBackground, true );
+    setAttribute( Qt::WA_QuitOnClose, false );
+    setAttribute( Qt::WA_StaticContents, true );
     setAutoFillBackground( false );
 
     //
