@@ -77,7 +77,10 @@ static const KeyCodeMapEntry inits[] = {
 };
 
 Remote::Remote( QWidget* parent )
-    : QWidget( 0, Qt::FramelessWindowHint ), gui_( new Ui::Remote )
+    : QWidget( 0,
+	       Qt::FramelessWindowHint |
+	       Qt::Tool
+	), gui_( new Ui::Remote )
 {
     setAttribute( Qt::WA_TranslucentBackground, true );
     setAttribute( Qt::WA_QuitOnClose, false );
