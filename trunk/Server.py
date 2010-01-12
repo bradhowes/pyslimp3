@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -66,6 +66,7 @@ class Server( asyncore.dispatcher ):
             self.socket = None
         self.create_socket( socket.AF_INET, socket.SOCK_DGRAM )
         self.socket.bind( ( '', port ) )
+        self.socket.setblocking( 0 )
         self.set_reuse_addr()
 
     def run( self ):
@@ -78,17 +79,41 @@ class Server( asyncore.dispatcher ):
             timerManager.processTimers()
 
     def handle_read( self ):
-        msg, addr = self.socket.recvfrom( self.kReceiveBufferSize )
-        if msg[ 0 ] == 'd':
-            self.processDiscovery( addr )
-        else:
-            self.processMessage( addr, msg )
+        
+        #
+        # Data available on our server socket. Keep reading until there isn't
+        # any.
+        #
+        keyAddr = None
+        keyMsg = None
+        while 1:
+            try:
+                msg, addr = self.socket.recvfrom( self.kReceiveBufferSize )
+            except socket.error:
+                break
+
+            #
+            # Delay key messages until we read the last one. This assumes we
+            # process incoming messages faster than they arrive. Otherwise, we
+            # will end up doing nothing ...
+            #
+            kind = msg[ 0 ]
+            if kind == 'd':
+                self.processDiscovery( addr )
+            elif kind == 'i':
+                keyAddr = addr
+                keyMsg = msg
+            else:
+                self.processMessage( addr, msg )
+
+        if keyMsg != None:
+            self.processMessage( keyAddr, keyMsg );
 
     def processMessage( self, addr, msg ):
         client = self.clients.getClient( self, addr )
         client.touch()
         kind = msg[ 0 ]
-        if kind == 'h' or kind == 'd':
+        if kind == 'h':
             self.processHello( client )
         elif kind == 'i':
             self.processIRMessage( client, msg )
