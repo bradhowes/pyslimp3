@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -56,8 +56,8 @@ class AlbumListBrowser( PlayableBrowser ):
     # Show the current album name and track count
     #
     def generateWith( self, obj ):
-        return Content( [ obj.getArtistName(),
-                          obj.getName() ],
+        return Content( [ obj.getName(),
+                          obj.getArtistName() ],
                         [ 'Album',
                           self.getIndexOverlay() ] )
 

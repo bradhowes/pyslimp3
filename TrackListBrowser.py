@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -35,6 +35,7 @@ class TrackListBrowser( PlayableBrowser ):
         PlayableBrowser.__init__( self, client, prevLevel, index )
         self.trackList = trackList
         self.unrecord = unrecord
+        self.tens = None
 
     def getCollection( self ): return self.trackList
 
@@ -50,10 +51,10 @@ class TrackListBrowser( PlayableBrowser ):
     # Show the current track name and duration values
     #
     def generateWith( self, obj ): 
-        return Content( [ obj.getAlbumName() + 
+        return Content( [ obj.getName(),
+                          obj.getAlbumName() + 
                           unichr( CustomCharacters.kDottedVerticalBar ) + 
-                          obj.getArtistName(),
-                          obj.getName() ],
+                          obj.getArtistName() ],
                         [ 'Track',
                           self.getIndexOverlay() ] )
 
@@ -85,6 +86,36 @@ class TrackListBrowser( PlayableBrowser ):
             if self.index < 0:
                 return prevLevel
 
+        return self
+
+    #
+    # Override of Browser method. Allow entry of index numbers in the keypad.
+    #
+    def digit( self, digit ):
+        maxIndex = self.getMaxIndex()
+        index = digit
+        
+        #
+        # If there was a previous digit that could make a valid index > 9,
+        # attempt to use it, and reset the tens offset.
+        #
+        if self.tens:
+            index += self.tens
+            self.tens = None
+
+        #
+        # See if this digit could be used to make a valid index > 9
+        #
+        elif digit > 0:
+            tens = digit * 10
+            if tens <= maxIndex:
+                self.tens = tens
+
+        #
+        # Calculate a valid index
+        #
+        index = min( max( index, 1 ), maxIndex ) - 1
+        self.setIndex( index )
         return self
 
     #

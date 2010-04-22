@@ -63,7 +63,7 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;Power Button&lt;/b&gt; - "Q" key&lt;br&gt;Toggle iTunes control</string>
+    <string>&lt;b&gt;Power Button&lt;/b&gt; - &quot;Q&quot; key&lt;br&gt;Toggle iTunes control</string>
    </property>
    <property name="styleSheet">
     <string/>
@@ -73,6 +73,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -99,6 +105,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -123,6 +135,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -149,6 +167,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -173,6 +197,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -199,6 +229,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -223,6 +259,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -249,6 +291,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -273,6 +321,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -299,6 +353,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -316,13 +376,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;PIP&lt;/b&gt; - "I" key&lt;br&gt;show a ratings editor when appropriate</string>
+    <string>&lt;b&gt;PIP&lt;/b&gt; - &quot;I&quot; key&lt;br&gt;show a ratings editor when appropriate</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -349,6 +415,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -374,6 +446,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -391,7 +469,7 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;RWD&lt;/b&gt; - "&amp;lt;" key&lt;br&gt;Press for previous track or hold to rewind
+    <string>&lt;b&gt;RWD&lt;/b&gt; - &quot;&amp;lt;&quot; key&lt;br&gt;Press for previous track or hold to rewind
     current one</string>
    </property>
    <property name="text">
@@ -399,6 +477,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -417,13 +501,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;PLAY&lt;/b&gt; - "P" key&lt;br&gt;Press to begin or resume playing</string>
+    <string>&lt;b&gt;PLAY&lt;/b&gt; - &quot;P&quot; key&lt;br&gt;Press to begin or resume playing</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -442,7 +532,7 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;FFWD&lt;/b&gt; - "&gt;" key&lt;br&gt;Press for next track or hold to fast-forward
+    <string>&lt;b&gt;FFWD&lt;/b&gt; - &quot;&gt;&quot; key&lt;br&gt;Press for next track or hold to fast-forward
     current one</string>
    </property>
    <property name="text">
@@ -450,6 +540,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -468,13 +564,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;REC&lt;/b&gt;  -"R" key&lt;br&gt;Press to jump to "target" playlist or add to it</string>
+    <string>&lt;b&gt;REC&lt;/b&gt;  -&quot;R&quot; key&lt;br&gt;Press to jump to &quot;target&quot; playlist or add to it</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -493,7 +595,7 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;STOP&lt;/b&gt; - "S" key&lt;br&gt;Stop iTunes playback, and rewind to beginning of
+    <string>&lt;b&gt;STOP&lt;/b&gt; - &quot;S&quot; key&lt;br&gt;Stop iTunes playback, and rewind to beginning of
     current track</string>
    </property>
    <property name="text">
@@ -501,6 +603,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -527,6 +635,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -544,13 +658,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;TV/VIDEO&lt;/b&gt; - "T" key&lt;br&gt;Not used</string>
+    <string>&lt;b&gt;TV/VIDEO&lt;/b&gt; - &quot;T&quot; key&lt;br&gt;Not used</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -569,13 +689,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;DISP&lt;/b&gt; - "D" key&lt;br&gt;Jump to the current playback display</string>
+    <string>&lt;b&gt;DISP&lt;/b&gt; - &quot;D&quot; key&lt;br&gt;Jump to the current playback display</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -594,13 +720,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;SLEEP&lt;/b&gt; - "E" key&lt;br&gt;Invoke the screen saver now</string>
+    <string>&lt;b&gt;SLEEP&lt;/b&gt; - &quot;E&quot; key&lt;br&gt;Invoke the screen saver now</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -619,13 +751,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;GUIDE&lt;/b&gt; - "G" key&lt;br&gt;Not used</string>
+    <string>&lt;b&gt;GUIDE&lt;/b&gt; - &quot;G&quot; key&lt;br&gt;Not used</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -652,6 +790,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -676,6 +820,12 @@
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -702,6 +852,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -727,6 +883,12 @@
    <property name="autoRepeat">
     <bool>true</bool>
    </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -744,13 +906,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;MENU&lt;/b&gt; - "M" key&lt;br&gt;Jump to the top-level browser</string>
+    <string>&lt;b&gt;MENU&lt;/b&gt; - &quot;M&quot; key&lt;br&gt;Jump to the top-level browser</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -769,13 +937,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;OK&lt;/b&gt; - "K" key&lt;br&gt;Toggle shuffling mode for active playlist</string>
+    <string>&lt;b&gt;OK&lt;/b&gt; - &quot;K&quot; key&lt;br&gt;Toggle shuffling mode for active playlist</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -794,13 +968,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;VOL+&lt;/b&gt; - "]" key&lt;br&gt;Increase iTunes volume</string>
+    <string>&lt;b&gt;VOL+&lt;/b&gt; - &quot;]&quot; key&lt;br&gt;Increase iTunes volume</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -819,13 +999,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;VOL-&lt;/b&gt; - "[" key&lt;br&gt;Decrease iTunes volume</string>
+    <string>&lt;b&gt;VOL-&lt;/b&gt; - &quot;[&quot; key&lt;br&gt;Decrease iTunes volume</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -844,13 +1030,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;CH-&lt;/b&gt; - "{" key&lt;br&gt;Decrease SLiMP3 brightness level</string>
+    <string>&lt;b&gt;CH-&lt;/b&gt; - &quot;{&quot; key&lt;br&gt;Decrease SLiMP3 brightness level</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -869,13 +1061,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;CH+&lt;/b&gt; - "}" key&lt;br&gt;Increase SLiMP3 brightness level</string>
+    <string>&lt;b&gt;CH+&lt;/b&gt; - &quot;}&quot; key&lt;br&gt;Increase SLiMP3 brightness level</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -894,13 +1092,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;RECALL&lt;/b&gt; - "A" key&lt;br&gt;Cycle through the repeat modes for the active playlist</string>
+    <string>&lt;b&gt;RECALL&lt;/b&gt; - &quot;A&quot; key&lt;br&gt;Cycle through the repeat modes for the active playlist</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -919,13 +1123,19 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <property name="toolTip">
-    <string>&lt;b&gt;MUTING&lt;/b&gt; - "U" key&lt;br&gt;Toggle the mute setting of iTunes</string>
+    <string>&lt;b&gt;MUTING&lt;/b&gt; - &quot;U&quot; key&lt;br&gt;Toggle the mute setting of iTunes</string>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="autoRepeat">
     <bool>true</bool>
+   </property>
+   <property name="autoRepeatDelay">
+    <number>0</number>
+   </property>
+   <property name="autoRepeatInterval">
+    <number>1</number>
    </property>
    <property name="flat">
     <bool>true</bool>
