@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -547,10 +547,16 @@ class iTunesXML( object ):
         content = pipe.communicate()[ 0 ]
         lines = content.split()
         location = eval( lines[ 1 ] )
+        print( 'location:', location )
 
         #
-        # Convert the (file:) URL from above into a local file path.
+        # Convert the (file:) URL from above into a local file path. NOTE:
+        # strip off any 'file://localhost/' since it appears to hang when we do
+        # not have a network connection. *FIXME*
         #
+        if location.find( 'file://localhost/' ) == 0:
+            location = location[ 16 : ]
+
         self.xmlFilePath, headers = urllib.urlretrieve( location )
         self.backgroundLoader = None
         self.loadedTimeStamp = None
@@ -641,11 +647,11 @@ class iTunesXML( object ):
             #
             # For now, we only work with audio files.
             #
-            trackType = track.get( 'Track Type' )
+            trackType = track.get( 'Track Type', '' ).strip()
             if trackType != 'File':
                 continue
 
-            kind = track.get( 'Kind', '' )
+            kind = track.get( 'Kind', '' ).strip()
             if not kind.endswith( 'audio file' ):
                 continue
 
@@ -653,22 +659,23 @@ class iTunesXML( object ):
             # By default we use the 'album artist' tag instead of 'artist' so
             # that collections of various artists remain together
             #
-            artistName = track.get( 'Album Artist', '' )
-            if not artistName:
+            artistName = track.get( 'Album Artist', '' ).strip()
+            if len( artistName ) == 0:
                 if track.get( 'Compilation', 0 ):
                     artistName = 'Various Artists'
                 else:
-                    artistName = track.get( 'Artist', '' )
-            if not artistName:
-                continue
+                    artistName = track.get( 'Artist', '' ).strip()
+                if len( artistName ) == 0:
+                    print( 'empty artist for', track )
+                    continue
 
             artistName = OrderedItem( artistName )
 
             #
             # Get the album name
             #
-            albumName = track.get( 'Album', '' )
-            if not albumName:
+            albumName = track.get( 'Album', '' ).strip()
+            if len( albumName ) == 0:
                 continue
 
             #
@@ -721,8 +728,8 @@ class iTunesXML( object ):
             # If the 'Artist' field is different than 'Album Artist', link the
             # album to the an entry for the 'Artist'.
             #
-            aliasName = track.get( 'Artist' )
-            if aliasName and aliasName != artistName.getName():
+            aliasName = track.get( 'Artist', '' ).strip()
+            if len( aliasName ) > 0 and aliasName != artistName.getName():
                 aliasName = OrderedItem( aliasName )
                 alias = artistMap.get( aliasName )
                 if alias is None:

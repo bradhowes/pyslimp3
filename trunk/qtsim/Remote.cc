@@ -77,9 +77,12 @@ static const KeyCodeMapEntry inits[] = {
 };
 
 Remote::Remote( QWidget* parent )
-    : QWidget( 0,
-	       Qt::FramelessWindowHint |
-	       Qt::Tool
+    : QWidget(
+	//parent,
+	0,
+	Qt::FramelessWindowHint
+	// Qt::Tool
+	// 0
 	), gui_( new Ui::Remote )
 {
     setAttribute( Qt::WA_TranslucentBackground, true );
@@ -108,40 +111,8 @@ Remote::Remote( QWidget* parent )
     // Build the GUI. Connect all buttons to the same slot.
     //
     gui_->setupUi( this );
-    connect( gui_->power, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->one, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->two, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->three, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->four, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->five, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->six, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->seven, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->eight, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->nine, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->zero, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->rewind, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->play, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->fastForward, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->pause, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->stop, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->left, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->right, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->up, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->down, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->volumeUp, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->volumeDown, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->brightnessUp, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->brightnessDown, SIGNAL( clicked() ),
-	     SLOT( buttonPressed() ) );
-    connect( gui_->disp, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->guide, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->menu, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->pip, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->rec, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->recall, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->sleep, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->ok, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
-    connect( gui_->mute, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
+    foreach ( QObject* child, children() )
+	connect( child, SIGNAL( clicked() ), SLOT( buttonPressed() ) );
 }
 
 void

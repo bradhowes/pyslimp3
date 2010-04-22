@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -58,6 +58,7 @@ class PlaybackDisplay( DisplayGenerator ):
         #
         self.setFormatterIndex(
             client.getSettings().getPlaybackFormatterIndex() )
+        self.tens = None
 
     #
     # Set the position formatter index to a new value.
@@ -177,15 +178,15 @@ class PlaybackDisplay( DisplayGenerator ):
     #
     def generate( self ):
         track = self.source.getCurrentTrack()
-        line1 = track.getAlbumName() + \
+        line1 = track.getName()
+        line2 = track.getAlbumName() + \
             unichr( CustomCharacters.kDottedVerticalBar ) + \
             track.getArtistName()
-        line2 = track.getName()
         state = self.getPlayerState( track )
         return Content( [ line1, 
                           line2 ],
-                        [ state, 
-                          self.getPlayerPosition( track ) ] )
+                        [ self.getPlayerPosition( track ),
+                          state ] )
 
     #
     # Obtain a string representing the current iTunes player state.
@@ -317,11 +318,34 @@ class PlaybackDisplay( DisplayGenerator ):
     #
     def digit( self, digit ):
         source = self.source
-        if digit == 0:
+        playlist = source.getActivePlaylist()
+        maxIndex = playlist.getTrackCount()
+
+        index = digit
+
+        #
+        # If there was a previous digit that could make a valid index > 9,
+        # attempt to use it, and reset the tens offset.
+        #
+        if self.tens:
+            index += self.tens
+            self.tens = None
+
+        #
+        # See if this digit could be used to make a valid index > 9
+        #
+        elif digit > 0:
+            tens = digit * 10
+            if tens <= maxIndex:
+                self.tens = tens
+
+        #
+        # Calculate a valid index
+        #
+        if index == 0:
             source.beginTrack()
         else:
-            playlist = source.getActivePlaylist()
-            count = playlist.getTrackCount()
-            if digit <= count:
-                playlist.play( digit - 1 )
+            index = min( max( index, 1 ), maxIndex ) - 1
+            playlist.play( index )
+
         return self

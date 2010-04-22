@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -76,7 +76,7 @@ class Browser( DisplayGenerator ):
     #
     def getCurrentObject( self ): 
         if self.index < 0 or self.index >= self.getMaxIndex():
-            raise IndexError, self.index, self.getMaxIndex()
+            raise IndexError, ( self.index, self.getMaxIndex() )
         return self.getCollection()[ self.index ]
 
     #
@@ -161,7 +161,7 @@ class Browser( DisplayGenerator ):
         return None
 
     #
-    # Get the key of the current brows item
+    # Get the key of the current browse item
     #
     def getKeyAtIndex( self, index ):
         return self.getCollection()[ index ].getKey()
@@ -175,7 +175,7 @@ class Browser( DisplayGenerator ):
     def digit( self, digit ):
         maxIndex = self.getMaxIndex()
         if maxIndex <= 10:
-            
+
             #
             # Just select the entry that matches the digit
             #

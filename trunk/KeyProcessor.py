@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -101,15 +101,26 @@ class KeyProcessor( object ):
     #
     # How often to check for a key release. This should be long enough to
     # eliminate false positives but short enough to stop repeated key events.
+    # This is also how frequently a held-key will repeat an action.
     #
-    kReleaseCheckThreshold = 0.256 # seconds
+    # kReleaseCheckThreshold = 0.256 # seconds
+    kReleaseCheckThreshold = 0.100 # seconds
 
     #
-    # Minimum amount of time in seconds a key must be held down in order for it
-    # to be considered 'held'
+    # Number of calls to checkForRelease() before a button reports being held
+    # down. Since checkForRelease() runs every kReleaseCheckThreshold, a button
+    # must be held down for kHoldPressThreshold * kReleaseCheckThreshold
+    # seconds before it begins repeating.
     #
-    kHoldPressThreshold = 0.512 # seconds
-
+    kHoldPressCount = 4
+    
+    #
+    # Amount of time that must pass so that an incoming key message with the
+    # same key code as the last message is treated as a separate key press, and
+    # not a held key event.
+    #
+    kUniqueKeyPressTimeDelta = 100
+    
     def __init__( self, timerManager, notifier ):
         self.timerManager = timerManager
         self.notifier = notifier
@@ -127,9 +138,9 @@ class KeyProcessor( object ):
         if force or self.releaseTimer is None:
             self.silenced = False
             self.lastKey = None
-            self.firstTimeStamp = None
             self.lastTimeStamp = None
             self.emittedHeldKey = False
+            self.downCount = 0
         else:
             self.silenced = True
 
@@ -144,48 +155,27 @@ class KeyProcessor( object ):
         # Override timestamp from SliMP3 message. Makes an (gross?) assumption
         # that UDP latencies from the SliMP3 to us are low.
         #
-        timeStamp = datetime.now()
+        delta = 0
+        if self.lastTimeStamp:
+            delta = timeStamp - self.lastTimeStamp
+            # print( 'timeStamp', timeStamp, timeStamp - self.lastTimeStamp )
+        self.lastTimeStamp = timeStamp
 
         #
-        # Same key?
+        # Same key but only if no gap in updates
         #
-        if key == self.lastKey:
+        if key == self.lastKey and delta < self.kUniqueKeyPressTimeDelta:
 
-            #
-            # Update the timestamp so that checkForRelease() will keep running.
-            #
-            self.lastTimeStamp = timeStamp
-
-            #
-            # Calculate how long the key has been held down for.
-            #
-            delta = timeStamp - self.firstTimeStamp
-            delta = delta.seconds + delta.microseconds / 1000000.0
-
-            #
-            # If we have yet to emit the 'kModHeld' modifier, check to see if
-            # we've held the key down long enough to emit it.
-            #
-            if not self.emittedHeldKey:
-                if delta >= self.kHoldPressThreshold:
-                    self.emittedHeldKey = True
-                    self.notify( kModHeld )
-            else:
-
-                #
-                # We've already emitted a 'held' event, so now emit 'repeat'
-                # events.
-                #
-                self.notify( kModRepeat )
+            self.pendingRelease = False
 
         else:
-            
+
             #
             # If we have an active releaseTimer, manually fire it. Make sure
             # that it will think that the previous key was released.
             #
             if self.releaseTimer:
-                self.lastTimeStamp = self.releaseTimeStamp
+                self.pendingRelease = True
                 self.releaseTimer.fire()
             else:
                 self.reset( True )
@@ -194,17 +184,17 @@ class KeyProcessor( object ):
             # New key press.
             #
             self.lastKey = key
-            self.firstTimeStamp = timeStamp
+            self.downCount = 0
             self.lastTimeStamp = timeStamp
-            self.startReleaseTimer( timeStamp )
+            self.startReleaseTimer()
             self.notify( kModFirst )
 
     #
     # Start a timer that will invoke checkForRelease() after
     # kReleaseCheckThreshold seconds.
     #
-    def startReleaseTimer( self, timeStamp ):
-        self.releaseTimeStamp = timeStamp
+    def startReleaseTimer( self ):
+        self.pendingRelease = True
         self.releaseTimer = self.timerManager.addTimer( 
             self.kReleaseCheckThreshold, self.checkForRelease )
 
@@ -216,8 +206,20 @@ class KeyProcessor( object ):
         #
         # If an event was received since we last checked, try again.
         #
-        if self.lastTimeStamp != self.releaseTimeStamp:
-            self.startReleaseTimer( self.lastTimeStamp )
+        if not self.pendingRelease:
+            self.startReleaseTimer()
+
+            #
+            # Keep track of how many times we've been called for this key
+            # event, and emit 'held' and repeat messages when enough time has
+            # passed.
+            #
+            downCount = self.downCount + 1
+            self.downCount = downCount
+            if downCount == self.kHoldPressCount:
+                self.notify( kModHeld )
+            elif downCount > self.kHoldPressCount:
+                self.notify( kModRepeat )
             return
 
         #
