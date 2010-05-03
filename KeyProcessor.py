@@ -151,6 +151,9 @@ class KeyProcessor( object ):
     #
     def process( self, timeStamp, key ):
 
+	timeStamp = timeStamp / 100000.0
+
+	# print( 'key:', key, 'timestamp:', timeStamp )
         #
         # Override timestamp from SliMP3 message. Makes an (gross?) assumption
         # that UDP latencies from the SliMP3 to us are low.
@@ -242,5 +245,5 @@ class KeyProcessor( object ):
     #
     def notify( self, modifier ):
         keyCode = makeKeyCode( self.lastKey, modifier )
-        print( 'notify', keyCode )
+        # print( 'notify', keyCode )
         self.notifier.processKeyCode( keyCode )

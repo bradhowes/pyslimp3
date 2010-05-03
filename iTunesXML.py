@@ -714,8 +714,8 @@ class iTunesXML( object ):
                 #
                 # Update the genre names
                 #
-                genreName = track.get( 'Genre' )
-                if genreName is not None and len( genreName ) > 0:
+                genreName = track.get( 'Genre', '' ).strip()
+                if len( genreName ) > 0:
                     genreName = OrderedItem( genreName )
                     genre = genreMap.get( genreName )
                     if genre is None:
@@ -737,7 +737,7 @@ class iTunesXML( object ):
                     artistMap[ aliasName ] = alias
                     artistList.append( alias )
                 found = None
-                
+
                 #
                 # NOTE: do not use the getter methods to fetch albums, since we
                 # do not want to cause a sort on the held albums yet.
