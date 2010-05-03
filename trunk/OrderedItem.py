@@ -62,6 +62,8 @@ class OrderedItem( object ):
         # any non-alphanumeric characters.
         #
         bits = name.upper().split()
+	if len( bits ) == 0:
+            raise ValueError, "empty name"
         if bits[ 0 ] in ( 'A', 'AN', 'THE', 'EL', 'LA', 'LOS', 'LAS' ):
             bits = bits[ 1: ]
 
