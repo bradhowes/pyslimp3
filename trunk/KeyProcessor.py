@@ -17,7 +17,8 @@
 # USA.
 #
 
-from datetime import datetime
+from time import time
+import traceback
 
 #
 # Key Constants
@@ -113,19 +114,21 @@ class KeyProcessor( object ):
     # seconds before it begins repeating.
     #
     kHoldPressCount = 4
-    
+
     #
     # Amount of time that must pass so that an incoming key message with the
     # same key code as the last message is treated as a separate key press, and
     # not a held key event.
     #
-    kUniqueKeyPressTimeDelta = 100
+    kUniqueKeyPressTimeDelta = 0.800
     
     def __init__( self, timerManager, notifier ):
         self.timerManager = timerManager
         self.notifier = notifier
         self.releaseTimer = None
-        self.reset( True )
+        self.lastTimeStamp = 0
+        self.lastKey = None
+        self.reset()
 
     #
     # Reset the key processor to a known state. If there is an active
@@ -134,15 +137,12 @@ class KeyProcessor( object ):
     # that screen changes caused by remote commands won't inherit key release
     # or repeat events.
     #
-    def reset( self, force = False ):
-        if force or self.releaseTimer is None:
-            self.silenced = False
-            self.lastKey = None
-            self.lastTimeStamp = None
-            self.emittedHeldKey = False
-            self.downCount = 0
-        else:
-            self.silenced = True
+    def reset( self ):
+        if self.releaseTimer:
+            self.releaseTimer.fire()
+        self.releaseTimer = None
+        self.emittedHeldKey = False
+        self.downCount = 0
 
     #
     # Process a new raw key event from a remote controller. Depending on what
@@ -151,46 +151,31 @@ class KeyProcessor( object ):
     #
     def process( self, timeStamp, key ):
 
-	timeStamp = timeStamp / 100000.0
-
-	# print( 'key:', key, 'timestamp:', timeStamp )
-        #
-        # Override timestamp from SliMP3 message. Makes an (gross?) assumption
-        # that UDP latencies from the SliMP3 to us are low.
-        #
-        delta = 0
-        if self.lastTimeStamp:
-            delta = timeStamp - self.lastTimeStamp
-            # print( 'timeStamp', timeStamp, timeStamp - self.lastTimeStamp )
+        timeStamp = timeStamp / 100000.0
+        delta = timeStamp - self.lastTimeStamp
         self.lastTimeStamp = timeStamp
 
         #
         # Same key but only if no gap in updates
         #
         if key == self.lastKey and delta < self.kUniqueKeyPressTimeDelta:
-
             self.pendingRelease = False
+            return
 
-        else:
+        #
+        # If we have an active releaseTimer, manually fire it. Make sure
+        # that it will think that the previous key was released.
+        #
+        self.pendingRelease = True
+        self.reset()
 
-            #
-            # If we have an active releaseTimer, manually fire it. Make sure
-            # that it will think that the previous key was released.
-            #
-            if self.releaseTimer:
-                self.pendingRelease = True
-                self.releaseTimer.fire()
-            else:
-                self.reset( True )
-
-            #
-            # New key press.
-            #
-            self.lastKey = key
-            self.downCount = 0
-            self.lastTimeStamp = timeStamp
-            self.startReleaseTimer()
-            self.notify( kModFirst )
+        #
+        # New key press.
+        #
+        self.lastKey = key
+        self.downCount = 0
+        self.startReleaseTimer()
+        self.notify( kModFirst )
 
     #
     # Start a timer that will invoke checkForRelease() after
@@ -198,6 +183,8 @@ class KeyProcessor( object ):
     #
     def startReleaseTimer( self ):
         self.pendingRelease = True
+        if self.releaseTimer:
+            self.releaseTimer.deactivate()
         self.releaseTimer = self.timerManager.addTimer( 
             self.kReleaseCheckThreshold, self.checkForRelease )
 
@@ -210,7 +197,6 @@ class KeyProcessor( object ):
         # If an event was received since we last checked, try again.
         #
         if not self.pendingRelease:
-            self.startReleaseTimer()
 
             #
             # Keep track of how many times we've been called for this key
@@ -223,27 +209,22 @@ class KeyProcessor( object ):
                 self.notify( kModHeld )
             elif downCount > self.kHoldPressCount:
                 self.notify( kModRepeat )
+            self.startReleaseTimer()
             return
 
         #
-        # Honor the silenced attribute so that we don't emit keCode events
-        # inside a new screen.
+        # Key has been releasedn
         #
-        if not self.silenced:
-            if self.emittedHeldKey:
-                self.notify( kModReleaseHeld )
-            else:
-                self.notify( kModRelease )
+        if self.emittedHeldKey:
+            self.notify( kModReleaseHeld )
+        else:
+            self.notify( kModRelease )
 
-        #
-        # Make sure reset
-        #
-        self.reset( True )
+        self.reset()
 
     #
     # Notify the notifier object that a new keyCode event has taken place.
     #
     def notify( self, modifier ):
         keyCode = makeKeyCode( self.lastKey, modifier )
-        # print( 'notify', keyCode )
         self.notifier.processKeyCode( keyCode )
