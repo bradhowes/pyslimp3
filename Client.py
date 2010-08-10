@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2010 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -434,10 +434,12 @@ class Client( object ):
     #
     # Volume control methods
     #
-    def volumeUp( self ): self.changeVolume( 1 )
-    def volumeDown( self ): self.changeVolume( -1 )
+    def volumeUp( self ): self.changeVolume( 5 )
+    def volumeDown( self ): self.changeVolume( -5 )
+
     def changeVolume( self, delta ):
-        self.iTunes.adjustVolume( delta )
+        extra = self.iTunes.getVolume() % delta
+        self.iTunes.adjustVolume( delta - extra )
         self.setOverlayGenerator( 
             VolumeGenerator( self, self.linesGenerator ) )
 
