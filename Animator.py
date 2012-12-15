@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2011 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -20,13 +20,16 @@
 from datetime import datetime
 from Display import *
 
-#
-# Renderer of Content contents to make a display. When the content is the same,
-# but one or more lines are too long to show, this will scroll the lines to the
-# left until all of the line has been displayed. It then loops back and shows
-# the beginning of the line.
-# 
 class Animator( object ):
+    '''
+    Renderer of Content contents to make a display. When the content is the
+    same, but one or more lines are too long to show, this will scroll the
+    lines to the left until all of the line has been displayed. It then loops
+    back and shows the beginning of the line.
+    
+    Supports a 'screen saver' that will activate after screenSaverTimeout
+    seconds. When the screen saver is active, 
+    '''
 
     def __init__( self, screenSaverClass, screenSaverTimeout ):
         self.content = None
@@ -41,7 +44,7 @@ class Animator( object ):
     #
     def setScreenSaverClass( self, screenSaverClass ):
         self.screenSaverClass = screenSaverClass
-        if self.screenSaver:
+        if self.screenSaver is not None:
             self.screenSaver = screenSaverClass( self.output )
 
     #
@@ -110,7 +113,7 @@ class Animator( object ):
     # long lines.
     #
     def render( self ):
-        if self.screenSaver:
+        if self.screenSaverActivated():
             return self.screenSaver.render()
 
         #
@@ -125,12 +128,11 @@ class Animator( object ):
     def updateOffsets( self ):
         raise NotImplementedError, 'generateOutput'
 
-#
-# Animator that scrolls text left by one character to slowly reveal the rest of
-# a line that is longer than ( kDisplayWidth - len( overlay text ).
-#
 class ScrollAnimator( Animator ):
-
+    '''
+    Animator that scrolls text left by one character to slowly reveal the rest
+    of a line that is longer than kDisplayWidth - len( overlay text ).
+    '''
     kHoldCount = 10             # Number of renders before animating
     kName = 'Scroll'            # Name to show in the conguration settings
 
@@ -203,12 +205,11 @@ class ScrollAnimator( Animator ):
                     offset += 1
                     self.offsets[ index ] = min( offset, shiftNeeded )
 
-#
-# Animator that shifts text left by ( kDisplayWidth - len( overlay text)
-# characters at a time to reveal the rest of a line.
-#
 class ShiftAnimator( Animator ):
-
+    '''
+    Animator that shifts text left by ( kDisplayWidth - len( overlay text)
+    characters at a time to reveal the rest of a line.
+    '''
     kHoldCount = 6              # Number of renders before a shift
     kName = 'Shift'             # Name to show in the configuration settings
 
@@ -268,9 +269,9 @@ class ShiftAnimator( Animator ):
 
                 self.offsets[ index ] = offset
 
-#
-# List of available animator classes
-#
 kAnimators = ( ScrollAnimator,
                ShiftAnimator,
                )
+'''
+List of available animator classes
+'''
