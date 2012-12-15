@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009, 2010 Brad Howes.
+# Copyright (C) 2009, 2010, 2012 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -204,7 +204,6 @@ class Playlist( OrderedItem ):
         for index in range( len( self.tracks ) ):
             if self.tracks[ index ].getID() == track.getID():
                 return index
-        print( 'track not found in playlist:', track.getName(), track.getID() )
         return -1
 
     #
