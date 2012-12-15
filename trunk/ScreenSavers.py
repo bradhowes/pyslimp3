@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 Brad Howes.
+# Copyright (C) 2009, 2011 Brad Howes.
 #
 # This file is part of Pyslimp3.
 #
@@ -20,12 +20,12 @@
 from random import randrange
 from Content import *
 
-#
-# Base class for all screen savers. Defines the interface for Animator to use
-# to update the display of an active screen saver. Derived classes must
-# implement the updateDisplay() method.
-#
 class ScreenSaverBase( object ):
+    '''
+    Base class for all screen savers. Defines the interface for Animator to use
+    to update the display of an active screen saver. Derived classes must
+    implement the updateDisplay() method.
+    '''
 
     def __init__( self, content ):
 
@@ -45,7 +45,7 @@ class ScreenSaverBase( object ):
     # [0-kDisplayHeight)
     #
     def getRandomCharacterPosition( self ):
-        value =randrange( kDisplayHeight * kDisplayWidth )
+        value = randrange( kDisplayHeight * kDisplayWidth )
         y = value / kDisplayWidth
         x = value - y * kDisplayWidth
         return x, y
@@ -63,10 +63,10 @@ class ScreenSaverBase( object ):
     def updateDisplay( self ):
         raise NotImplementedError, 'updateDisplay'
 
-#
-# Screensaver that just shows a blank screen.
-#
 class Blanker( ScreenSaverBase ):
+    '''
+    Screensaver that just shows a blank screen.
+    '''
 
     kBlankLines = [ ' ' * kDisplayWidth ] * kDisplayHeight
     kName = 'Blank Display'
@@ -77,12 +77,11 @@ class Blanker( ScreenSaverBase ):
     def updateDisplay( self ):
         return
 
-#
-# Screensaver that randomly replaces a character in the original screen with a
-# blank one, or restores it if previously blanked.
-#
 class Zapper( ScreenSaverBase ):
-
+    '''
+    Screensaver that randomly replaces a character in the original screen with
+    a blank one, or restores it if previously blanked.
+    '''
     kName = 'Zap Characters'
 
     def updateDisplay( self ):
@@ -92,11 +91,10 @@ class Zapper( ScreenSaverBase ):
         else:
             self.display[ y ][ x ] = ' '
 
-#
-# Screensaver that randomly swaps two characters.
-#
 class Swapper( ScreenSaverBase ):
-
+    '''
+    Screensaver that randomly swaps two characters.
+    '''
     kName = 'Swap Characters'
 
     def updateDisplay( self ):
@@ -106,12 +104,11 @@ class Swapper( ScreenSaverBase ):
         self.display[ y1 ][ x1 ] = self.display[ y2 ][ x2 ]
         self.display[ y2 ][ x2 ] = value
 
-#
-# Screensaver that rotates left the original screen in an endless loop. Each
-# line rotates faster than the line before it.
-#
 class LeftRotater( ScreenSaverBase ):
-
+    '''
+    Screensaver that rotates left the original screen in an endless loop. Each
+    line rotates faster than the line before it.
+    '''
     kName = 'Rotate Left'
 
     def updateDisplay( self ):
@@ -124,3 +121,6 @@ kScreenSavers = ( Blanker,
                   Swapper,
                   Zapper,
                   )
+
+'''List of all defined screen savers
+'''
