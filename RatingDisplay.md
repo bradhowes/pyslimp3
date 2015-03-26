@@ -1,0 +1,5 @@
+# Introduction #
+
+Derived from OverlayDisplay.
+
+The RatingDisplay class provides the common functionality necessary to view and edit rating values. What it cannot do is obtain and change the rating values. Derived classes do this by implementing `setRating()` and `getRating()` methods. The two derived classes, AlbumRatingDisplay and TrackRatingDisplay, do so and provide access to album and track ratings respectively within iTunes.

@@ -1,0 +1,15 @@
+![http://pyslimp3.googlecode.com/svn/wiki/TrackListBrowser.jpg](http://pyslimp3.googlecode.com/svn/wiki/TrackListBrowser.jpg)
+
+# Introduction #
+
+The TrackListBrowser class allows the user to browse a set of Track objects. The set of tracks may be from a specific album or a playlist. The display shows the album name (**@#%&`*`! Smilers**) and artist name (**Aimee Mann**) on the first line, and the track name (**Freeway**), track index (**1**) and track count (**13**) on the second.
+
+# Keys Supported #
+
+| UP | Show the next track in the collection |
+|:---|:--------------------------------------|
+| DOWN | Show the previous track in the collection |
+| RIGHT, PIP | Show a TrackRatingDisplay screen to view and edit the rating for the current track |
+| REC | Append the current track to the target playlist |
+| PLAY | Play the container hold this track (album or playlist) but starting with the current track |
+| LEFT | Return to the parent level (eg. AlbumListBrowser or PlaylistBrowser |

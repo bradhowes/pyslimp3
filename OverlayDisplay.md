@@ -1,0 +1,7 @@
+# Introduction #
+
+Derived from DisplayGenerator.
+
+An overlay display is one that temporarily overlays the current display to provide temporary information or access to a parameter editor, such as the VolumeGenerator used to see and change the iTunes volume. The [Client](Client.md) class will automatically remove an OverlayGenerator display after 3 seconds. The user may also dismiss any OverlayGenerator by using the LEFT button.
+
+Overrides the `isOverlay()` method to return **True** (the default implementation in DisplayGenerator returns **False**).

@@ -1,0 +1,15 @@
+![http://pyslimp3.googlecode.com/svn/wiki/AlbumListBrowser.jpg](http://pyslimp3.googlecode.com/svn/wiki/AlbumListBrowser.jpg)
+
+# Introduction #
+
+The AlbumListBrowser class allows the user to browse a set of Album objects. The album set may be from a particular artist or genre, or the result of a search. The display shows the artist name (**Aimee Mann**) of the current album on the first line, and the album name (**@#%&`*`! Smilers**), album index (**2**) and album count (**374**) on the second.
+
+## Keys Supported ##
+
+| UP | Show the next album in the collection |
+|:---|:--------------------------------------|
+| DOWN | Show the previous album in the collection |
+| RIGHT | Show a TrackListBrowser for the tracks associated with the current album |
+| REC | Append all of the tracks of the current album to the target playlist |
+| PLAY | Play the tracks of the current album, starting with the first track |
+| LEFT | Return to the parent level (eg. ArtistListBrowser or GenreListBrowser) |

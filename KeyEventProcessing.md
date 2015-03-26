@@ -1,0 +1,92 @@
+# Key Event Flow #
+
+```
+Server.processIRMessage -> Client.processKeyEvent -> KeyProcessor.process -> 
+Client.processKeyCode -> DisplayGenerator.processKeyCode
+```
+
+An instance of the Server class receives all messages from a SLiMP3 device. Those that start with an 'i' character (for infrared or IR) contain data that describes the key event from the remote control. The Server class uses an instance of the IR class to translate native remote codes into semi-abstract key codes defined in KeyProcessor.py. If there is a valid key translation, the Server instance forwards the event timestamp and translated key value to the appropriate Client instance's `processKeyEvent()` method.
+
+The Client `processKeyEvent()`} method hands off the key event data to its KeyProcessor instance which performs filtering of raw key events into more useful keycodes that describe not just the key that was pressed, but  also a temporal descriptor that better describes the key even in terms of others that have appeared before it. For instance, when one first presses the right-arrow key on the remote, the KeyProcessor's process() method will emit a keycode with the value of `kArrowRight.kModFirst`. If the key is held down for a certain amount of time (`KeyProcessor.kHoldPressThreshold`), the KeyProcessor emits the keycode `kArrowRight.kModHeld`, and if the key continues to be held down it will emit repeated `kArrowRight.kModRepeat` keycodes. Finally, when the KeyProcessor's checkForRelease() method determines that the key is no longer held down, the KeyProcessor will emit one of two keycodes, `kArrowRight.kModRelease` or `kArrowRight.kModReleaseHeld` depending on whether the key had been held down longer than the `KeyProcessor.kHoldPressThreshold`) duration.
+
+# Global Keys #
+
+From any display, the following keys are available (in Client.py):
+
+| **Key Code** | **Action** |
+|:-------------|:-----------|
+| kVolumeUp | Increase iTunes volume |
+| kVolumeDown | Decrease iTunes volume |
+| kChannelUp | Increase display brightness |
+| kChannelDown | Decrease display brightness |
+| kMute | Toggle iTunes muting |
+| kShuffle | Toggle shuffling mode for the active playlist |
+| kRepeat | Toggle repeat mode for the active playlist |
+| kDisplay | Show the current track and position of the active playlist (PlaybackDisplay) |
+| kMenuHome | Show the top-level browser (TopBrowser) |
+| kStop | Stop iTunes from playing and rewind to the start of the current file |
+| kPause | Stop iTunes from playing and remain at the current position |
+
+# Browser Keys #
+
+When viewing a browser, the following keys are defined:
+
+| **Key Code** | **Action** |
+|:-------------|:-----------|
+| kArrowUp | previous value |
+| kArrowDown | next value |
+| kArrowLeft | previous Browser instance |
+| kArrowRight | new Browser instance for the current value |
+| kDigit0 - kDigit9 | if the number of items being browsed is less than 11, use the digit (with 0 == 10) as an index of the item to show. Otherwise, use TelephoneKeypadProcessing to obtain a letter or digit, and then show the first item being browsed that starts with it. |
+
+# Search Keys #
+
+When viewing one of the Searcher screens, the following keys are defined:
+
+| **Key Code** | **Action** |
+|:-------------|:-----------|
+| kArrowUp | Increase the value shown in the current character position in the order A-Z, 0-9. |
+| kArrowDown | Decrease the value shown in the current character position in the order 9-0Z-A. |
+| kArrowLeft | Erase the last character of the search text. If no characters exist, show the previous screen (TopBrowser) |
+| kArrowRight | Move to the right to add a new character to the search text. Two presses in a row will execute the search if the search text is at least 3 characters in length. |
+| kDigit1 - kDigit9 | Enter characters as described in TelephoneKeypadProcessing. |
+
+# Album Browser Keys #
+
+When viewing a list of albums, either by one artist, or all albums within iTunes, the following keys are defined:
+
+| **Key Code** | **Action** |
+|:-------------|:-----------|
+| kArrowUp | Previous album in the collection.|
+| kArrowDown | Next album in the collection.|
+| kArrowLeft | Show prior Browser instance |
+| kArrowRight | Show a TrackListBrowser instance for the current album. |
+| kPlay | Begin playiing all of the tracks for the current album. |
+| kPIP | Show the current album ratings |
+
+# Artist Browser Keys #
+
+When viewing a list of artists, the following keys are defined:
+
+| **Key Code** | **Action** |
+|:-------------|:-----------|
+| kArrowUp | Previous artist in the collection.|
+| kArrowDown | Next artist in the collection.|
+| kArrowLeft | Show prior Browser instance |
+| kArrowRight | Show an AlbumListBrowser instance for the current artist. |
+| kPlay | Begin playiing all of the tracks for all of the albums associated with the current artist. |
+
+# Playback Display Keys #
+
+When viewing the currently playing track, the following keys are defined:
+
+| **Key Code** | **Action** |
+|:-------------|:-----------|
+| kArrowLeft | Show prior Browser instance |
+| kArrowRight | Show the current track ratings. |
+| kPIP | Show the current track ratings. |
+| kPlay | Begin playing the track. |
+| kStop | Stop iTunes from playing and rewind to the start of the current track |
+| kPause | Stop iTunes from playing and remain at the current position |
+| kRewind | Move to the previous track in the current playlist. If held down, move backwards (rewind) the playback position until released. |
+| kFastForward | Move to the next track in the current playlist. If held down, move forwards the playback position until released. |

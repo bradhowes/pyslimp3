@@ -1,0 +1,109 @@
+# Display Hierarchy #
+
+In general, Pyslimp follows a fairly simple model for browsing: use the UP and
+DOWN arrow keys to cycle through a set of elements, use the RIGHT arrow to
+"drill down", refine, or get more specific information, and use the LEFT arrow
+to return from a refinement to a more general view.
+
+For instance, the ArtistListBrowser display allows one to view the artists
+found in the iTunes Library (or those found during a search operation).
+Pressing the RIGHT arrow will reveal the albums associated with the current
+artist shown by the ArtistListBrowser. The new browser is an AlbumListBrowser.
+Now pressing UP or DOWN will cycle through the albums of the artist. Pressing
+the LEFT arrow will return to the previous level with the ArtistListBrowser,
+while pressiing the RIGHT arrow will drill down further, showing the tracks of
+the currently display album in a TrackListBrowser.
+
+There are a few "jump" keys that will transport you to another display type:
+
+> - MENU: show the top-level browser (TopBrowser)
+> - DISP: show a PlaybackDisplay display if possible, showing the iTunes playback status (current track info, positon)
+> - REC:  show the current "target" playlist if not showing an artist, album, or track browswer. Otherwise, add the artist, album or track to the "target" playlist. See the PlaylistManagement for more details.
+
+Note that even after "jumping", you should always be able to return to the
+previous level by using the LEFT arrow.
+
+```
+TopBrowser:
+
+  "Browse Albums"
+  |
+  +-- AlbumListBrowser - browse the albums in the iTunes Library
+      |
+      +-- TrackListBrowser - browse the tracks of the current album
+          |
+	  +-- TrackRatingDisplay - view and edit the rating of the track
+	      |
+	      +-- AlbumRatingDisplay - view and edit the rating of the album
+
+  "Browse Artists"
+  |
+  +-- ArtistListBrowser - browse the artists in the iTunes Library
+      |
+      +-- AlbumListBrowser - browse the albums of the current artist
+      	  |
+	  +-- TrackListBrowser - browse the tracks of the current album
+	      |
+	      +-- TrackRatingDisplay - view and edit the rating of the track
+	      	  |
+		  +-- AlbumRatingDisplay - view and edit the rating of the album
+
+  "Browse Genres"
+  |
+  +-- GenreListBrowser - browse the genres in the iTunes Library
+      |
+      +-- AlbumListBrowser - browse the albums of the current genre
+      	  |
+	  +-- TrackListBrowser - browse the tracks of the current album
+	      |
+	      +-- TrackRatingDisplay - view and edit the rating of the track
+	      	  |
+		  +-- AlbumRatingDisplay - view and edit the rating of the album
+
+  "Browse Playlists"
+  |
+  +-- PlaylistBrowser
+      |
+      +-- TrackListBrowser - browse the tracks of the current album
+	  |
+	  +-- TrackRatingDisplay - view and edit the rating of the track
+	      |
+	      +-- AlbumRatingDisplay - view and edit the rating of the album
+
+  "Search Albums"
+  |
+  +-- AlbumSearcher
+      |
+      +-- AlbumSearchResults - browse the found albums
+      |	  |
+      |	  +-- TrackListBrowser - browse the tracks of the current album
+      |	      |
+      |	      +-- TrackRatingDisplay - view and edit the rating of the track
+      |	      	  |
+      |	      	  +-- AlbumRatingDisplay - view and edit the rating of the album
+      +-- NoneFound (if nothing found)
+
+  "Search Artists"
+  |
+  +-- ArtistSearcher
+      |
+      +-- ArtistSearchResults - browse the found artists
+      |	  |
+      |	  +-- AlbumListBrowser - browse the albums of the current artist
+      |	      |
+      |	      +-- TrackListBrowser - browse the tracks of the current album
+      |	      	  |
+      |	      	  +-- TrackRatingDisplay - view and edit the rating of the track
+      |	      	      |
+      |		      +-- AlbumRatingDisplay - view and edit the rating of the 
+      |		      	  		       album
+      +-- NoneFound (if nothing found)
+
+  "Configuration Settings"
+  |
+  +-- SettingsBrowser
+      |
+      +-- ScreenSaverSetting
+      |
+      +-- AnimatorSetting
+```

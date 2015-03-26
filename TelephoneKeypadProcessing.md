@@ -1,0 +1,18 @@
+# Introduction #
+
+Since most remote control devices do not have an alphanumeric keypad, one must design a means by which the user can enter alphanumeric text using the existing keys. An instinctive approach, and one that was taken by the SLiMP3 developers, is to borrow the text entry behavior of some cell phones whereby pressing a number key will emit the first letter assigned to the key as shown below. Pressing the same key will show the next assigned letter, with repeated pressings cycling through the list. Finally, after all of the letters, the number of the key itself is used.
+
+The Searcher classes support this type of text entry for the search text, and the Browsers classes use it to identify the item in the browsed set to display.
+
+<table>
+<tr><td align='center'></td><td align='center'>ABC</td><td align='center'>DEF</td></tr>
+<tr><td align='center'>1</td><td align='center'>2</td><td align='center'>3</td></tr>
+<tr><td align='center'>GHI</td><td align='center'>JKL</td><td align='center'>MNO</td></tr>
+<tr><td align='center'>4</td><td align='center'>5</td><td align='center'>6</td></tr>
+<tr><td align='center'>PQRS</td><td align='center'>TUV</td><td align='center'>WXYZ</td></tr>
+<tr><td align='center'>7</td><td align='center'>8</td><td align='center'>9</td></tr>
+</table>
+
+# Example #
+
+In a Searcher display, pressing the `4` key will first show the letter `G`. Pressing `4` again will replace the `G` with `H`. Yet again, and the letter `I` appears. Finally, one more press and the `4` number appears in place of the `I`.

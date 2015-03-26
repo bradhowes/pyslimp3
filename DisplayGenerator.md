@@ -1,0 +1,5 @@
+# Introduction #
+
+The DisplayGenerator class defines the interface for provides of SLiMP3 content. It also defines some fundamental key mappings that all derived classes obtain for free. At a minimum, a derived class must override the `generate()` method in order to return a [Content](Content.md) class that contains the lines to display on the SLiMP3 device.
+
+The DisplayGenerator adds entries to the key map for the LEFT button and the digit buttons on the remote control. The LEFT button maps to the `left()` routine, which offers default functionality of returning to a higher browser level. Each digit has its own map entry that will invoke a routine with the name `digit#()` where '#' is a number from 0 - 9. The default implementation is to invoke the general `digit( value )` routine where `value` is the integer value corresponding to the button that was pressed. Derived classes may override either the `digit#()` routine(s) or the more general `digit()` one, or both.
