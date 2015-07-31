@@ -94,7 +94,8 @@ i | Show album or track ratings
 
 # Additional Information
 
-The Wiki tab contains additional documentation for Pyslimp3. Start with the TopBrowser page to see the screens
-available once you "power on" the device. Check out KeyEventProcessing for a discussion of how it handles remote
-control key events. A related page, TelephoneKeypadProcessing, describes how to enter text using the numeric keypad
-found on the remote.
+The [wiki](../../wiki) tab contains additional documentation for Pyslimp3. Start with the
+[TopBrowser](../../wiki/TopBrowser) page to see the screens available once you "power on" the device. Check out
+[KeyEventProcessing](../../wiki/KeyEventProcessing) for a discussion of how it handles remote control key events. A related
+page, [TelephoneKeypadProcessing](../../wiki/TelephoneKeypadProcessing), describes how to enter text using the numeric
+keypad found on the remote.
