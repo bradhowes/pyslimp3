@@ -1,4 +1,4 @@
-![logo](http://pyslimp3.googlecode.com/svn/wiki/logo.png)
+![logo](images/logo.png)
 
 # Introduction
 
@@ -54,9 +54,9 @@ found in the `qtsim` directory. To build,
     qmake
     make
 
-![Qt Simulator Screen](http://pyslimp3.googlecode.com/svn/wiki/BrowseAlbums.jpg)
+![Qt Simulator Screen](images/BrowseAlbums.jpg)
 
-![Qt Remote Control](http://pyslimp3.googlecode.com/svn/wiki/RemoteControl.jpg)
+![Qt Remote Control](images/RemoteControl.jpg)
 
 The other simulator is a bare-bones text-based one. To run:
 
