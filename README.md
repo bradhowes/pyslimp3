@@ -43,6 +43,11 @@ To start the Pyslimp3 server (from the Pyslimp3 source directory):
 The Pyslimp3 should be able to locate your iTunes Music Library XML file, read it, and begin displaying information on
 any SLiMP3 device connected to your local network.
 
+# How to Operate
+
+See the [documentation](wiki/TopBrowser) in the project wiki. A list of the keys on the Sony RMV201 remote and what
+they do in Pyslimp3 is found [here](wiki/KeyMappings).
+
 # Simulators
 
 The code base also contains two very simple simulators that will display screens from the server and provide minimal
