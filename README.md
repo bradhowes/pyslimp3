@@ -45,8 +45,8 @@ any SLiMP3 device connected to your local network.
 
 # How to Operate
 
-See the [documentation](wiki/TopBrowser) in the project wiki. A list of the keys on the Sony RMV201 remote and what
-they do in Pyslimp3 is found [here](wiki/KeyMappings).
+See the [documentation](../../wiki/TopBrowser) in the project wiki. A list of the keys on the Sony RMV201 remote and what
+they do in Pyslimp3 is found [here](../../wiki/KeyMappings).
 
 # Simulators
 
